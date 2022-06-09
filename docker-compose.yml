@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  mariadb:
+    image: mariadb
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MARIADB_ROOT_HOST: localhost
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: zasobar
+      MARIADB_USER: user
+      MARIADB_PASSWORD: user
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - app_db:/var/lib/mysql
+volumes:
+  app_db:
+networks:
+  nt_mariadb:
+    driver: bridge
