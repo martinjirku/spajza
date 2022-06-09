@@ -14,6 +14,10 @@ type (
 		Username string
 		Password string
 	}
+	UserRegistrationResponse struct {
+		Username string
+		Id       int
+	}
 	UserLoginRequest struct {
 		Username string
 		Password string
@@ -29,27 +33,27 @@ func NewUserController(userRepository *services.UserService, config *config.Conf
 }
 
 func (h *UserController) Register(c echo.Context) error {
-	data := UserRegistrationRequest{}
+	data := &UserRegistrationRequest{}
 	if err := c.Bind(data); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
+		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "Bad request"})
 	}
 
 	response, err := h.userService.Register(data.Username, data.Password)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "Conflict")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, UserRegistrationResponse{Id: int(response.ID), Username: response.Email})
 }
 
 func (h *UserController) Login(c echo.Context) error {
 	data := UserLoginRequest{}
-	if err := c.Bind(data); err != nil {
+	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
 	err := h.userService.Login(data.Username, data.Password)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "WrongCredentials")
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
 	tokenProvider := services.NewTokenProvider(h.config.JWTSecret, h.config.JWTValidity, h.config.JWTIssuer)
 	tokenString, err := tokenProvider.GetToken(data.Username, time.Now())
@@ -59,7 +63,18 @@ func (h *UserController) Login(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "auth",
 		Value:    *tokenString,
+		Path:     "/",
 		MaxAge:   int((h.config.JWTValidity + 2) * 60),
+		HttpOnly: true,
+	})
+	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *UserController) Logout(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
+		Name:     "auth",
+		Value:    "",
+		MaxAge:   0,
 		HttpOnly: true,
 	})
 	return c.NoContent(http.StatusNoContent)

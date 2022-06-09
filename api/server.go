@@ -16,7 +16,8 @@ func main() {
 	userController := controller.NewUserController(&repository.User, config.DefaultConfiguration)
 
 	e.POST("/api/user/register", userController.Register)
-	e.GET("/api/user/login", userController.Login)
+	e.POST("/api/user/login", userController.Login)
+	e.POST("/api/user/logout", userController.Logout)
 	e.Logger.Fatal(e.Start(":1323"))
 }
 

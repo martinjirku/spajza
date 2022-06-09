@@ -32,7 +32,7 @@ func (r *UserService) Login(email string, password string) error {
 	if result.Error != nil {
 		return result.Error
 	}
-	if user.VerifyPassword(password) {
+	if !user.VerifyPassword(password) {
 		return errors.New("WrongPassword")
 	}
 	return nil
