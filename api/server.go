@@ -18,7 +18,7 @@ func main() {
 	e.POST("/api/user/register", userController.Register)
 	e.POST("/api/user/login", userController.Login)
 	e.POST("/api/user/logout", userController.Logout)
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(config.DefaultConfiguration.Domain + ":" + config.DefaultConfiguration.Port))
 }
 
 func initRepository() services.RepositoryService {

@@ -13,7 +13,6 @@ var DB *gorm.DB
 func NewDB(params ...string) *gorm.DB {
 	var err error
 	conString := config.GetMariaDBSQLConnectionString()
-	log.Print(conString)
 
 	DB, err = gorm.Open(mysql.New(mysql.Config{DSN: conString}))
 

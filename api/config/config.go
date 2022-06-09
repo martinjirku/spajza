@@ -1,6 +1,8 @@
 package config
 
 type Configuration struct {
+	Port        string
+	Domain      string
 	JWTSecret   string
 	JWTValidity uint
 	JWTIssuer   string
@@ -13,6 +15,8 @@ type Configuration struct {
 }
 
 var DefaultConfiguration = &Configuration{
+	Port:        "8000",
+	Domain:      "localhost",
 	JWTSecret:   "TopSecret",
 	JWTValidity: 10,
 	JWTIssuer:   "zasobar",
