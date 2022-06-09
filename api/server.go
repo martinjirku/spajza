@@ -5,6 +5,7 @@ import (
 	"github.com/martinjirku/zasobar/controller"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/martinjirku/zasobar/services"
 	"github.com/martinjirku/zasobar/storage"
 )
@@ -13,7 +14,8 @@ func main() {
 	e := echo.New()
 	repository := initRepository()
 
-	userController := controller.NewUserController(&repository.User, config.DefaultConfiguration)
+	userController := controller.NewUserController(repository.User, config.DefaultConfiguration)
+	e.Use(middleware.Logger())
 
 	e.POST("/api/user/register", userController.Register)
 	e.POST("/api/user/login", userController.Login)

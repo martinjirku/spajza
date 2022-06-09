@@ -23,12 +23,12 @@ type (
 		Password string
 	}
 	UserController struct {
-		config      *config.Configuration
-		userService *services.UserService
+		config      config.Configuration
+		userService services.UserService
 	}
 )
 
-func NewUserController(userRepository *services.UserService, config *config.Configuration) UserController {
+func NewUserController(userRepository services.UserService, config config.Configuration) UserController {
 	return UserController{userService: userRepository, config: config}
 }
 
@@ -62,7 +62,7 @@ func (h *UserController) Login(c echo.Context) error {
 	}
 	c.SetCookie(&http.Cookie{
 		Name:     "auth",
-		Value:    *tokenString,
+		Value:    tokenString,
 		Path:     "/",
 		MaxAge:   int((h.config.JWTValidity + 2) * 60),
 		HttpOnly: true,

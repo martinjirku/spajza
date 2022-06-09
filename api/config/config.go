@@ -14,7 +14,7 @@ type Configuration struct {
 	DBType      string
 }
 
-var DefaultConfiguration = &Configuration{
+var DefaultConfiguration = Configuration{
 	Port:        "8000",
 	Domain:      "localhost",
 	JWTSecret:   "TopSecret",

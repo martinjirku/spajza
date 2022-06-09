@@ -16,7 +16,7 @@ func NewTokenProvider(secret string, validity uint, issuer string) *TokenProvide
 	return &TokenProvider{secret: secret, validity: validity, issuer: issuer}
 }
 
-func (p *TokenProvider) GetToken(userName string, currentTime time.Time) (*string, error) {
+func (p *TokenProvider) GetToken(userName string, currentTime time.Time) (string, error) {
 	exp := currentTime.Add(time.Minute * time.Duration(p.validity))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    p.issuer,
@@ -25,7 +25,7 @@ func (p *TokenProvider) GetToken(userName string, currentTime time.Time) (*strin
 	})
 	tokenString, err := token.SignedString([]byte(p.secret))
 	if err != nil {
-		return nil, err
+		return tokenString, err
 	}
-	return &tokenString, nil
+	return tokenString, nil
 }

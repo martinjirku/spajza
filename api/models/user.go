@@ -23,18 +23,20 @@ func isPasswordValid(p string) bool {
 	return len(p) > 3
 }
 
-func NewUserWithPassword(email string, password string) (*User, error) {
+func NewUserWithPassword(email string, password string) (User, error) {
+	user := User{Email: email}
 	if !isEmailValid(email) {
-		return nil, errors.New("InvalidEmail")
+		return user, errors.New("InvalidEmail")
 	}
 	if !isPasswordValid(password) {
-		return nil, errors.New("InvalidPassword")
+		return user, errors.New("InvalidPassword")
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 	if err != nil {
-		return nil, err
+		return user, err
 	}
-	return &User{Password: string(hash), Email: email}, nil
+	user.Password = string(hash)
+	return user, nil
 }
 
 func (u *User) VerifyPassword(plainPassword string) bool {

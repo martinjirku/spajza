@@ -17,10 +17,10 @@ func (r *UserService) ListAll() ([]*models.User, error) {
 	return u, err
 }
 
-func (r *UserService) Register(email string, password string) (*models.User, error) {
+func (r *UserService) Register(email string, password string) (models.User, error) {
 	user, err := models.NewUserWithPassword(email, password)
 	if err != nil {
-		return nil, err
+		return user, err
 	}
 	result := r.db.Create(&user)
 	return user, result.Error

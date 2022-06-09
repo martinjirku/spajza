@@ -29,7 +29,7 @@ var _ = Describe("User", func() {
 	})
 
 	Describe("Password validation", func() {
-		var user *models.User
+		var user models.User
 		var password string
 
 		BeforeEach(func() {
