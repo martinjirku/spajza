@@ -27,10 +27,13 @@ func (r *UserService) Register(email string, password string) (models.User, erro
 }
 
 func (r *UserService) Login(email string, password string) error {
-	var user = models.User{Email: email}
-	result := r.db.First(&user)
+	var user models.User
+	result := r.db.Find(&user, "email = ?", email)
 	if result.Error != nil {
 		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("WrongUsername")
 	}
 	if !user.VerifyPassword(password) {
 		return errors.New("WrongPassword")

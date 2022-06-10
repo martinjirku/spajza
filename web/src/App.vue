@@ -1,28 +1,8 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import TopHeader from "./components/common/TopHeader.vue";
-import LeftColumn from "./components/common/LeftColumn.vue";
-</script>
-
 <template>
   <v-app>
     <router-view></router-view>
   </v-app>
 </template>
-<!-- <div class="common-layout">
-    <el-container>
-      <el-aside width="200px">
-        <LeftColumn></LeftColumn>
-      </el-aside>
-      <el-container>
-        <el-header class="header">
-          <TopHeader></TopHeader>
-        </el-header>
-        <el-main>Main</el-main>
-      </el-container>
-    </el-container>
-  </div> -->
 
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");

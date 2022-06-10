@@ -19,4 +19,14 @@ export default defineConfig({
     }),
     Components({ resolvers: [ElementPlusResolver()] }),
   ],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+    },
+  },
 });
