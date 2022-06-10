@@ -21,7 +21,9 @@
                           type="text"
                           v-model="username"
                           placeholder="Meno"
-                          messages="* Povinné"
+                          :error-messages="usernameErrors"
+                          hint="Zadajte email, prosím."
+                          :rules="[usernameRules.validate]"
                           append-inner-icon="mdi-outline-person"
                           :disabled="isLoading"
                           autocomplete="email"
@@ -34,7 +36,8 @@
                           v-model="password"
                           type="password"
                           placeholder="Heslo"
-                          messages="* Povinné"
+                          :rules="[passwordRules.validate]"
+                          :error-messages="passwordErrors"
                           autocomplete="password"
                           :disabled="isLoading"
                           append-inner-icon="mdi-form-textbox-password"
@@ -71,10 +74,21 @@ import PageContainer from "@/components/common/PageContainer.vue";
 import { useAuthenticationStore } from "@/auth/authentication";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useField } from "vee-validate";
+import { string } from "yup";
 
 const isLoading = ref(false);
-const username = ref("");
-const password = ref("");
+
+const usernameRules = string().required().max(255).email();
+const { errors: usernameErrors, value: username } = useField<string>(
+  "username",
+  usernameRules
+);
+const passwordRules = string().required().min(4).max(255);
+const { errors: passwordErrors, value: password } = useField<string>(
+  "username",
+  passwordRules
+);
 const errorMsg = ref("");
 
 const auth = useAuthenticationStore();
@@ -82,8 +96,8 @@ const router = useRouter();
 const isDisabled = computed(() => {
   return (
     isLoading.value ||
-    (username?.value?.length ?? 0) < 3 ||
-    (password?.value?.length ?? 0) < 3
+    !!usernameErrors.value.length ||
+    !!passwordErrors.value.length
   );
 });
 
