@@ -1,112 +1,99 @@
 <template>
-  <v-main>
-    <page-container>
-      <v-container class="d-flex fluid fill-height align-center justify-center">
-        <v-col cols="12" class="v-col-md-9 v-col-lg-6 v-col-xl-5">
-          <v-card class="elevation-12 pa-sm-6 pa-md-12">
-            <v-card-content>
-              <form ref="form" @submit.prevent="onSubmit">
-                <v-row justify="center">
-                  <v-col cols="12">
-                    <v-row>
-                      <v-col cols="12">
-                        <h1 class="text-h4 font-weight-bold text-primary">
-                          Špajza - Prihlásenie
-                        </h1>
-                      </v-col>
-                      <v-col cols="12">
-                        <v-text-field
-                          name="username"
-                          label="Meno"
-                          type="text"
-                          v-model="username"
-                          placeholder="Meno"
-                          :error-messages="usernameErrors"
-                          hint="Zadajte email, prosím."
-                          :rules="[usernameRules.validate]"
-                          append-inner-icon="mdi-outline-person"
-                          :disabled="isLoading"
-                          autocomplete="email"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="12">
-                        <v-text-field
-                          name="password"
-                          label="Heslo"
-                          v-model="password"
-                          type="password"
-                          placeholder="Heslo"
-                          :rules="[passwordRules.validate]"
-                          :error-messages="passwordErrors"
-                          autocomplete="password"
-                          :disabled="isLoading"
-                          append-inner-icon="mdi-form-textbox-password"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="6">
-                        <router-link to="/" class="text-primary"
-                          >Registrácia</router-link
-                        >
-                      </v-col>
-                      <v-col cols="6">
-                        <v-btn
-                          color="primary"
-                          width="100%"
-                          type="submit"
-                          :disabled="isDisabled"
-                        >
-                          Prihlásiť sa
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </form>
-            </v-card-content>
-          </v-card>
-        </v-col>
-      </v-container>
-    </page-container>
-  </v-main>
+  <page-container>
+    <div class="row full-height full-width q-pa-md justify-center">
+      <div class="login-box self-center col-12 col-md-8 col-lg-6 col-xl-5">
+        <form @submit.prevent="onSubmit">
+          <div class="row q-px-xl q-py-lg">
+            <div class="col-12">
+              <h4 class="font-weight-bold text-primary">
+                Špajza - Prihlásenie
+              </h4>
+            </div>
+            <div class="col-12">
+              <q-input
+                for="username"
+                v-model="values.username"
+                type="text"
+                label="Meno"
+                aria-label="Meno"
+                autocomplete="email"
+                :disabled="isSubmitting"
+                :error="username.meta.dirty && !username.meta.valid"
+                :error-message="errors.username"
+              ></q-input>
+            </div>
+            <div class="col-12">
+              <q-input
+                for="password"
+                v-model="values.password"
+                type="password"
+                label="Heslo"
+                aria-label="Meno"
+                autocomplete="password"
+                :disabled="isSubmitting"
+                :error="password.meta.dirty && !password.meta.valid"
+                :error-message="errors.password"
+              ></q-input>
+            </div>
+            <div class="col-12 text-negative">
+              <span>{{ errorMsg }}</span>
+            </div>
+            <div class="col-6 justify-center">
+              <router-link to="/" class="text-primary">Registrácia</router-link>
+            </div>
+            <div class="col-6">
+              <q-btn
+                class="full-width"
+                color="primary"
+                width="100%"
+                type="submit"
+                :disabled="isSubmitting"
+                :loading="isSubmitting"
+              >
+                Prihlásiť sa
+              </q-btn>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </page-container>
 </template>
+<style lang="scss" scoped>
+.login-box {
+  background-color: rgb(255, 255, 255, 0.8);
+}
+</style>
+
 <script lang="ts" setup>
 import PageContainer from "@/components/common/PageContainer.vue";
 import { useAuthenticationStore } from "@/auth/authentication";
-import { computed, ref } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useField } from "vee-validate";
-import { string } from "yup";
+import { useField, useForm } from "vee-validate";
+import { string, object } from "yup";
 
-const isLoading = ref(false);
-
+type FormState = { username: string; password: string };
 const usernameRules = string().required().max(255).email();
-const { errors: usernameErrors, value: username } = useField<string>(
-  "username",
-  usernameRules
-);
 const passwordRules = string().required().min(4).max(255);
-const { errors: passwordErrors, value: password } = useField<string>(
-  "username",
-  passwordRules
-);
+
+const validationSchema = object<FormState>({
+  username: usernameRules,
+  password: passwordRules,
+});
+
+const { handleSubmit, values, errors, validateField, isSubmitting, meta } =
+  useForm<FormState>({ validationSchema });
+const username = useField("username");
+const password = useField("password");
 const errorMsg = ref("");
 
 const auth = useAuthenticationStore();
 const router = useRouter();
-const isDisabled = computed(() => {
-  return (
-    isLoading.value ||
-    !!usernameErrors.value.length ||
-    !!passwordErrors.value.length
-  );
-});
 
-const onSubmit = async () => {
-  if (isDisabled.value) return;
+const onSubmit = handleSubmit(async (values) => {
   try {
-    isLoading.value = true;
-    const resp = await auth.login(username.value, password.value);
-    isLoading.value = false;
+    const resp = await auth.login(values.username, values.password);
     if (resp.ok) {
       router.replace(auth.returnUrl);
       return;
@@ -114,7 +101,7 @@ const onSubmit = async () => {
   } catch (error) {
     console.log(error);
   } finally {
-    errorMsg.value = "Prihlásenie sa nepodarilo";
+    errorMsg.value = "*Prihlásenie sa nepodarilo, skúste znova.";
   }
-};
+});
 </script>

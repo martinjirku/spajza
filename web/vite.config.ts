@@ -1,9 +1,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import AutoImport from "unplugin-auto-import/vite";
-import Components from "unplugin-auto-import/vite";
-import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { fileURLToPath, URL } from "url";
+import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,11 +11,12 @@ export default defineConfig({
     },
   },
   plugins: [
-    vue(),
-    AutoImport({
-      resolvers: [ElementPlusResolver()],
+    vue({
+      template: { transformAssetUrls },
     }),
-    Components({ resolvers: [ElementPlusResolver()] }),
+    quasar({
+      sassVariables: "./src/quasar-variables.sass",
+    }),
   ],
   server: {
     proxy: {
