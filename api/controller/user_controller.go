@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/config"
 	"github.com/martinjirku/zasobar/services"
@@ -25,6 +26,9 @@ type (
 	UserController struct {
 		config      config.Configuration
 		userService services.UserService
+	}
+	UserMeResponse struct {
+		Username string `json:"username"`
 	}
 )
 
@@ -78,4 +82,16 @@ func (h *UserController) Logout(c echo.Context) error {
 		HttpOnly: true,
 	})
 	return c.NoContent(http.StatusNoContent)
+}
+
+func (h *UserController) AboutMe(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	sub := claims["sub"]
+	if username, ok := sub.(string); ok {
+		return c.JSON(http.StatusOK, UserMeResponse{Username: username})
+	} else {
+		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "JwtMalformedSubNotProvided"})
+	}
+
 }

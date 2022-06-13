@@ -16,10 +16,20 @@ func main() {
 
 	userController := controller.NewUserController(repository.User, config.DefaultConfiguration)
 	e.Use(middleware.Logger())
+	e.Logger.Info(config.DefaultConfiguration.JWTSecret)
 
-	e.POST("/api/user/register", userController.Register)
+	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+		SigningKey:  []byte(config.DefaultConfiguration.JWTSecret),
+		TokenLookup: "cookie:auth",
+		Skipper: func(c echo.Context) bool {
+			return c.Request().RequestURI == "/api/user/login"
+		},
+	}))
+
 	e.POST("/api/user/login", userController.Login)
+	e.POST("/api/user/register", userController.Register)
 	e.POST("/api/user/logout", userController.Logout)
+	e.GET("/api/user/me", userController.AboutMe)
 	e.Logger.Fatal(e.Start(config.DefaultConfiguration.Domain + ":" + config.DefaultConfiguration.Port))
 }
 
