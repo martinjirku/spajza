@@ -1,6 +1,20 @@
 <template>
-  <router-view></router-view>
+  <page-container v-if="auth.authStatus === 'checking'">
+    <q-inner-loading
+      :showing="true"
+      label="Please wait..."
+      label-class="text-teal"
+      label-style="font-size: 1.1em"
+    />
+  </page-container>
+  <router-view v-if="auth.authStatus === 'loaded'"></router-view>
 </template>
+
+<script lang="ts" setup>
+import PageContainer from "./components/common/PageContainer.vue";
+import { useAuthenticationStore } from "./auth/authentication";
+const auth = useAuthenticationStore();
+</script>
 
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");

@@ -21,16 +21,18 @@ router.beforeEach(async (to) => {
   const publicPages = ["/login"];
   const authRequired = !publicPages.includes(to.path);
   const auth = useAuthenticationStore();
-  if (to.path === "/login") {
+  if (auth.authStatus === "checking") {
     await auth.checkAuthentification();
+  }
+  if (to.path === "/login") {
     if (auth.loggedIn) {
       auth.resetReturnUrl();
       return auth.returnUrl;
     }
     return;
   }
-  await auth.checkAuthentification();
   if (!authRequired) return;
+
   if (auth.loggedIn) {
     return;
   } else {

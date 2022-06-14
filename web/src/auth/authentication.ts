@@ -4,6 +4,7 @@ type UserResponse = {
 };
 
 type Store = {
+  authStatus: "checking" | "loaded";
   loggedIn: boolean;
   username?: string;
   returnUrl?: string;
@@ -13,6 +14,7 @@ const DEFAULT_RETURN_URL = "/";
 
 export const useAuthenticationStore = defineStore("auth", {
   state: (): Store => ({
+    authStatus: "checking",
     loggedIn: false,
     username: undefined as string | undefined,
     returnUrl: DEFAULT_RETURN_URL,
@@ -36,6 +38,9 @@ export const useAuthenticationStore = defineStore("auth", {
         .catch(() => {
           this.loggedIn = false;
           this.username = undefined;
+        })
+        .finally(() => {
+          this.authStatus = "loaded";
         });
 
       return response;
