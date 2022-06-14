@@ -1,7 +1,5 @@
 <template>
-  <v-main>
-    <page-container>Some home page</page-container>
-  </v-main>
+  <page-container>Some home page</page-container>
 </template>
 <script lang="ts" setup>
 import PageContainer from "@/components/common/PageContainer.vue";

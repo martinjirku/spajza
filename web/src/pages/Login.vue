@@ -95,7 +95,7 @@ const onSubmit = handleSubmit(async (values) => {
   try {
     const resp = await auth.login(values.username, values.password);
     if (resp.ok) {
-      router.replace(auth.returnUrl);
+      router.replace(auth.returnUrl ?? "/");
       return;
     }
   } catch (error) {

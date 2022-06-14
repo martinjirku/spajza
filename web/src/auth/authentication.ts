@@ -1,21 +1,53 @@
 import { defineStore } from "pinia";
+type UserResponse = {
+  username: string;
+};
+
+type Store = {
+  loggedIn: boolean;
+  username?: string;
+  returnUrl?: string;
+};
+
+const DEFAULT_RETURN_URL = "/";
 
 export const useAuthenticationStore = defineStore("auth", {
-  state: () => ({
+  state: (): Store => ({
     loggedIn: false,
-    returnUrl: "/",
+    username: undefined as string | undefined,
+    returnUrl: DEFAULT_RETURN_URL,
   }),
   actions: {
+    resetReturnUrl() {
+      this.returnUrl = DEFAULT_RETURN_URL;
+    },
+    async checkAuthentification() {
+      const response = await fetch("/api/user/me", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      })
+        .then((a) => a.json())
+        .then((d) => {
+          if (d.username) {
+            this.loggedIn = true;
+            this.username = d.username;
+          }
+        })
+        .catch(() => {
+          this.loggedIn = false;
+          this.username = undefined;
+        });
+
+      return response;
+    },
     async login(username: string, password: string) {
       const response = await fetch("/api/user/login", {
         method: "POST",
         body: JSON.stringify({ username, password }),
         headers: { "Content-Type": "application/json" },
       });
-      console.log(response);
       if (response.ok) {
         this.loggedIn = true;
-        this.returnUrl = "/";
       }
       return response;
     },
