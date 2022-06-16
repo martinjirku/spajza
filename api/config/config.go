@@ -18,7 +18,7 @@ var DefaultConfiguration = Configuration{
 	Port:        "8000",
 	Domain:      "localhost",
 	JWTSecret:   "TopSecret",
-	JWTValidity: 10,
+	JWTValidity: 10 * 60 * 24,
 	JWTIssuer:   "zasobar",
 	DBUser:      "user",
 	DBPassword:  "user",

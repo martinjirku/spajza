@@ -8,14 +8,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mdi/font": "^6.7.96",
-    "@quasar/extras": "^1.14.0",
-    "@types/node": "^17.0.40",
-    "pinia": "^2.0.14",
-    "quasar": "^2.7.1",
-    "vee-validate": "^4.5.11",
-    "vue": "^3.2.36",
-    "vue-router": "^4.0.15",
+    "@mdi/font": "6.7.96",
+    "@quasar/extras": "1.14.0",
+    "@types/node": "17.0.40",
+    "pinia": "2.0.14",
+    "quasar": "2.7.1",
+    "vee-validate": "4.5.11",
+    "vue": "3.2.36",
+    "vue-router": "4.0.15",
     "yup": "1.0.0-beta.4"
   },
   "devDependencies": {

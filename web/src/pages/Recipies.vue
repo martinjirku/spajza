@@ -1,5 +1,5 @@
 <template>
-  <PageLayout>Some home page</PageLayout>
+  <PageLayout>Recipies</PageLayout>
 </template>
 <script lang="ts" setup>
 import PageLayout from "@/components/common/PageLayout.vue";
