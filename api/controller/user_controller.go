@@ -78,6 +78,7 @@ func (h *UserController) Logout(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "auth",
 		Value:    "",
+		Path:     "/",
 		MaxAge:   0,
 		HttpOnly: true,
 	})

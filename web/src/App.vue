@@ -23,6 +23,17 @@ const auth = useAuthenticationStore();
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
 }
+
+:root {
+  --bg-gradient: linear-gradient(
+    113.04deg,
+    #e68a8a -0.64%,
+    #e6a15c 37.48%,
+    #e08053 68.8%,
+    #ebeb8f 99.61%
+  );
+}
+
 body {
   padding: 0;
   margin: 0;

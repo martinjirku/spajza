@@ -1,5 +1,11 @@
 <template>
   <page-container>
+    <q-inner-loading
+      :showing="isLoggingOut"
+      label="Odhlasujem Vás..."
+      label-class="text-teal"
+      label-style="font-size: 1.1em"
+    />
     <q-layout>
       <q-header elevated class="bg-transparent">
         <q-toolbar>
@@ -13,6 +19,27 @@
           />
           <h1 class="q-my-sm q-ml-lg text-h4">Špajza</h1>
           <q-space />
+          <q-btn round flat>
+            <q-avatar size="26px">
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png" />
+            </q-avatar>
+
+            <q-menu class="user-dropdown" auto-close max-width="350px">
+              <q-list dense>
+                <q-item class="GL__menu-link-signed-in">
+                  <q-item-section>
+                    <div>
+                      Prihlásený ako <strong>{{ auth.username }}</strong>
+                    </div>
+                  </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable @click="logout" class="GL__menu-link">
+                  <q-item-section>Odhlásiť</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </q-toolbar>
       </q-header>
       <q-drawer
@@ -26,7 +53,7 @@
           <q-list padding>
             <q-item
               v-for="link in links"
-              :to="link.link.href.value"
+              :to="link.to"
               :key="link.text"
               active-class="is-active"
               v-ripple
@@ -68,17 +95,15 @@
   background-color: #fff;
 }
 
+.user-dropdown {
+  background: var(--bg-gradient);
+}
+
 .q-drawer.q-drawer {
   background: none;
 }
 .q-drawer.q-drawer--mobile {
-  background: linear-gradient(
-    113.04deg,
-    #e68a8a -0.64%,
-    #e6a15c 37.48%,
-    #e08053 68.8%,
-    #ebeb8f 99.61%
-  );
+  background: var(--bg-gradient);
 }
 a,
 a:hover {
@@ -88,9 +113,10 @@ a:hover {
 </style>
 
 <script lang="ts" setup>
+import { useAuthenticationStore } from "@/auth/authentication";
 import { useQuasar } from "quasar";
 import { ref } from "vue";
-import { useLink } from "vue-router";
+import { useLink, useRouter } from "vue-router";
 import PageContainer from "./PageContainer.vue";
 // https://github.com/quasarframework/quasar/issues/13154
 // temporal workaroud because v-ripple broke the page
@@ -100,11 +126,27 @@ defineExpose({
 });
 
 const isLeftOpen = ref(false);
-
+const isLoggingOut = ref(false);
+const auth = useAuthenticationStore();
+const router = useRouter();
 const toggleLeftDrawer = () => (isLeftOpen.value = !isLeftOpen.value);
 const links = [
-  { icon: "home", text: "Prehľad", link: useLink({ to: "/" }) },
-  { icon: "storage", text: "Špajza", link: useLink({ to: "/spajza" }) },
-  { icon: "menu_book", text: "Recepty", link: useLink({ to: "/recepty" }) },
+  { icon: "home", text: "Prehľad", to: "/" },
+  { icon: "storage", text: "Špajza", to: "/spajza" },
+  { icon: "menu_book", text: "Recepty", to: "/recepty" },
+  { icon: "shopping_bag", text: "Nákup", to: "/nakup" },
 ];
+
+const logout = () => {
+  console.log("logout");
+  isLoggingOut.value = false;
+  auth
+    .logout()
+    .then(() => {
+      router.push("/prihlasenie");
+    })
+    .finally(() => {
+      isLoggingOut.value = true;
+    });
+};
 </script>

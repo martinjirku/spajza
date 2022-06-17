@@ -51,8 +51,19 @@ export const useAuthenticationStore = defineStore("auth", {
         body: JSON.stringify({ username, password }),
         headers: { "Content-Type": "application/json" },
       });
+      await this.checkAuthentification();
       if (response.ok) {
         this.loggedIn = true;
+      }
+      return response;
+    },
+    async logout() {
+      const response = await fetch("/api/user/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) {
+        this.loggedIn = false;
       }
       return response;
     },
