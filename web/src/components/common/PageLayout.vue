@@ -26,7 +26,7 @@
 
             <q-menu class="user-dropdown" auto-close max-width="350px">
               <q-list dense>
-                <q-item class="GL__menu-link-signed-in">
+                <q-item>
                   <q-item-section>
                     <div>
                       Prihlásený ako <strong>{{ auth.username }}</strong>
@@ -34,7 +34,11 @@
                   </q-item-section>
                 </q-item>
                 <q-separator />
-                <q-item clickable @click="logout" class="GL__menu-link">
+                <q-item to="/typ-poloziek" active-class="is-active-user-menu">
+                  <q-item-section> Druhy položiek </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable @click="logout">
                   <q-item-section>Odhlásiť</q-item-section>
                 </q-item>
               </q-list>
@@ -84,7 +88,11 @@
   font-weight: 600;
   position: relative;
 }
-.is-active::before {
+.is-active-user-menu {
+  cursor: default !important;
+}
+.is-active::before,
+.is-active-user-menu::before {
   position: absolute;
   left: 0;
   top: 0;
@@ -92,7 +100,7 @@
   height: 100%;
   opacity: 0.1;
   content: "";
-  background-color: #fff;
+  background-color: #000;
 }
 
 .user-dropdown {

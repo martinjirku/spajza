@@ -4,6 +4,7 @@ import Home from "@/pages/Home.vue";
 import StorageRoom from "@/pages/Storage.vue";
 import Recipies from "@/pages/Recipies.vue";
 import Shopping from "@/pages/Shopping.vue";
+import CategoryItems from "@/pages/CategoryItems.vue";
 
 import { useAuthenticationStore } from "@/auth/authentication";
 
@@ -29,6 +30,10 @@ const router = createRouter({
     {
       path: "/nakup",
       component: Shopping,
+    },
+    {
+      path: "/typ-poloziek",
+      component: CategoryItems,
     },
   ],
 });
