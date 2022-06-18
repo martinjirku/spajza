@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
+
+    <property name="now" value="now()" dbms="mariadb"/>
+
+    <changeSet id="1" author="harry.hole">
+        <comment>Creates new User</comment>
+        <createTable tableName="users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime(3)"></column>
+            <column name="updated_at" type="datetime(3)"></column>
+            <column name="deleted_at" type="datetime(3)"></column>
+            <column name="password" type="varchar(255)"></column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createIndex tableName="users" indexName="idx_user_email">
+            <column name="email"/>
+        </createIndex>
+        <rollback>
+            <dropIndex tableName="users" indexName="idx_user_email" />
+            <dropTable tableName="users" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="2" author="harry.hole">
+        <comment>Units table creation</comment>
+        <createTable tableName="units">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime(3)"></column>
+            <column name="updated_at" type="datetime(3)"></column>
+            <column name="deleted_at" type="datetime(3)"></column>
+            <column name="title" type="varchar(250)"></column>
+            <column name="unit_name" type="varchar(30)"></column>
+            <column name="category" type="ENUM('MASS','LENGTH','AREA','VOLUME','COUNT', 'TIME')"></column>
+        </createTable>
+        <insert tableName="units">
+            <column name="title">Kilogramy</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">MASS</column>
+            <column name="unit_name">kg</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Dĺžka</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">LENGTH</column>
+            <column name="unit_name">m</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Plocha</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">AREA</column>
+            <column name="unit_name">m2</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Objem (m3)</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">VOLUME</column>
+            <column name="unit_name">m3</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Objem (l)</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">VOLUME</column>
+            <column name="unit_name">l</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Počet</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">COUNT</column>
+            <column name="unit_name">ks</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Čas (min)</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">TIME</column>
+            <column name="unit_name">min</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Čas (s)</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">TIME</column>
+            <column name="unit_name">sec</column>
+        </insert>
+        <insert tableName="units">
+            <column name="title">Čas (h)</column>
+            <column name="created_at" valueDate="${now}"></column>
+            <column name="category">TIME</column>
+            <column name="unit_name">hod</column>
+        </insert>
+        <rollback>
+            <dropTable tableName="units" />
+        </rollback>
+    </changeSet>
+
+    <changeSet id="3" author="harry.hole">
+        <comment>Categories creation</comment>
+        <createTable tableName="categories">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime(3)"></column>
+            <column name="updated_at" type="datetime(3)"></column>
+            <column name="deleted_at" type="datetime(3)"></column>
+            <column name="title" type="varchar(250)"></column>
+            <column name="unit_id" type="int">
+                <constraints foreignKeyName="unit_id_key" referencedTableName="unit"/>
+            </column>
+        </createTable>
+        <rollback>
+            <dropTable tableName="categories" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
