@@ -121,7 +121,7 @@ a:hover {
 </style>
 
 <script lang="ts" setup>
-import { useAuthenticationStore } from "@/auth/authentication";
+import { useAuthenticationStore } from "@auth/authentication";
 import { useQuasar } from "quasar";
 import { ref } from "vue";
 import { useLink, useRouter } from "vue-router";

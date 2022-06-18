@@ -66,8 +66,8 @@
 </style>
 
 <script lang="ts" setup>
-import PageContainer from "@/components/common/PageContainer.vue";
-import { useAuthenticationStore } from "@/auth/authentication";
+import PageContainer from "@components/common/PageContainer.vue";
+import { useAuthenticationStore } from "@auth/authentication";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useField, useForm } from "vee-validate";

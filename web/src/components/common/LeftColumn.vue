@@ -22,7 +22,7 @@
 </style>
 
 <script lang="ts" setup>
-import { useAuthenticationStore } from "@/auth/authentication";
+import { useAuthenticationStore } from "@auth/authentication";
 import { storeToRefs } from "pinia";
 
 const { loggedIn } = storeToRefs(useAuthenticationStore());
