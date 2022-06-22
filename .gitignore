@@ -1,2 +1,3 @@
 ./app_db
-./build
+./build/
+./build/*
