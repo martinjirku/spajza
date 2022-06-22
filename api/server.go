@@ -15,6 +15,7 @@ func main() {
 	repository := initRepository()
 
 	userController := controller.NewUserController(repository.User, config.DefaultConfiguration)
+	unitController := controller.NewUnitController()
 	e.Use(middleware.Logger())
 	e.Logger.Info(config.DefaultConfiguration.JWTSecret)
 
@@ -30,11 +31,11 @@ func main() {
 	e.POST("/api/user/register", userController.Register)
 	e.POST("/api/user/logout", userController.Logout)
 	e.GET("/api/user/me", userController.AboutMe)
+	e.GET("/api/units/possible-units", unitController.GetPossibleUnits)
 	e.Logger.Fatal(e.Start(config.DefaultConfiguration.Domain + ":" + config.DefaultConfiguration.Port))
 }
 
 func initRepository() services.RepositoryService {
 	db := storage.NewDB()
-	storage.AutoMigrate(db)
 	return services.NewRepositoryService(db)
 }

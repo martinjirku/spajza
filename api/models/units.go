@@ -7,12 +7,14 @@ import (
 type UnitCategory string
 
 const (
-	MASS   UnitCategory = "MASS"   // kg
-	LENGTH UnitCategory = "LENGTH" // m
-	AREA   UnitCategory = "AREA"   // m2
-	VOLUME UnitCategory = "VOLUME" // m3
-	COUNT  UnitCategory = "COUNT"  // ks
-	TIME   UnitCategory = "TIME"   // m
+	UNKNOWN     UnitCategory = "unknown"
+	MASS        UnitCategory = "mass"        // kg
+	LENGTH      UnitCategory = "length"      // m
+	AREA        UnitCategory = "area"        // m2
+	VOLUME      UnitCategory = "volume"      // m3
+	TEMPERATURE UnitCategory = "temperature" // C
+	TIME        UnitCategory = "time"        // m
+	COUNT       UnitCategory = "count"       // ks
 )
 
 func (ct *UnitCategory) Scan(value interface{}) error {
@@ -27,6 +29,6 @@ func (ct UnitCategory) Value() (string, error) {
 type Unit struct {
 	gorm.Model
 	Title    string       `gorm:"type:varchar(255)"`
-	UnitName string       `gorm:"type:varchar(30)"`
+	UnitName string       `gorm:"type:varchar(50)"`
 	Category UnitCategory `gorm:"type:varchar(255)"`
 }

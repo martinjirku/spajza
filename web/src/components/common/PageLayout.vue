@@ -37,6 +37,9 @@
                 <q-item to="/typ-poloziek" active-class="is-active-user-menu">
                   <q-item-section> Druhy položiek </q-item-section>
                 </q-item>
+                <q-item to="/nastavenia" active-class="is-active-user-menu">
+                  <q-item-section> Nastavenia </q-item-section>
+                </q-item>
                 <q-separator />
                 <q-item clickable @click="logout">
                   <q-item-section>Odhlásiť</q-item-section>

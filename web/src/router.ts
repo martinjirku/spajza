@@ -5,6 +5,7 @@ import StorageRoom from "@pages/Storage.vue";
 import Recipies from "@pages/Recipies.vue";
 import Shopping from "@pages/Shopping.vue";
 import CategoryItems from "@pages/CategoryItems.vue";
+import Settings from "@pages/Settings.vue";
 
 import { useAuthenticationStore } from "@/auth/authentication";
 
@@ -34,6 +35,10 @@ const router = createRouter({
     {
       path: "/typ-poloziek",
       component: CategoryItems,
+    },
+    {
+      path: "/nastavenia",
+      component: Settings,
     },
   ],
 });
