@@ -19,4 +19,4 @@ clean:
 	@rm -rf $(BUILD_PATH)/$(BINARY_NAME)
 
 db-update:
-	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./changelog.xml update
+	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./000_changelog.xml update

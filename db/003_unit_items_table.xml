@@ -5,7 +5,7 @@
     xmlns:pro="http://www.liquibase.org/xml/ns/pro" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
     http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
 
-    <changeSet id="3" author="harry.hole">
+    <changeSet id="003" author="harry.hole">
         <!-- Mass -->
         <insert tableName="units">
             <column name="created_at" valueDate="${now}"></column>
@@ -255,5 +255,8 @@
             <column name="name">count</column>
             <column name="symbol">ks</column>
         </insert>
+        <rollback>
+            DELETE FROM units WHERE name in ('count', 'year', 'day', 'hour', 'minute', 'month', 'second', 'decagram', 'gram','kilogram','milligram','ounce','pound','ton','centimeter','decimeter','foot','inch','kilometer','meter','mile','millimeter','yard','cup','deciliter','gallon','hectoliter','liter','milliliter','pint','celsius','fahrenheit','kelvin')
+        </rollback>
     </changeSet>
 </databaseChangeLog>
