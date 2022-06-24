@@ -4,31 +4,32 @@ import (
 	"gorm.io/gorm"
 )
 
-type UnitCategory string
+type Quantity string
 
 const (
-	UNKNOWN     UnitCategory = "unknown"
-	MASS        UnitCategory = "mass"        // kg
-	LENGTH      UnitCategory = "length"      // m
-	VOLUME      UnitCategory = "volume"      // l
-	TEMPERATURE UnitCategory = "temperature" // C
-	TIME        UnitCategory = "time"        // m
-	COUNT       UnitCategory = "count"       // ks
+	UNKNOWN     Quantity = "unknown"
+	MASS        Quantity = "mass"        // kg
+	LENGTH      Quantity = "length"      // m
+	VOLUME      Quantity = "volume"      // l
+	TEMPERATURE Quantity = "temperature" // C
+	TIME        Quantity = "time"        // m
+	COUNT       Quantity = "count"       // ks
 	// AREA        UnitCategory = "area"        // m2
 )
 
-func (ct *UnitCategory) Scan(value interface{}) error {
-	*ct = UnitCategory(value.([]byte))
+func (ct *Quantity) Scan(value interface{}) error {
+	*ct = Quantity(value.([]byte))
 	return nil
 }
 
-func (ct UnitCategory) Value() (string, error) {
+func (ct Quantity) Value() (string, error) {
 	return string(ct), nil
 }
 
 type Unit struct {
 	gorm.Model
-	Title    string       `gorm:"type:varchar(255)"`
-	UnitName string       `gorm:"type:varchar(50)"`
-	Category UnitCategory `gorm:"type:varchar(255)"`
+	Title    string   `gorm:"type:varchar(250)"`
+	Quantity Quantity `gorm:"type:varchar(25)"`
+	Name     string   `gorm:"type:varchar(50)"`
+	Symbol   string   `gorm:"type:varchar(10)"`
 }

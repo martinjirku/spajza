@@ -18,7 +18,6 @@
             <column name="quantity" type="ENUM('unknown','mass','length','volume','temperature','time','count','bytes','bites','area','pressure')"></column>
             <column name="name" type="varchar(50)"></column>
             <column name="symbol" type="varchar(10)"></column>
-            <column name="system" type="varchar(50)"></column>
         </createTable>
         <rollback>
             <dropTable tableName="units" />
