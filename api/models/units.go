@@ -10,11 +10,11 @@ const (
 	UNKNOWN     UnitCategory = "unknown"
 	MASS        UnitCategory = "mass"        // kg
 	LENGTH      UnitCategory = "length"      // m
-	AREA        UnitCategory = "area"        // m2
-	VOLUME      UnitCategory = "volume"      // m3
+	VOLUME      UnitCategory = "volume"      // l
 	TEMPERATURE UnitCategory = "temperature" // C
 	TIME        UnitCategory = "time"        // m
 	COUNT       UnitCategory = "count"       // ks
+	// AREA        UnitCategory = "area"        // m2
 )
 
 func (ct *UnitCategory) Scan(value interface{}) error {

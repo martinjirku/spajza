@@ -1,11 +1,12 @@
 BUILD_PATH = $(CURDIR)/build
 API_PATH = $(CURDIR)/api
+DB_PATH = $(CURDIR)/db
 BINARY_NAME = zasobar-api
 GO = $(shell which go)
+LIQUIBASE = $(shell which liquibase)
 GOINSTALL = $(GO) install
 GOCLEAN = $(GO) clean
 GOBUILD = $(GO) build
-
 
 
 build: deps
@@ -17,3 +18,5 @@ deps:
 clean:
 	@rm -rf $(BUILD_PATH)/$(BINARY_NAME)
 
+db-update:
+	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./changelog.xml update
