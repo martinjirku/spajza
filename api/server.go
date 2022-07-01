@@ -31,7 +31,8 @@ func main() {
 	e.POST("/api/user/register", userController.Register)
 	e.POST("/api/user/logout", userController.Logout)
 	e.GET("/api/user/me", userController.AboutMe)
-	e.GET("/api/units/possible-units", unitController.GetPossibleUnits)
+	e.GET("/api/units", unitController.ListAllUnits)
+	e.GET("/api/units/:quantity", unitController.ListUnitsByQuantity)
 	e.Logger.Fatal(e.Start(config.DefaultConfiguration.Domain + ":" + config.DefaultConfiguration.Port))
 }
 

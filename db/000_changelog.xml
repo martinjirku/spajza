@@ -8,8 +8,6 @@
     <property name="now" value="now()" dbms="mariadb"/>
 
     <include id="001" file="./001_user_creation.xml"/>
-    <include id="002" file="./002_units_creation.xml"/>
-    <include id="003" file="./003_unit_items_table.xml"/>
-    <include id="004" file="./004_category_creation.xml"/>
+    <include id="003" file="./002_category_creation.xml"/>
 
 </databaseChangeLog>
