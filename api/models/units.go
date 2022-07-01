@@ -1,13 +1,10 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
+import "errors"
 
 type Quantity string
 
 const (
-	UNKNOWN     Quantity = "unknown"
 	MASS        Quantity = "mass"        // kg
 	LENGTH      Quantity = "length"      // m
 	VOLUME      Quantity = "volume"      // l
@@ -17,19 +14,24 @@ const (
 	// AREA        UnitCategory = "area"        // m2
 )
 
+var (
+	quantities = []Quantity{MASS, LENGTH, VOLUME, TEMPERATURE, TIME, COUNT}
+)
+
 func (ct *Quantity) Scan(value interface{}) error {
-	*ct = Quantity(value.([]byte))
-	return nil
+	*ct = Quantity(value.(string))
+	return ct.IsValid()
+}
+
+func (ct *Quantity) IsValid() error {
+	for _, item := range quantities {
+		if item == *ct {
+			return nil
+		}
+	}
+	return errors.New("unknown quantity")
 }
 
 func (ct Quantity) Value() (string, error) {
 	return string(ct), nil
-}
-
-type Unit struct {
-	gorm.Model
-	Title    string   `gorm:"type:varchar(250)"`
-	Quantity Quantity `gorm:"type:varchar(25)"`
-	Name     string   `gorm:"type:varchar(50)"`
-	Symbol   string   `gorm:"type:varchar(10)"`
 }

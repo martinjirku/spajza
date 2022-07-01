@@ -5,6 +5,7 @@ import (
 
 	goUnits "github.com/bcicen/go-units"
 	"github.com/labstack/echo/v4"
+	"github.com/martinjirku/zasobar/models"
 	"github.com/martinjirku/zasobar/services"
 )
 
@@ -46,5 +47,14 @@ func (u *UnitController) ListAllUnits(c echo.Context) error {
 }
 
 func (u *UnitController) ListUnitsByQuantity(c echo.Context) error {
-	return c.JSON(http.StatusOK, mapGoUnitsToUnits(u.unitService.ListByQuantity(c.Param("quantity"))))
+	var quantity models.Quantity
+	err := quantity.Scan(c.Param("quantity"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	units, err := u.unitService.ListByQuantity(quantity)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusOK, mapGoUnitsToUnits(units))
 }

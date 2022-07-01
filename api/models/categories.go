@@ -6,7 +6,8 @@ import (
 
 type Category struct {
 	gorm.Model
-	Title string `gorm:"type:varchar(255)"`
-	Unit  Unit
-	Path  string `gorm:"type:varchar(255)"`
+	Title        string   `gorm:"type:varchar(250)"`
+	Path         string   `gorm:"type:varchar(250)"`
+	DefaultUnit  string   `gorm:"type:varchar(50)"`
+	QuantityType Quantity `gorm:"type:varchar(50)"`
 }
