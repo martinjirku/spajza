@@ -1,10 +1,9 @@
-package models_test
+package users_test
 
 import (
+	"github.com/martinjirku/zasobar/users"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/martinjirku/zasobar/models"
 )
 
 var _ = Describe("User", func() {
@@ -13,15 +12,15 @@ var _ = Describe("User", func() {
 		Context("with valid password", func() {
 
 			It("should create not be error", func() {
-				_, err := models.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				_, err := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(err).To(BeNil())
 			})
 			It("should create new user with email", func() {
-				user, _ := models.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				user, _ := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(user.Email).To(Equal("martinjirku@gmail.com"))
 			})
 			It("should create new user with hashed password", func() {
-				user, _ := models.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				user, _ := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(user.Password).NotTo(BeNil())
 				Expect(user.Password).NotTo(Equal("totalneDobreHeslo"))
 			})
@@ -29,12 +28,12 @@ var _ = Describe("User", func() {
 	})
 
 	Describe("Password validation", func() {
-		var user models.User
+		var user users.User
 		var password string
 
 		BeforeEach(func() {
 			password = "totalneDobreHeslo"
-			user, _ = models.NewUserWithPassword("martinjirku@gmail.com", password)
+			user, _ = users.NewUserWithPassword("martinjirku@gmail.com", password)
 		})
 
 		It("should successfully validate password", func() {

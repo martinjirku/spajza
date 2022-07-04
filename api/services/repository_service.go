@@ -1,11 +1,14 @@
 package services
 
-import "gorm.io/gorm"
+import (
+	"github.com/martinjirku/zasobar/users"
+	"gorm.io/gorm"
+)
 
 type RepositoryService struct {
-	User UserService
+	User users.UserService
 }
 
 func NewRepositoryService(db *gorm.DB) RepositoryService {
-	return RepositoryService{User: UserService{db}}
+	return RepositoryService{User: users.NewUserService(db)}
 }

@@ -1,17 +1,15 @@
-package controller
+package units
 
 import (
 	"net/http"
 
 	goUnits "github.com/bcicen/go-units"
 	"github.com/labstack/echo/v4"
-	"github.com/martinjirku/zasobar/models"
-	"github.com/martinjirku/zasobar/services"
 )
 
 type (
 	UnitController struct {
-		unitService services.UnitService
+		unitService UnitService
 	}
 
 	Unit struct {
@@ -23,7 +21,7 @@ type (
 )
 
 func NewUnitController() UnitController {
-	return UnitController{unitService: services.NewUnitService()}
+	return UnitController{unitService: NewUnitService()}
 }
 
 func mapUnitToDto(u goUnits.Unit) Unit {
@@ -47,7 +45,7 @@ func (u *UnitController) ListAllUnits(c echo.Context) error {
 }
 
 func (u *UnitController) ListUnitsByQuantity(c echo.Context) error {
-	var quantity models.Quantity
+	var quantity Quantity
 	err := quantity.Scan(c.Param("quantity"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

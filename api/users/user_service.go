@@ -1,9 +1,8 @@
-package services
+package users
 
 import (
 	"errors"
 
-	models "github.com/martinjirku/zasobar/models"
 	"gorm.io/gorm"
 )
 
@@ -11,14 +10,18 @@ type UserService struct {
 	db *gorm.DB
 }
 
-func (r *UserService) ListAll() ([]*models.User, error) {
-	var u []*models.User
+func NewUserService(db *gorm.DB) UserService {
+	return UserService{db}
+}
+
+func (r *UserService) ListAll() ([]*User, error) {
+	var u []*User
 	err := r.db.Find(&u).Error
 	return u, err
 }
 
-func (r *UserService) Register(email string, password string) (models.User, error) {
-	user, err := models.NewUserWithPassword(email, password)
+func (r *UserService) Register(email string, password string) (User, error) {
+	user, err := NewUserWithPassword(email, password)
 	if err != nil {
 		return user, err
 	}
@@ -27,7 +30,7 @@ func (r *UserService) Register(email string, password string) (models.User, erro
 }
 
 func (r *UserService) Login(email string, password string) error {
-	var user models.User
+	var user User
 	result := r.db.Find(&user, "email = ?", email)
 	if result.Error != nil {
 		return result.Error

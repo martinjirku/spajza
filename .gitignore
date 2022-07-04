@@ -2,3 +2,6 @@
 build/
 build/**
 ./api/__debug_bin
+api/.vscode/configurationCache.log
+api/.vscode/dryrun.log
+api/.vscode/targets.log

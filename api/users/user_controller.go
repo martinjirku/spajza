@@ -1,4 +1,4 @@
-package controller
+package users
 
 import (
 	"net/http"
@@ -7,7 +7,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/config"
-	"github.com/martinjirku/zasobar/services"
 )
 
 type (
@@ -25,14 +24,14 @@ type (
 	}
 	UserController struct {
 		config      config.Configuration
-		userService services.UserService
+		userService UserService
 	}
 	UserMeResponse struct {
 		Username string `json:"username"`
 	}
 )
 
-func NewUserController(userRepository services.UserService, config config.Configuration) UserController {
+func NewUserController(userRepository UserService, config config.Configuration) UserController {
 	return UserController{userService: userRepository, config: config}
 }
 
@@ -59,7 +58,7 @@ func (h *UserController) Login(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
-	tokenProvider := services.NewTokenProvider(h.config.JWTSecret, h.config.JWTValidity, h.config.JWTIssuer)
+	tokenProvider := NewTokenProvider(h.config.JWTSecret, h.config.JWTValidity, h.config.JWTIssuer)
 	tokenString, err := tokenProvider.GetToken(data.Username, time.Now())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "WrongJwtToken")

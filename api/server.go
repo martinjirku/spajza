@@ -1,42 +1,25 @@
 package main
 
 import (
-	"github.com/martinjirku/zasobar/config"
-	"github.com/martinjirku/zasobar/controller"
+	"github.com/martinjirku/zasobar/units"
+	"github.com/martinjirku/zasobar/users"
+	"github.com/martinjirku/zasobar/web"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/martinjirku/zasobar/services"
 	"github.com/martinjirku/zasobar/storage"
 )
 
 func main() {
-	e := echo.New()
-	repository := initRepository()
-
-	userController := controller.NewUserController(repository.User, config.DefaultConfiguration)
-	unitController := controller.NewUnitController()
-	e.Use(middleware.Logger())
-	e.Logger.Info(config.DefaultConfiguration.JWTSecret)
-
-	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:  []byte(config.DefaultConfiguration.JWTSecret),
-		TokenLookup: "cookie:auth",
-		Skipper: func(c echo.Context) bool {
-			return c.Request().RequestURI == "/api/user/login"
-		},
-	}))
-
-	e.POST("/api/user/login", userController.Login)
-	e.POST("/api/user/register", userController.Register)
-	e.POST("/api/user/logout", userController.Logout)
-	e.GET("/api/user/me", userController.AboutMe)
-	e.GET("/api/units", unitController.ListAllUnits)
-	e.GET("/api/units/:quantity", unitController.ListUnitsByQuantity)
-	e.Logger.Fatal(e.Start(config.DefaultConfiguration.Domain + ":" + config.DefaultConfiguration.Port))
-}
-
-func initRepository() services.RepositoryService {
+	e, err := web.CreateWebServer("8080")
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
 	db := storage.NewDB()
-	return services.NewRepositoryService(db)
+
+	userApp := users.NewUserApp(db)
+	userApp.SetupRouter(e)
+
+	unitsApp := units.NewUnitApp()
+	unitsApp.SetupRouter(e)
+
+	e.Logger.Fatal(web.StartWebServer(e))
 }
