@@ -10,19 +10,19 @@ import (
 )
 
 type (
-	UserRegistrationRequest struct {
+	userRegistrationRequest struct {
 		Username string
 		Password string
 	}
-	UserRegistrationResponse struct {
+	userRegistrationResponse struct {
 		Username string
 		Id       int
 	}
-	UserLoginRequest struct {
+	userLoginRequest struct {
 		Username string
 		Password string
 	}
-	UserController struct {
+	userController struct {
 		config      config.Configuration
 		userService UserService
 	}
@@ -31,12 +31,12 @@ type (
 	}
 )
 
-func NewUserController(userRepository UserService, config config.Configuration) UserController {
-	return UserController{userService: userRepository, config: config}
+func newUserController(userRepository UserService, config config.Configuration) userController {
+	return userController{userService: userRepository, config: config}
 }
 
-func (h *UserController) Register(c echo.Context) error {
-	data := &UserRegistrationRequest{}
+func (h *userController) register(c echo.Context) error {
+	data := &userRegistrationRequest{}
 	if err := c.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "Bad request"})
 	}
@@ -46,11 +46,11 @@ func (h *UserController) Register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, UserRegistrationResponse{Id: int(response.ID), Username: response.Email})
+	return c.JSON(http.StatusOK, userRegistrationResponse{Id: int(response.ID), Username: response.Email})
 }
 
-func (h *UserController) Login(c echo.Context) error {
-	data := UserLoginRequest{}
+func (h *userController) login(c echo.Context) error {
+	data := userLoginRequest{}
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
@@ -73,7 +73,7 @@ func (h *UserController) Login(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (h *UserController) Logout(c echo.Context) error {
+func (h *userController) Logout(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "auth",
 		Value:    "",
@@ -84,12 +84,13 @@ func (h *UserController) Logout(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func (h *UserController) AboutMe(c echo.Context) error {
+func (h *userController) AboutMe(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	sub := claims["sub"]
 	if username, ok := sub.(string); ok {
-		return c.JSON(http.StatusOK, UserMeResponse{Username: username})
+		c.JSON(http.StatusOK, UserMeResponse{Username: username})
+		return nil
 	} else {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "JwtMalformedSubNotProvided"})
 	}

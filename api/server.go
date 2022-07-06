@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/martinjirku/zasobar/categories"
 	"github.com/martinjirku/zasobar/units"
 	"github.com/martinjirku/zasobar/users"
 	"github.com/martinjirku/zasobar/web"
@@ -15,11 +16,9 @@ func main() {
 	}
 	db := storage.NewDB()
 
-	userApp := users.NewUserApp(db)
-	userApp.SetupRouter(e)
-
-	unitsApp := units.NewUnitApp()
-	unitsApp.SetupRouter(e)
+	users.StartApp(db, e)
+	units.StartApp(e)
+	categories.StartApp(db, e)
 
 	e.Logger.Fatal(web.StartWebServer(e))
 }

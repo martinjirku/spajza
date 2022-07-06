@@ -1,14 +1,14 @@
 package categories
 
 import (
-	"github.com/martinjirku/zasobar/units"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-type Category struct {
-	gorm.Model
-	Title        string         `gorm:"type:varchar(250)"`
-	Path         string         `gorm:"type:varchar(250)"`
-	DefaultUnit  string         `gorm:"type:varchar(50)"`
-	QuantityType units.Quantity `gorm:"type:varchar(50)"`
+func StartApp(db *gorm.DB, e *echo.Echo) {
+	service := NewCategoryService(db)
+	controller := NewController(service)
+	e.GET("/api/categories", controller.ListAll)
+	e.POST("/api/categories", controller.SaveCategory)
+	e.POST("/api/categories/:id", controller.SaveCategory)
 }

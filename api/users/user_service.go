@@ -1,8 +1,6 @@
 package users
 
 import (
-	"errors"
-
 	"gorm.io/gorm"
 )
 
@@ -36,10 +34,10 @@ func (r *UserService) Login(email string, password string) error {
 		return result.Error
 	}
 	if result.RowsAffected == 0 {
-		return errors.New("WrongUsername")
+		return ErrorWrongUsername()
 	}
 	if !user.VerifyPassword(password) {
-		return errors.New("WrongPassword")
+		return ErrorWrongPassword()
 	}
 	return nil
 }

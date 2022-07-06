@@ -1,6 +1,9 @@
 package units
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type Quantity string
 
@@ -19,7 +22,14 @@ var (
 )
 
 func (ct *Quantity) Scan(value interface{}) error {
-	*ct = Quantity(value.(string))
+	switch t := value.(type) {
+	case *string:
+		*ct = Quantity(value.(string))
+	case []byte:
+		*ct = Quantity(string(value.([]byte)))
+	default:
+		return fmt.Errorf("could not scan value quantity: %s", t)
+	}
 	return ct.IsValid()
 }
 

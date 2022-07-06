@@ -11,12 +11,12 @@ var isInitialized = false
 
 func NewUnitService() UnitService {
 	if isInitialized {
-		InitUnits()
+		initUnits()
 	}
 	return UnitService{}
 }
 
-func InitUnits() {
+func initUnits() {
 	goUnits.NewUnit("cup", "cup", goUnits.Volume)
 	isInitialized = true
 }
