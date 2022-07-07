@@ -6,8 +6,8 @@
       label-class="text-teal"
       label-style="font-size: 1.1em"
     />
-    <q-layout>
-      <q-header elevated class="bg-transparent">
+    <q-layout view="hHh lpr fFf">
+      <q-header elevated>
         <q-toolbar>
           <q-btn
             flat
@@ -34,10 +34,10 @@
                   </q-item-section>
                 </q-item>
                 <q-separator />
-                <q-item to="/typ-poloziek" active-class="is-active-user-menu">
+                <q-item to="/typ-poloziek" active-class="is-active">
                   <q-item-section> Druhy položiek </q-item-section>
                 </q-item>
-                <q-item to="/nastavenia" active-class="is-active-user-menu">
+                <q-item to="/nastavenia" active-class="is-active">
                   <q-item-section> Nastavenia </q-item-section>
                 </q-item>
                 <q-separator />
@@ -80,7 +80,9 @@
       </q-drawer>
 
       <q-page-container>
-        <slot></slot>
+        <q-page :style-fn="calculateHeight">
+          <slot></slot>
+        </q-page>
       </q-page-container>
     </q-layout>
   </page-container>
@@ -94,8 +96,7 @@
 .is-active-user-menu {
   cursor: default !important;
 }
-.is-active::before,
-.is-active-user-menu::before {
+.is-active::before {
   position: absolute;
   left: 0;
   top: 0;
@@ -103,13 +104,17 @@
   height: 100%;
   opacity: 0.1;
   content: "";
-  background-color: #000;
+  background-color: #fff;
+  transition: none;
 }
 
 .user-dropdown {
   background: var(--bg-gradient);
+  color: #fff;
 }
-
+.q-header {
+  background: var(--bg-gradient);
+}
 .q-drawer.q-drawer {
   background: none;
 }
@@ -127,7 +132,7 @@ a:hover {
 import { useAuthenticationStore } from "@auth/authentication";
 import { useQuasar } from "quasar";
 import { ref } from "vue";
-import { useLink, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import PageContainer from "./PageContainer.vue";
 // https://github.com/quasarframework/quasar/issues/13154
 // temporal workaroud because v-ripple broke the page
@@ -160,4 +165,8 @@ const logout = () => {
       isLoggingOut.value = true;
     });
 };
+
+const calculateHeight = (offset: number) => ({
+  height: offset ? `calc(100vh - ${offset}px)` : "100vh",
+});
 </script>
