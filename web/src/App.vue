@@ -2,7 +2,7 @@
   <page-container v-if="auth.authStatus === 'checking'">
     <q-inner-loading
       :showing="true"
-      label="Please wait..."
+      label="Prosím čakajte..."
       label-class="text-teal"
       label-style="font-size: 1.1em"
     />

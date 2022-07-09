@@ -87,8 +87,7 @@
     </q-layout>
   </page-container>
 </template>
-
-<style lang="scss">
+<style>
 .is-active {
   font-weight: 600;
   position: relative;
@@ -108,25 +107,38 @@
   transition: none;
 }
 
-.user-dropdown {
-  background: var(--bg-gradient);
-  color: #fff;
-}
 .q-header {
   background: var(--bg-gradient);
 }
-.q-drawer.q-drawer {
-  background: none;
-}
-.q-drawer.q-drawer--mobile {
-  background: var(--bg-gradient);
-}
+
 a,
 a:hover {
   text-decoration: none;
   color: inherit;
 }
+
+.q-drawer.q-drawer--mobile {
+  background: var(--bg-gradient);
+}
+.user-dropdown {
+  background: var(--bg-gradient);
+  color: #fff;
+}
+.q-drawer.q-drawer {
+  background: none;
+}
+
+body.desktop .q-focus-helper.q-focus-helper {
+  transition: background-color 0.2s cubic-bezier(0.25, 0.8, 0.5, 1),
+    opacity 0.1s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
+body.desktop .q-focus-helper.q-focus-helper::before,
+body.desktop .q-focus-helper.q-focus-helper::after {
+  transition: background-color 0.2s cubic-bezier(0.25, 0.8, 0.5, 1),
+    opacity 0.1s cubic-bezier(0.25, 0.8, 0.5, 1);
+}
 </style>
+<style lang="scss" scoped></style>
 
 <script lang="ts" setup>
 import { useAuthenticationStore } from "@auth/authentication";

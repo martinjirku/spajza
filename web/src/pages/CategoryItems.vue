@@ -10,11 +10,30 @@
             <q-space />
             <div class="q-gutter-xs">
               <q-btn
-                v-if="activeCategories.length > 0"
+                v-if="
+                  activeCategories.length > 0 && activeCategories[0].id !== -1
+                "
                 round
                 icon="delete"
               ></q-btn>
-              <q-btn round icon="add"></q-btn>
+              <q-btn
+                v-if="
+                  activeCategories.length > 0 && activeCategories[0].id === -1
+                "
+                round
+                icon="close"
+                @click="activeCategories = []"
+              ></q-btn>
+              <q-btn
+                v-if="activeCategories[0]?.id !== -1"
+                round
+                icon="add"
+                @click="
+                  activeCategories = [
+                    { id: -1, path: '', defaultUnit: 'kilogram' },
+                  ]
+                "
+              ></q-btn>
             </div>
           </div>
         </q-img>
@@ -34,7 +53,7 @@
             square
             card-container-class="card-container"
             :rows="categories"
-            :columns="columns as QTableProps['columns']"
+            :columns="(columns as any)"
             selection="single"
             :selected="activeCategories"
             row-key="id"
@@ -65,74 +84,10 @@
         <div class="col-5">
           <q-card v-if="activeCategories[0]" flat square>
             <q-card-section>
-              <Form
-                :key="activeCategories[0].id"
-                @submit="onSubmit"
-                :initial-values="activeCategories[0]"
-                :validation-schema="schema"
-              >
-                <Field name="title" v-slot="{ errorMessage, value, field }">
-                  <q-input
-                    label="Názov"
-                    :model-value="(value as string)"
-                    v-bind="field"
-                    type="text"
-                    :error="!!errorMessage"
-                    :error-message="errorMessage"
-                  ></q-input>
-                </Field>
-                <Field
-                  name="defaultUnit"
-                  v-slot="{
-                    errorMessage,
-                    value,
-                    field: { value: _, ...field },
-                  }"
-                >
-                  <q-select
-                    label="Jednotka"
-                    v-model="(value as string)"
-                    :options="unitOptions"
-                    v-bind="field"
-                    stack-label
-                    input-debounce="10"
-                    map-options
-                    emit-value
-                    use-chips
-                    use-input
-                    @filter="filterUnits"
-                    :error="!!errorMessage"
-                    :error-message="errorMessage"
-                  >
-                    <template v-slot:selected-item="scope">
-                      <q-chip
-                        v-if="scope"
-                        square
-                        color="white"
-                        text-color="brown"
-                        class="q-mb-none q-mt-sm q-ml-xs q-mr-none"
-                      >
-                        <q-avatar
-                          color="brown"
-                          text-color="white"
-                          :icon="scope.opt.icon"
-                        />
-                        <span class="q-mx-sm">
-                          {{ scope.opt.label }}
-                        </span>
-                      </q-chip>
-                      <q-badge v-else>prázdny</q-badge>
-                    </template>
-                    <template v-slot:no-option>
-                      <q-item>
-                        <q-item-section class="text-grey">
-                          Žiadne jednotky
-                        </q-item-section>
-                      </q-item>
-                    </template>
-                  </q-select>
-                </Field>
-              </Form>
+              <CategoryForm
+                :key="activeCategories[0]?.id"
+                :categoryId="activeCategories[0]?.id"
+              ></CategoryForm>
             </q-card-section>
           </q-card>
           <div
@@ -167,83 +122,17 @@
 </style>
 <script lang="ts" setup>
 import imgUrl from "@assets/megan-thomas-xMh_ww8HN_Q-unsplash copy.png";
-import { getCategories, getUnits } from "@api";
 import PageLayout from "@components/common/PageLayout.vue";
-import { useQuery } from "vue-query";
 import { ref, computed, watch } from "vue";
-import { QSelectProps, QTableProps } from "quasar";
 import { Category } from "@api/category";
-import { string, object, mixed, InferType, number } from "yup";
-import { useForm, Form, Field, SubmissionHandler } from "vee-validate";
-import { quantities, QuantityType, Unit } from "@api/unit";
+import { useUnits } from "@categories/UnitQuery";
+import { useCategories } from "@categories/CategoryQuery";
+import CategoryForm from "@categories/CategoryForm.vue";
 
 const activeCategories = ref<Category[]>([]);
 
-const { data: categories, isLoading } = useQuery("categories", () =>
-  getCategories()
-);
-const { data: units, isLoading: unitsLoading } = useQuery("units", () =>
-  getUnits()
-);
-
-const createUnits = (units: Unit[] = []): QSelectProps["options"] => {
-  return units.map((a) => {
-    return {
-      label: `${[a.name]} (${a.symbol})`,
-      value: a.name,
-      icon: ((key: QuantityType) => {
-        if (key === "mass") return "scale";
-        if (key === "volume") return "takeout_dining";
-        if (key === "time") return "timer";
-        if (key === "count") return "tag";
-        if (key === "length") return "straighten";
-        if (key === "temperature") return "thermostat";
-        return "square_foot";
-      })(a.quantity),
-    };
-  });
-};
-const unitOptions = ref(createUnits(units.value));
-watch(units, () => {
-  unitOptions.value = createUnits(units.value);
-});
-watch(activeCategories, () => {
-  unitOptions.value = createUnits(units.value);
-});
-
-const filterUnits = (val: string, update: Function) => {
-  if (val === "") {
-    update(() => {
-      unitOptions.value = createUnits(units.value);
-    });
-    return;
-  }
-  update(() => {
-    unitOptions.value = createUnits(
-      units.value?.filter((i) => {
-        return (
-          i.name.toLowerCase().indexOf(val.toLowerCase()) > -1 ||
-          i.symbol.toLowerCase().indexOf(val.toLowerCase()) > -1 ||
-          i.names.some((n) => n.toLowerCase().indexOf(val.toLowerCase()) > -1)
-        );
-      }) ?? []
-    );
-  });
-};
-
-const schema = object({
-  id: number().optional(),
-  title: string().max(250).required(),
-  path: string().max(250).optional(),
-  defaultUnit: string().max(50),
-  quantityType: mixed<QuantityType>().oneOf(quantities),
-});
-
-type FormState = InferType<typeof schema>;
-
-const onSubmit = ((values) => {
-  console.log(values);
-}) as SubmissionHandler;
+const { data: categories, isLoading } = useCategories();
+const { data: units, isLoading: unitsLoading } = useUnits();
 
 const columns = computed(() => [
   {
