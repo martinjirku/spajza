@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/martinjirku/zasobar/units"
 	"gorm.io/gorm"
 )
 
@@ -15,11 +14,10 @@ type controller struct {
 
 type (
 	categoryItemDto struct {
-		Id           uint           `json:"id"`
-		Title        string         `json:"title"`
-		Path         string         `json:"path"`
-		DefaultUnit  string         `json:"defaultUnit"`
-		QuantityType units.Quantity `json:"quantityType"`
+		Id          uint   `json:"id"`
+		Title       string `json:"title"`
+		Path        string `json:"path"`
+		DefaultUnit string `json:"defaultUnit"`
 	}
 	listAllResponse categoryItemDto
 )
@@ -30,20 +28,18 @@ func NewController(cs CategoryService) controller {
 
 func mapCategoryItemToCategory(c categoryItemDto) Category {
 	return Category{
-		Model:        gorm.Model{ID: c.Id},
-		Title:        c.Title,
-		Path:         c.Path,
-		DefaultUnit:  c.DefaultUnit,
-		QuantityType: c.QuantityType,
+		Model:       gorm.Model{ID: c.Id},
+		Title:       c.Title,
+		Path:        c.Path,
+		DefaultUnit: c.DefaultUnit,
 	}
 }
 func mapCategoryToCategoryItem(c Category) categoryItemDto {
 	return categoryItemDto{
-		Id:           c.ID,
-		Title:        c.Title,
-		Path:         c.Path,
-		DefaultUnit:  c.DefaultUnit,
-		QuantityType: c.QuantityType,
+		Id:          c.ID,
+		Title:       c.Title,
+		Path:        c.Path,
+		DefaultUnit: c.DefaultUnit,
 	}
 }
 
@@ -55,11 +51,10 @@ func (ctrl *controller) ListAll(c echo.Context) error {
 	}
 	for _, c := range categories {
 		response = append(response, listAllResponse{
-			Id:           c.ID,
-			Title:        c.Title,
-			QuantityType: c.QuantityType,
-			Path:         c.Path,
-			DefaultUnit:  c.DefaultUnit,
+			Id:          c.ID,
+			Title:       c.Title,
+			Path:        c.Path,
+			DefaultUnit: c.DefaultUnit,
 		})
 	}
 	return c.JSON(http.StatusOK, response)

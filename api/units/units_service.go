@@ -22,7 +22,17 @@ func initUnits() {
 }
 
 func (u UnitService) ListAll() []goUnits.Unit {
-	return goUnits.All()
+	result := []goUnits.Unit{}
+	for _, u := range goUnits.All() {
+		if u.Quantity == "bytes" {
+			continue
+		}
+		if u.Quantity == "bits" {
+			continue
+		}
+		result = append(result, u)
+	}
+	return result
 }
 
 func (u UnitService) ListByQuantity(quantity Quantity) ([]goUnits.Unit, error) {

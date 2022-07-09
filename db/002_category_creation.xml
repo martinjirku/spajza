@@ -16,7 +16,7 @@
             <column name="deleted_at" type="datetime(3)"></column>
             <column name="title" type="varchar(250)"></column>
             <column name="default_unit" type="varchar(50)"></column>
-            <column name="quantity_type" type="ENUM('unknown','mass','length','volume','temperature','time','count','bytes','bites','area','pressure')"></column>
+            <column name="path" type="varchar(250)"></column>
         </createTable>
         <rollback>
             <dropTable tableName="categories" />

@@ -32,6 +32,8 @@ const auth = useAuthenticationStore();
     #e08053 68.8%,
     #ebeb8f 99.61%
   );
+
+  --bg-semitransparent: rgb(255, 255, 255, 0.8);
 }
 
 body {
@@ -42,7 +44,7 @@ body {
   padding: 0;
 }
 .el-card {
-  --el-card-bg-color: rgba(255, 255, 255, 0.8);
+  --el-card-bg-color: var(--bg-semitransparent);
 }
 a {
   text-decoration: none;

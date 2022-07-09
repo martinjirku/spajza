@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import { quasarLang, quasarConfig } from "./quasar";
 import { createPinia } from "pinia";
+import { VueQueryPlugin } from "vue-query";
 import { Quasar } from "quasar";
 import router from "@/router";
 import "./localization";
@@ -14,4 +15,5 @@ app.use(Quasar, {
   lang: quasarLang,
 });
 app.use(router);
+app.use(VueQueryPlugin);
 app.mount("#app");

@@ -13,10 +13,12 @@ type (
 	}
 
 	unit struct {
-		Name     string
-		Symbol   string
-		Type     string
-		Quantity string
+		Name       string   `json:"name"`
+		Names      []string `json:"names"`
+		PluralName string   `json:"pluralName"`
+		Symbol     string   `json:"symbol"`
+		System     string   `json:"system"`
+		Quantity   string   `json:"quantity"`
 	}
 )
 
@@ -25,10 +27,14 @@ func newUnitController() unitController {
 }
 
 func mapUnitToDto(u goUnits.Unit) unit {
+
 	return unit{
-		Name:     u.Name,
-		Quantity: u.Quantity,
-		Symbol:   u.Symbol,
+		Name:       u.Name,
+		Quantity:   u.Quantity,
+		Symbol:     u.Symbol,
+		System:     u.System(),
+		Names:      u.Names(),
+		PluralName: u.PluralName(),
 	}
 }
 
