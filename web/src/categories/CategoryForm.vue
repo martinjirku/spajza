@@ -76,7 +76,7 @@
           color="primary"
           class="full-width"
           type="submit"
-          :disable="!valid || !dirty"
+          :disable="!valid || !dirty || isLoading"
           >{{ categoryId !== -1 ? "Uložiť" : "Vytvoriť" }}</q-btn
         >
       </div>
@@ -85,23 +85,27 @@
 </template>
 <script lang="ts" setup>
 import { SubmissionHandler } from "vee-validate";
-import { ref, watch, defineProps, computed } from "vue";
+import { ref, watch, defineProps, computed, defineEmits } from "vue";
 import { createUnits, schema } from "./Category";
-import { useCategories } from "./CategoryQuery";
+import { useCategories, useCategoryMutation } from "./CategoryQuery";
 import { useUnits } from "./UnitQuery";
 import { Field, Form } from "vee-validate";
-import { setLocale } from "yup";
+import { Category } from "@api/category";
 const { categoryId } = defineProps({
   categoryId: {
     type: Number,
     required: true,
   },
 });
+const emit = defineEmits<{
+  (e: "submitted", value: Category): void;
+}>();
 
 const category = computed(() => {
   return categories.value?.find((c) => c.id === categoryId) ?? {};
 });
 const { data: categories } = useCategories();
+const { mutateAsync, isLoading } = useCategoryMutation();
 
 const { data: units } = useUnits();
 const unitOptions = ref(createUnits(units.value));
@@ -131,6 +135,8 @@ const filterUnits = (val: string, update: Function) => {
 };
 
 const onSubmit = ((values) => {
-  console.log(values);
+  mutateAsync(values as Category).then((data) => {
+    emit("submitted", data);
+  });
 }) as SubmissionHandler;
 </script>

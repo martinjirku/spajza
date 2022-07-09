@@ -46,8 +46,12 @@
         <q-space></q-space>
       </div>
       <div v-else class="row q-col-gutter-md q-pt-md q-mr-md">
-        <div class="col-7">
+        <div
+          class="col-12 col-sm-7"
+          v-if="!activeCategories[0] || $q.screen.gt.xs"
+        >
           <q-table
+            ref="categoryTableRef"
             dark
             flat
             square
@@ -81,12 +85,16 @@
             </template>
           </q-table>
         </div>
-        <div class="col-5">
-          <q-card v-if="activeCategories[0]" flat square>
+        <div
+          class="col-12 col-sm-5"
+          v-if="!!activeCategories[0] || $q.screen.gt.xs"
+        >
+          <q-card class="sticky-card" v-if="activeCategories[0]" flat square>
             <q-card-section>
               <CategoryForm
                 :key="activeCategories[0]?.id"
                 :categoryId="activeCategories[0]?.id"
+                @submitted="onSubmitted"
               ></CategoryForm>
             </q-card-section>
           </q-card>
@@ -109,6 +117,11 @@
 .sticky {
   position: sticky;
   top: -127px;
+  z-index: 1;
+}
+.sticky-card {
+  position: sticky;
+  top: 80px;
 }
 .test {
   height: 1200px;
@@ -128,11 +141,21 @@ import { Category } from "@api/category";
 import { useUnits } from "@categories/UnitQuery";
 import { useCategories } from "@categories/CategoryQuery";
 import CategoryForm from "@categories/CategoryForm.vue";
+import { QTable, useQuasar } from "quasar";
 
 const activeCategories = ref<Category[]>([]);
+const categoryTableRef = ref<QTable>();
+
+const $q = useQuasar();
 
 const { data: categories, isLoading } = useCategories();
 const { data: units, isLoading: unitsLoading } = useUnits();
+
+const onSubmitted = (data: Category) => {
+  activeCategories.value = [data];
+  categoryTableRef.value?.lastPage();
+  categoryTableRef.value?.scrollTo(data.id);
+};
 
 const columns = computed(() => [
   {
