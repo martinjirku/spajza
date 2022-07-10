@@ -14,20 +14,25 @@
                   activeCategories.length > 0 && activeCategories[0].id !== -1
                 "
                 round
+                flat
+                title="Zmazať"
                 icon="delete"
+                @click="onDelete"
               ></q-btn>
               <q-btn
-                v-if="
-                  activeCategories.length > 0 && activeCategories[0].id === -1
-                "
+                v-if="activeCategories.length > 0"
                 round
+                flat
                 icon="close"
+                title="Zatvoriť"
                 @click="activeCategories = []"
               ></q-btn>
               <q-btn
                 v-if="activeCategories[0]?.id !== -1"
                 round
                 icon="add"
+                flat
+                title="Vytvoriť"
                 @click="
                   activeCategories = [
                     { id: -1, path: '', defaultUnit: 'kilogram' },
@@ -139,7 +144,10 @@ import PageLayout from "@components/common/PageLayout.vue";
 import { ref, computed, watch } from "vue";
 import { Category } from "@api/category";
 import { useUnits } from "@categories/UnitQuery";
-import { useCategories } from "@categories/CategoryQuery";
+import {
+  useCategories,
+  useDeleteCategoryMutation,
+} from "@categories/CategoryQuery";
 import CategoryForm from "@categories/CategoryForm.vue";
 import { QTable, useQuasar } from "quasar";
 
@@ -150,11 +158,18 @@ const $q = useQuasar();
 
 const { data: categories, isLoading } = useCategories();
 const { data: units, isLoading: unitsLoading } = useUnits();
+const { mutateAsync } = useDeleteCategoryMutation();
 
 const onSubmitted = (data: Category) => {
   activeCategories.value = [data];
   categoryTableRef.value?.lastPage();
-  categoryTableRef.value?.scrollTo(data.id);
+};
+
+const onDelete = () => {
+  if (activeCategories.value[0]?.id === undefined) return;
+  mutateAsync(activeCategories.value[0].id).then((resp) => {
+    activeCategories.value = [];
+  });
 };
 
 const columns = computed(() => [

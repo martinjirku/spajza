@@ -2,6 +2,7 @@
   <Form
     :key="categoryId"
     @submit="onSubmit"
+    ref="formRef"
     :initial-values="category"
     :validation-schema="schema"
     lang="sk"
@@ -84,7 +85,7 @@
   </Form>
 </template>
 <script lang="ts" setup>
-import { SubmissionHandler } from "vee-validate";
+import { FormContext, SubmissionHandler, useForm } from "vee-validate";
 import { ref, watch, defineProps, computed, defineEmits } from "vue";
 import { createUnits, schema } from "./Category";
 import { useCategories, useCategoryMutation } from "./CategoryQuery";
@@ -100,18 +101,23 @@ const { categoryId } = defineProps({
 const emit = defineEmits<{
   (e: "submitted", value: Category): void;
 }>();
+const formRef = ref<FormContext<Record<string, any>>>();
 
+const { data: categories } = useCategories();
 const category = computed(() => {
   return categories.value?.find((c) => c.id === categoryId) ?? {};
 });
-const { data: categories } = useCategories();
 const { mutateAsync, isLoading } = useCategoryMutation();
-
 const { data: units } = useUnits();
 const unitOptions = ref(createUnits(units.value));
 
 watch([units, () => categoryId], () => {
   unitOptions.value = createUnits(units.value);
+});
+watch([category], ([category]) => {
+  setTimeout(() => {
+    formRef.value?.resetForm(category);
+  }, 0);
 });
 
 const filterUnits = (val: string, update: Function) => {

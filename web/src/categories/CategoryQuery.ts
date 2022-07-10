@@ -1,4 +1,9 @@
-import { createCategory, getCategories, updateCategory } from "@api";
+import {
+  createCategory,
+  deleteCategory,
+  getCategories,
+  updateCategory,
+} from "@api";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { Category } from "@api/category";
 
@@ -15,6 +20,20 @@ export const useCategoryMutation = () => {
     },
     {
       onSuccess: () => {
+        queryClient.invalidateQueries("categories");
+      },
+    }
+  );
+};
+
+export const useDeleteCategoryMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (id: number) => {
+      return deleteCategory(id);
+    },
+    {
+      onSettled: () => {
         queryClient.invalidateQueries("categories");
       },
     }

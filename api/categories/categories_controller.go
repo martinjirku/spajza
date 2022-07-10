@@ -86,3 +86,18 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 	return c.JSON(http.StatusOK, mapCategoryToCategoryItem(response))
 
 }
+
+func (ctrl *controller) DeleteCategory(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	var category = Category{}
+	category.ID = uint(id)
+	err = ctrl.cs.DeleteItem(category)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return c.JSON(http.StatusNoContent, "")
+}

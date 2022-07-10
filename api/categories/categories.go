@@ -11,4 +11,5 @@ func StartApp(db *gorm.DB, e *echo.Echo) {
 	e.GET("/api/categories", controller.ListAll)
 	e.POST("/api/categories", controller.SaveCategory)
 	e.POST("/api/categories/:id", controller.SaveCategory)
+	e.DELETE("/api/categories/:id", controller.DeleteCategory)
 }

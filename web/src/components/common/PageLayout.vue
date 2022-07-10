@@ -166,7 +166,6 @@ const links = [
 ];
 
 const logout = () => {
-  console.log("logout");
   isLoggingOut.value = false;
   auth
     .logout()

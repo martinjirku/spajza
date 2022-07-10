@@ -31,3 +31,7 @@ func (cs *CategoryService) UpdateItem(c Category) (Category, error) {
 	return c, result.Error
 
 }
+func (cs *CategoryService) DeleteItem(c Category) error {
+	result := cs.db.Delete(&c)
+	return result.Error
+}
