@@ -35,7 +35,7 @@
                 title="Vytvoriť"
                 @click="
                   activeCategories = [
-                    { id: -1, path: '', defaultUnit: 'kilogram' },
+                    { id: -1, path: '', defaultUnit: 'kilogram', title: '' },
                   ]
                 "
               ></q-btn>
@@ -160,9 +160,11 @@ const { data: categories, isLoading } = useCategories();
 const { data: units, isLoading: unitsLoading } = useUnits();
 const { mutateAsync } = useDeleteCategoryMutation();
 
-const onSubmitted = (data: Category) => {
+const onSubmitted = ([data, updated]: [Category, boolean]) => {
   activeCategories.value = [data];
-  categoryTableRef.value?.lastPage();
+  if (!updated) {
+    categoryTableRef.value?.lastPage();
+  }
 };
 
 const onDelete = () => {

@@ -66,6 +66,29 @@
         </template>
       </q-select>
     </Field>
+
+    <Field
+      name="path"
+      v-slot="{ errorMessage, value, field: { value: _, ...field } }"
+    >
+      <q-select
+        label="Hlavná kategória"
+        v-model="(value as string)"
+        :options="parentsOptions"
+        v-bind="field"
+        map-options
+        emit-value
+        clearable
+        :error="!!errorMessage"
+        :error-message="errorMessage"
+      >
+        <template v-slot:no-option>
+          <q-item>
+            <q-item-section class="text-grey"> Žiadni rodičia </q-item-section>
+          </q-item>
+        </template>
+      </q-select>
+    </Field>
     <div class="row q-col-gutter-sm">
       <div class="col-6">
         <q-btn class="full-width" flat type="button" @click="resetForm()">
@@ -87,7 +110,12 @@
 <script lang="ts" setup>
 import { FormContext, SubmissionHandler, useForm } from "vee-validate";
 import { ref, watch, defineProps, computed, defineEmits } from "vue";
-import { createUnits, schema } from "./Category";
+import {
+  createParentOptions,
+  createUnits,
+  ParentOption,
+  schema,
+} from "./Category";
 import { useCategories, useCategoryMutation } from "./CategoryQuery";
 import { useUnits } from "./UnitQuery";
 import { Field, Form } from "vee-validate";
@@ -99,7 +127,7 @@ const { categoryId } = defineProps({
   },
 });
 const emit = defineEmits<{
-  (e: "submitted", value: Category): void;
+  (e: "submitted", value: [Category, boolean]): void;
 }>();
 const formRef = ref<FormContext<Record<string, any>>>();
 
@@ -119,6 +147,16 @@ watch([category], ([category]) => {
     formRef.value?.resetForm(category);
   }, 0);
 });
+
+const indexedParents = computed(() =>
+  categories.value?.reduce((r, c) => {
+    r[c.id] = c;
+    return r;
+  }, {} as Record<string, Category>)
+);
+const parentsOptions = computed<ParentOption[]>(() =>
+  createParentOptions(categories.value, indexedParents.value)
+);
 
 const filterUnits = (val: string, update: Function) => {
   if (val === "") {
@@ -142,7 +180,8 @@ const filterUnits = (val: string, update: Function) => {
 
 const onSubmit = ((values) => {
   mutateAsync(values as Category).then((data) => {
-    emit("submitted", data);
+    const updated = values.id !== -1;
+    emit("submitted", [data, updated]);
   });
 }) as SubmissionHandler;
 </script>
