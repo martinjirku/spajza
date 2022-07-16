@@ -1,11 +1,12 @@
 package categories
 
 import (
+	"database/sql"
+
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
-func StartApp(db *gorm.DB, e *echo.Echo) {
+func StartApp(db *sql.DB, e *echo.Echo) {
 	service := NewCategoryService(db)
 	controller := NewController(service)
 	e.GET("/api/categories", controller.ListAll)

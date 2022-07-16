@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type controller struct {
@@ -28,7 +27,7 @@ func NewController(cs CategoryService) controller {
 
 func mapCategoryItemToCategory(c categoryItemDto) Category {
 	return Category{
-		Model:       gorm.Model{ID: c.Id},
+		ID:          c.Id,
 		Title:       c.Title,
 		Path:        c.Path,
 		DefaultUnit: c.DefaultUnit,
@@ -45,7 +44,7 @@ func mapCategoryToCategoryItem(c Category) categoryItemDto {
 
 func (ctrl *controller) ListAll(c echo.Context) error {
 	var response = []listAllResponse{}
-	var categories, err = ctrl.cs.ListAll()
+	var categories, err = ctrl.cs.ListAll(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -68,7 +67,7 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 	idStr := c.Param("id")
 	var category = mapCategoryItemToCategory(*providedCategory)
 	if idStr == "" {
-		response, err := ctrl.cs.CreateItem(category)
+		response, err := ctrl.cs.CreateItem(c.Request().Context(), category)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -79,7 +78,7 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	category.ID = uint(id)
-	response, err := ctrl.cs.UpdateItem(category)
+	response, err := ctrl.cs.UpdateItem(c.Request().Context(), category)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -95,7 +94,7 @@ func (ctrl *controller) DeleteCategory(c echo.Context) error {
 	}
 	var category = Category{}
 	category.ID = uint(id)
-	err = ctrl.cs.DeleteItem(category)
+	err = ctrl.cs.DeleteItem(c.Request().Context(), category)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

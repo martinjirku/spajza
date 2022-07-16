@@ -20,3 +20,6 @@ clean:
 
 db-update:
 	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./000_changelog.xml update
+
+dev:
+	cd $(API_PATH); $(GO) run ./server.go

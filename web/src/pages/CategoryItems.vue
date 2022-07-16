@@ -97,7 +97,7 @@
           <q-card class="sticky-card" v-if="activeCategories[0]" flat square>
             <q-card-section>
               <CategoryForm
-                :key="activeCategories[0]?.id"
+                :key="activeCategories[0]?.id ?? NaN"
                 :categoryId="activeCategories[0]?.id"
                 @submitted="onSubmitted"
               ></CategoryForm>

@@ -35,6 +35,10 @@ func newUserController(userRepository UserService, config config.Configuration) 
 	return userController{userService: userRepository, config: config}
 }
 
+func (h *userController) ListAll() ([]*User, error) {
+	return h.userService.ListAll()
+}
+
 func (h *userController) register(c echo.Context) error {
 	data := &userRegistrationRequest{}
 	if err := c.Bind(data); err != nil {

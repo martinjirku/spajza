@@ -1,7 +1,12 @@
 package main
 
 import (
+	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/martinjirku/zasobar/categories"
+	"github.com/martinjirku/zasobar/config"
 	"github.com/martinjirku/zasobar/units"
 	"github.com/martinjirku/zasobar/users"
 	"github.com/martinjirku/zasobar/web"
@@ -14,9 +19,14 @@ func main() {
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-	db := storage.NewDB()
+	gormDb := storage.NewDB()
 
-	users.StartApp(db, e)
+	db, err := sql.Open("mysql", config.GetMariaDBSQLConnectionString())
+	if err != nil {
+		e.Logger.Fatal("Failed createDb")
+	}
+
+	users.StartApp(gormDb, db, e)
 	units.StartApp(e)
 	categories.StartApp(db, e)
 

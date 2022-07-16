@@ -1,17 +1,21 @@
 package users
 
 import (
+	"database/sql"
 	"errors"
 	"regexp"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
-	Password string `gorm:"type:varchar(255)"`
-	Email    string `gorm:"type:varchar(255); index:idx_user_email,unique"`
+	ID        uint
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+	Password  string
+	Email     string
 }
 
 func isEmailValid(e string) bool {

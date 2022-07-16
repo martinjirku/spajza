@@ -109,7 +109,7 @@
 </template>
 <script lang="ts" setup>
 import { FormContext, SubmissionHandler, useForm } from "vee-validate";
-import { ref, watch, defineProps, computed, defineEmits } from "vue";
+import { ref, watch, computed } from "vue";
 import {
   createParentOptions,
   createUnits,

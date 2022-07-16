@@ -1,21 +1,37 @@
 package users
 
 import (
+	"database/sql"
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
 type UserService struct {
-	db *gorm.DB
+	db    *gorm.DB
+	rawDb *sql.DB
 }
 
-func NewUserService(db *gorm.DB) UserService {
-	return UserService{db}
+func NewUserService(db *gorm.DB, rawDb *sql.DB) UserService {
+	return UserService{db, rawDb}
 }
 
 func (r *UserService) ListAll() ([]*User, error) {
-	var u []*User
-	err := r.db.Find(&u).Error
-	return u, err
+	var users []*User
+	selectAllUsersStmt := "SELECT id, created_at, updated_at, deleted_at, password, email FROM users"
+	rows, err := r.rawDb.Query(selectAllUsersStmt)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var user = User{}
+		if err := rows.Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt, &user.Password, &user.Email); err != nil {
+			fmt.Printf("could not scan row: %v", err)
+		}
+
+		users = append(users, &user)
+	}
+	return users, err
 }
 
 func (r *UserService) Register(email string, password string) (User, error) {

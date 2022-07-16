@@ -1,12 +1,16 @@
 package categories
 
 import (
-	"gorm.io/gorm"
+	"database/sql"
+	"time"
 )
 
 type Category struct {
-	gorm.Model
-	Title       string `gorm:"type:varchar(250)"`
-	Path        string `gorm:"type:varchar(250)"`
-	DefaultUnit string `gorm:"type:varchar(50)"`
+	ID          uint
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   sql.NullTime
+	Title       string
+	Path        string
+	DefaultUnit string
 }
