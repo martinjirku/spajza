@@ -45,7 +45,7 @@ func (h *userController) register(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "Bad request"})
 	}
 
-	response, err := h.userService.Register(data.Username, data.Password)
+	response, err := h.userService.Register(c.Request().Context(), data.Username, data.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -58,7 +58,7 @@ func (h *userController) login(c echo.Context) error {
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
-	err := h.userService.Login(data.Username, data.Password)
+	err := h.userService.Login(c.Request().Context(), data.Username, data.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}

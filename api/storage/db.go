@@ -1,20 +1,19 @@
 package storage
 
 import (
+	"database/sql"
 	"log"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	config "github.com/martinjirku/zasobar/config"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func NewDB(params ...string) *gorm.DB {
+func NewDB(params ...string) *sql.DB {
 	var err error
 	conString := config.GetMariaDBSQLConnectionString()
 
-	DB, err = gorm.Open(mysql.New(mysql.Config{DSN: conString}))
+	DB, err := sql.Open("mysql", conString)
 
 	if err != nil {
 		log.Panic(err)

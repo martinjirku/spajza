@@ -3,23 +3,23 @@ package users
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
-	"gorm.io/gorm"
+	"golang.org/x/net/context"
 )
 
 type UserService struct {
-	db    *gorm.DB
-	rawDb *sql.DB
+	db *sql.DB
 }
 
-func NewUserService(db *gorm.DB, rawDb *sql.DB) UserService {
-	return UserService{db, rawDb}
+func NewUserService(db *sql.DB) UserService {
+	return UserService{db}
 }
 
 func (r *UserService) ListAll() ([]*User, error) {
 	var users []*User
 	selectAllUsersStmt := "SELECT id, created_at, updated_at, deleted_at, password, email FROM users"
-	rows, err := r.rawDb.Query(selectAllUsersStmt)
+	rows, err := r.db.Query(selectAllUsersStmt)
 	if err != nil {
 		return nil, err
 	}
@@ -34,26 +34,39 @@ func (r *UserService) ListAll() ([]*User, error) {
 	return users, err
 }
 
-func (r *UserService) Register(email string, password string) (User, error) {
+func (r *UserService) Register(ctx context.Context, email string, password string) (User, error) {
 	user, err := NewUserWithPassword(email, password)
 	if err != nil {
 		return user, err
 	}
-	result := r.db.Create(&user)
-	return user, result.Error
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	res, err := r.db.ExecContext(ctx, "INSERT INTO users(created_at, updated_at, email, password) VALUES (?,?,?,?)",
+		user.CreatedAt, user.UpdatedAt, user.Email, user.Password)
+	if err != nil {
+		return user, err
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return user, err
+	}
+	user.ID = uint(id)
+	return user, nil
 }
 
-func (r *UserService) Login(email string, password string) error {
-	var user User
-	result := r.db.Find(&user, "email = ?", email)
-	if result.Error != nil {
-		return result.Error
-	}
-	if result.RowsAffected == 0 {
+func (r *UserService) Login(ctx context.Context, email string, password string) error {
+	var user = User{}
+	err := r.db.
+		QueryRowContext(ctx, "SELECT id, created_at, updated_at, password, email FROM users WHERE email=? AND deleted_at IS NULL", email).
+		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.Password, &user.Email)
+	switch {
+	case err == sql.ErrNoRows:
 		return ErrorWrongUsername()
-	}
-	if !user.VerifyPassword(password) {
+	case err != nil:
+		return err
+	case !user.VerifyPassword(password):
 		return ErrorWrongPassword()
+	default:
+		return nil
 	}
-	return nil
 }
