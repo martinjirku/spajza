@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/martinjirku/zasobar/categories"
+	"github.com/martinjirku/zasobar/db"
+	"github.com/martinjirku/zasobar/storage"
 	"github.com/martinjirku/zasobar/units"
 	"github.com/martinjirku/zasobar/users"
 	"github.com/martinjirku/zasobar/web"
-
-	"github.com/martinjirku/zasobar/storage"
 )
 
 func main() {
@@ -14,11 +14,12 @@ func main() {
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-	db := storage.NewDB()
+	db := db.NewDB()
 
 	users.StartApp(db, e)
 	units.StartApp(e)
 	categories.StartApp(db, e)
+	storage.StartApp(db, e)
 
 	e.Logger.Fatal(web.StartWebServer(e))
 }

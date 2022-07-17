@@ -60,12 +60,12 @@ func (ctrl *controller) ListAll(c echo.Context) error {
 }
 
 func (ctrl *controller) SaveCategory(c echo.Context) error {
-	providedCategory := new(categoryItemDto)
-	if err := c.Bind(providedCategory); err != nil {
+	providedCategory := categoryItemDto{}
+	if err := c.Bind(&providedCategory); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	idStr := c.Param("id")
-	var category = mapCategoryItemToCategory(*providedCategory)
+	var category = mapCategoryItemToCategory(providedCategory)
 	if idStr == "" {
 		response, err := ctrl.cs.CreateItem(c.Request().Context(), category)
 		if err != nil {
