@@ -1,4 +1,5 @@
 import { Category } from "./category";
+import { CreateStoragePlace, StoragePlace } from "./storagePlace";
 import { Unit } from "./unit";
 
 const headers: HeadersInit = {
@@ -45,4 +46,43 @@ export const deleteCategory = (categoryId: number) => {
     method: "DELETE",
     headers,
   }).then((r) => r.text());
+};
+
+export const getStoragePlaces = () => {
+  return fetch("api/storage/places", { headers })
+    .then((resp) => resp.json())
+    .then((data) => data as StoragePlace[]);
+};
+
+export const getStoragePlace = (storagePlaceId: number) => {
+  return fetch(`api/storage/places/${storagePlaceId}`, { headers })
+    .then((resp) => resp.json())
+    .then((data) => data as StoragePlace);
+};
+
+export const deleteStoragePlace = (storagePlaceId: number) => {
+  return fetch(`/api/storage/places/${storagePlaceId}`, {
+    method: "DELETE",
+    headers,
+  }).then((r) => r.text());
+};
+
+export const createStoragePlace = (storagePlace: CreateStoragePlace) => {
+  return fetch(`/api/storage/places`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(storagePlace),
+  })
+    .then((resp) => resp.json())
+    .then((data) => data as StoragePlace);
+};
+
+export const updateStoragePlace = (storagePlace: StoragePlace) => {
+  return fetch(`/api/storage/places/${storagePlace.storagePlaceId}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(storagePlace),
+  })
+    .then((resp) => resp.json())
+    .then((data) => data as StoragePlace);
 };

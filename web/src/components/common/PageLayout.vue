@@ -37,8 +37,8 @@
                 <q-item to="/typ-poloziek" active-class="is-active">
                   <q-item-section> Druhy položiek </q-item-section>
                 </q-item>
-                <q-item to="/nastavenia" active-class="is-active">
-                  <q-item-section> Nastavenia </q-item-section>
+                <q-item to="/miesta-ulozenia" active-class="is-active">
+                  <q-item-section> Miesta uloženia </q-item-section>
                 </q-item>
                 <q-separator />
                 <q-item clickable @click="logout">

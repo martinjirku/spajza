@@ -28,9 +28,6 @@ export const schema = object({
   defaultUnit: string().max(250).required(),
 });
 
-// @ts-ignore
-window.schema = schema;
-
 export type CategoryFormState = InferType<typeof schema>;
 
 export type ParentOption = { value: string; label: string };

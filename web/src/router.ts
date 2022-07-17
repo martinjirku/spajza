@@ -6,6 +6,7 @@ import Recipies from "@pages/Recipies.vue";
 import Shopping from "@pages/Shopping.vue";
 import CategoryItems from "@pages/CategoryItems.vue";
 import Settings from "@pages/Settings.vue";
+import StoragePlaces from "@pages/StoragePlaces.vue";
 
 import { useAuthenticationStore } from "@/auth/authentication";
 
@@ -39,6 +40,10 @@ const router = createRouter({
     {
       path: "/nastavenia",
       component: Settings,
+    },
+    {
+      path: "/miesta-ulozenia",
+      component: StoragePlaces,
     },
   ],
 });

@@ -1,5 +1,3 @@
-import { QuantityType } from "./unit";
-
 export type Category = {
   id: number;
   path: string;
