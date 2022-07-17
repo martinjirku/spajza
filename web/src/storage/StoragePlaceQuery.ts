@@ -16,7 +16,6 @@ export const useStoragePlacesMutation = () => {
   const queryClient = useQueryClient();
   return useMutation(
     (data: StoragePlace) => {
-      console.log(data);
       return (data.storagePlaceId ?? -1) === -1
         ? createStoragePlace(data)
         : updateStoragePlace(data);
