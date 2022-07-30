@@ -117,7 +117,7 @@ a:hover {
   color: inherit;
 }
 
-.q-drawer.q-drawer--mobile {
+.q-drawer.q-drawer.q-drawer--mobile {
   background: var(--bg-gradient);
 }
 .user-dropdown {

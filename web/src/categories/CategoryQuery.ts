@@ -6,11 +6,21 @@ import {
 } from "@api";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { Category } from "@api/category";
+import { createTreeLikeCategoryOptions } from "./Category";
+import { computed } from "vue";
 
 export const useCategories = () =>
   useQuery("categories", () => getCategories(), {
     refetchOnMount: false,
   });
+
+export const useCategoryOptions = () => {
+  const { data, ...rest } = useQuery("categories", () => getCategories(), {
+    refetchOnMount: false,
+  });
+  const options = computed(() => createTreeLikeCategoryOptions(data.value));
+  return { data: options, ...rest };
+};
 
 export const useCategoryMutation = () => {
   const queryClient = useQueryClient();

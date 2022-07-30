@@ -1,3 +1,4 @@
+import { StoragePlace } from "@api/storagePlace";
 import { number, object, string } from "yup";
 
 export const schema = object({
@@ -5,3 +6,12 @@ export const schema = object({
   storagePlaceId: number().optional(),
   code: string().max(50).nullable(),
 });
+
+export const createStoragePlaceOptions = (places: StoragePlace[] = []) => {
+  return places.map((p) => {
+    return {
+      value: p.storagePlaceId,
+      label: p.title,
+    };
+  });
+};

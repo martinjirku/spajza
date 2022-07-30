@@ -3,24 +3,6 @@ import { QuantityType, Unit } from "@api/unit";
 import { QSelectProps } from "quasar";
 import { InferType, number, object, string } from "yup";
 
-export const createUnits = (units: Unit[] = []): QSelectProps["options"] => {
-  return units.map((a) => {
-    return {
-      label: `${[a.name]} (${a.symbol})`,
-      value: a.name,
-      icon: ((key: QuantityType) => {
-        if (key === "mass") return "scale";
-        if (key === "volume") return "takeout_dining";
-        if (key === "time") return "timer";
-        if (key === "count") return "tag";
-        if (key === "length") return "straighten";
-        if (key === "temperature") return "thermostat";
-        return "square_foot";
-      })(a.quantity),
-    };
-  });
-};
-
 export const schema = object({
   title: string().max(250).required(),
   id: number().optional(),
@@ -53,4 +35,26 @@ export const createParentOptions = (
       };
     }) ?? []
   );
+};
+
+export const createTreeLikeCategoryOptions = (categories: Category[] = []) => {
+  const indexedCategories = categories.reduce((c, i) => {
+    c[i.id] = i;
+    return c;
+  }, {} as Record<number, Category>);
+  return categories.map((c) => {
+    let label = [
+      ...c.path
+        .split(".")
+        .filter((i) => i !== "")
+        .map(Number),
+      c.id,
+    ]
+      .map((key) => indexedCategories[key]?.title)
+      .join(" > ");
+    return {
+      value: c.id,
+      label,
+    };
+  });
 };

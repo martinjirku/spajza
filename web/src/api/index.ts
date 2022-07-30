@@ -1,4 +1,5 @@
 import { Category } from "./category";
+import { StorageItem } from "./storage";
 import { CreateStoragePlace, StoragePlace } from "./storagePlace";
 import { Unit } from "./unit";
 
@@ -85,4 +86,67 @@ export const updateStoragePlace = (storagePlace: StoragePlace) => {
   })
     .then((resp) => resp.json())
     .then((data) => data as StoragePlace);
+};
+
+export const getStorageItems = () => {
+  return new Promise<{ items: StorageItem[] }>((resolve) => {
+    resolve({
+      items: [
+        {
+          storageItemId: 1,
+          title: "Rama",
+          baselineAmount: 400,
+          currentAmount: 400,
+          expiration_date: "2022-08-28T20:00:00.000Z",
+          quantityType: "mass",
+          unit: "gram",
+          categoryId: 1,
+          storagePlaceId: 4,
+        },
+        {
+          storageItemId: 2,
+          title: "Flora",
+          baselineAmount: 450,
+          currentAmount: 400,
+          expiration_date: "2022-09-28T20:00:00.000Z",
+          quantityType: "mass",
+          unit: "gram",
+          categoryId: 1,
+          storagePlaceId: 4,
+        },
+        {
+          storageItemId: 3,
+          title: "Hladká múka",
+          baselineAmount: 1000,
+          currentAmount: 400,
+          expiration_date: "2022-09-28T20:00:00.000Z",
+          quantityType: "mass",
+          unit: "gram",
+          categoryId: 2,
+          storagePlaceId: 1,
+        },
+        {
+          storageItemId: 4,
+          title: "Plnotučné mlieko",
+          baselineAmount: 1000,
+          currentAmount: 1000,
+          expiration_date: "2022-09-28T20:00:00.000Z",
+          quantityType: "volume",
+          unit: "liter",
+          categoryId: 3,
+          storagePlaceId: 4,
+        },
+      ],
+    });
+  });
+};
+
+export const addNewStorageItem = (storageItem: StorageItem) => {
+  return fetch(`/api/storage/items`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(storageItem),
+  })
+    .then((r) => r.json())
+    .then((data) => data as { data: StorageItem });
 };

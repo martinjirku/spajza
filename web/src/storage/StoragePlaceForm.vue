@@ -1,4 +1,3 @@
-StoragePlace
 <template>
   <Form
     :key="storagePlaceId"

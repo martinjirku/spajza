@@ -1,3 +1,4 @@
+createUnitOptions
 <template>
   <Form
     :key="categoryId"
@@ -110,16 +111,12 @@
 <script lang="ts" setup>
 import { FormContext, SubmissionHandler, useForm } from "vee-validate";
 import { ref, watch, computed } from "vue";
-import {
-  createParentOptions,
-  createUnits,
-  ParentOption,
-  schema,
-} from "./Category";
+import { createParentOptions, ParentOption, schema } from "./Category";
 import { useCategories, useCategoryMutation } from "./CategoryQuery";
 import { useUnits } from "./UnitQuery";
 import { Field, Form } from "vee-validate";
 import { Category } from "@api/category";
+import { createUnitOptions } from "@units/units";
 const { categoryId } = defineProps({
   categoryId: {
     type: Number,
@@ -137,10 +134,10 @@ const category = computed(() => {
 });
 const { mutateAsync, isLoading } = useCategoryMutation();
 const { data: units } = useUnits();
-const unitOptions = ref(createUnits(units.value));
+const unitOptions = ref(createUnitOptions(units.value));
 
 watch([units, () => categoryId], () => {
-  unitOptions.value = createUnits(units.value);
+  unitOptions.value = createUnitOptions(units.value);
 });
 watch([category], ([category]) => {
   setTimeout(() => {
@@ -161,12 +158,12 @@ const parentsOptions = computed<ParentOption[]>(() =>
 const filterUnits = (val: string, update: Function) => {
   if (val === "") {
     update(() => {
-      unitOptions.value = createUnits(units.value);
+      unitOptions.value = createUnitOptions(units.value);
     });
     return;
   }
   update(() => {
-    unitOptions.value = createUnits(
+    unitOptions.value = createUnitOptions(
       units.value?.filter((i) => {
         return (
           i.name.toLowerCase().indexOf(val.toLowerCase()) > -1 ||
