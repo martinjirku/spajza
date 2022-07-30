@@ -12,7 +12,19 @@
     <changeSet id="003" author="harry.hole">
         <sqlFile path="./003_storage_places_up.sql" />
         <rollback>
-            <sqlFile path="./003_storage_places_up.sql" />
+            <sqlFile path="./003_storage_places_down.sql" />
+        </rollback>
+    </changeSet>
+    <changeSet id="004" author="harry.hole">
+        <sqlFile path="./004_storage_item_up.sql" />
+        <rollback>
+            <sqlFile path="./004_storage_item_down.sql" />
+        </rollback>
+    </changeSet>
+    <changeSet id="005" author="harry.hole">
+        <sqlFile path="./005_storage_item_consumption_up.sql" />
+        <rollback>
+            <sqlFile path="./005_storage_item_consumption_down.sql" />
         </rollback>
     </changeSet>
 </databaseChangeLog>
