@@ -269,7 +269,6 @@ watch(isLoading, () => {
 });
 
 const onSubmit = ((value) => {
-  console.log(value);
   mutateAsync(value as StorageItem).then(({ data }) => {
     emit("submitted", data);
   });

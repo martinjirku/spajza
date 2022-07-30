@@ -1,5 +1,5 @@
 import { Category } from "./category";
-import { StorageItem } from "./storage";
+import { NewStorageItem, StorageItem } from "./storage";
 import { CreateStoragePlace, StoragePlace } from "./storagePlace";
 import { Unit } from "./unit";
 
@@ -97,7 +97,7 @@ export const getStorageItems = () => {
           title: "Rama",
           baselineAmount: 400,
           currentAmount: 400,
-          expiration_date: "2022-08-28T20:00:00.000Z",
+          expirationDate: "2022-08-28T20:00:00.000Z",
           quantityType: "mass",
           unit: "gram",
           categoryId: 1,
@@ -108,7 +108,7 @@ export const getStorageItems = () => {
           title: "Flora",
           baselineAmount: 450,
           currentAmount: 400,
-          expiration_date: "2022-09-28T20:00:00.000Z",
+          expirationDate: "2022-09-28T20:00:00.000Z",
           quantityType: "mass",
           unit: "gram",
           categoryId: 1,
@@ -119,7 +119,7 @@ export const getStorageItems = () => {
           title: "Hladká múka",
           baselineAmount: 1000,
           currentAmount: 400,
-          expiration_date: "2022-09-28T20:00:00.000Z",
+          expirationDate: "2022-09-28T20:00:00.000Z",
           quantityType: "mass",
           unit: "gram",
           categoryId: 2,
@@ -130,7 +130,7 @@ export const getStorageItems = () => {
           title: "Plnotučné mlieko",
           baselineAmount: 1000,
           currentAmount: 1000,
-          expiration_date: "2022-09-28T20:00:00.000Z",
+          expirationDate: "2022-09-28T20:00:00.000Z",
           quantityType: "volume",
           unit: "liter",
           categoryId: 3,
@@ -141,7 +141,7 @@ export const getStorageItems = () => {
   });
 };
 
-export const addNewStorageItem = (storageItem: StorageItem) => {
+export const addNewStorageItem = (storageItem: NewStorageItem) => {
   return fetch(`/api/storage/items`, {
     method: "POST",
     headers,

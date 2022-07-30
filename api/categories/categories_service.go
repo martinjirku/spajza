@@ -32,6 +32,7 @@ func (cs *CategoryService) ListAll(ctx context.Context) ([]Category, error) {
 	if err != nil {
 		return categories, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var c Category

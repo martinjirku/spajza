@@ -9,7 +9,10 @@ import (
 func StartApp(db *sql.DB, e *echo.Echo) {
 	storagePlacesService := NewStoragePlacesService(db)
 	storagePlacesController := NewStoragePlacesController(storagePlacesService)
+	storageService := NewStorageService(db)
+	storageController := newStorageController(storageService)
 
+	e.POST("/api/storage/items", storageController.create)
 	e.POST("/api/storage/places", storagePlacesController.create)
 	e.GET("/api/storage/places", storagePlacesController.list)
 	e.POST("/api/storage/places/:storagePlaceId", storagePlacesController.update)

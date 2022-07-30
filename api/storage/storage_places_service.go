@@ -43,6 +43,7 @@ func (s *StoragePlacesService) List(ctx context.Context) ([]StoragePlace, error)
 	if err != nil {
 		return storagePlaces, err
 	}
+	defer row.Close()
 	for row.Next() {
 		storagePlace := StoragePlace{}
 		err := row.Scan(&storagePlace.StoragePlaceId, &storagePlace.CreatedAt, &storagePlace.UpdatedAt, &storagePlace.Title, &storagePlace.Code)

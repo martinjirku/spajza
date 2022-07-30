@@ -20,12 +20,3 @@ export const schema = object({
     })
     .optional(),
 });
-
-export type NewStorageItem = {
-  categoryId: number;
-  title: string;
-  storagePlaceId: number;
-  amount: number;
-  unit: string;
-  expirationDate: Date;
-};

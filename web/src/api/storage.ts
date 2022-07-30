@@ -9,5 +9,14 @@ export type StorageItem = {
   storagePlaceId?: number;
   quantityType?: QuantityType;
   unit?: string;
-  expiration_date?: string;
+  expirationDate?: string;
+};
+
+export type NewStorageItem = {
+  categoryId: number;
+  title: string;
+  storagePlaceId: number;
+  amount: number;
+  unit: string;
+  expirationDate?: Date;
 };
