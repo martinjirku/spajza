@@ -43,7 +43,7 @@ func (u UnitService) ListByQuantity(quantity domain.Quantity) ([]domain.Unit, er
 		if err != nil {
 			return units, err
 		}
-		if q == unit.Quantity {
+		if domain.Quantity(q) == unit.Quantity {
 			units = append(units, unit)
 		}
 	}
@@ -54,7 +54,7 @@ func mapGoUnitsToDomain(u goUnits.Unit) domain.Unit {
 	return domain.Unit{
 		Name:       u.Name,
 		Symbol:     u.Symbol,
-		Quantity:   u.Symbol,
+		Quantity:   domain.Quantity(u.Quantity),
 		PluralName: u.PluralName(),
 		Names:      u.Names(),
 		System:     u.System(),

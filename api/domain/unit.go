@@ -3,7 +3,7 @@ package domain
 type Unit struct {
 	Name       string
 	Symbol     string
-	Quantity   string
+	Quantity   Quantity
 	System     string
 	PluralName string
 	Names      []string

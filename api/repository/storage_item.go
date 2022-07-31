@@ -10,17 +10,17 @@ import (
 	"github.com/martinjirku/zasobar/usecases"
 )
 
-type StorageService struct {
+type StorageItemRepository struct {
 	db *sql.DB
 	us *usecases.UnitService
 }
 
-func NewStorageService(db *sql.DB) StorageService {
+func NewStorageItemRepository(db *sql.DB) StorageItemRepository {
 	us := usecases.NewUnitService()
-	return StorageService{db: db, us: &us}
+	return StorageItemRepository{db: db, us: &us}
 }
 
-func (s *StorageService) Create(ctx context.Context, storageItem domain.NewStorageItemRequest) (domain.StorageItemResponse, error) {
+func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.NewStorageItemRequest) (domain.StorageItemResponse, error) {
 	unit, err := findUnit(s.us.ListAll(), storageItem.Unit)
 	if err != nil {
 		return domain.StorageItemResponse{}, err
@@ -37,16 +37,11 @@ func (s *StorageService) Create(ctx context.Context, storageItem domain.NewStora
 		ExpirationDate: storageItem.ExpirationDate,
 	}
 
-	query := "INSERT INTO storage_items (" +
-		"created_at, updated_at, title," +
-		"storage_place_id, category_id," +
-		"baseline_amount, current_amount," +
-		"quantity, unit, expiration_date)" +
-		"VALUES (?,?,?,?,?,?,?,?,?,?)"
-	result, err := s.db.ExecContext(ctx, query,
-		time.Now(), time.Now(), res.Title,
-		res.StoragePlaceId, res.CategoryId,
-		res.BaselineAmount, res.CurrentAmount,
+	query := "INSERT INTO storage_items (created_at, updated_at, title," +
+		"storage_place_id, category_id, baseline_amount, current_amount," +
+		"quantity, unit, expiration_date) VALUES (?,?,?,?,?,?,?,?,?,?)"
+	result, err := s.db.ExecContext(ctx, query, time.Now(), time.Now(), res.Title,
+		res.StoragePlaceId, res.CategoryId, res.BaselineAmount, res.CurrentAmount,
 		res.Quantity, res.Unit, res.ExpirationDate)
 	if err != nil {
 		return res, err

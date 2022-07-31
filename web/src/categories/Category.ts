@@ -30,7 +30,9 @@ export const createParentOptions = (
         .join(" > ");
 
       return {
-        value: c.path ? [c.path, c.id].join(".") : c.id.toString(),
+        value: c.path
+          ? ["", c.path, c.id].join(".")
+          : ["", c.id.toString()].join("."),
         label,
       };
     }) ?? []

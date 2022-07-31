@@ -10,8 +10,8 @@ func CreateWebServer(port string) (*echo.Echo, error) {
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Skipper: middleware.DefaultSkipper,
-		Format: `{"time":"${time_rfc3339}",` +
-			`"request":"${method}"${uri}",` +
+		Format: `{"time":"${time_unix}",` +
+			`"request":"${method} ${uri}",` +
 			`"status":${status},"error":"${error}"}` + "\n",
 		// Format: `{"time":"${time_rfc3339_nano}","id":"${id}","remote_ip":"${remote_ip}",` +
 		// 	`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +

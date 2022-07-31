@@ -10,12 +10,12 @@ import (
 
 type (
 	unit struct {
-		Name       string   `json:"name"`
-		Names      []string `json:"names"`
-		PluralName string   `json:"pluralName"`
-		Symbol     string   `json:"symbol"`
-		System     string   `json:"system"`
-		Quantity   string   `json:"quantity"`
+		Name       string          `json:"name"`
+		Names      []string        `json:"names"`
+		PluralName string          `json:"pluralName"`
+		Symbol     string          `json:"symbol"`
+		System     string          `json:"system"`
+		Quantity   domain.Quantity `json:"quantity"`
 	}
 )
 

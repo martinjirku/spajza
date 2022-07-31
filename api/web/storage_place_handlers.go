@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
+	"github.com/martinjirku/zasobar/usecases"
 )
 
 type (
@@ -31,7 +32,8 @@ type storagePlaceHandler struct {
 }
 
 func createStoragePlaceHandler() *storagePlaceHandler {
-	storagePlaceService := repository.NewStoragePlaceRepository(repository.SqlDb)
+	storagePlaceRepository := repository.NewStoragePlaceRepository(repository.SqlDb)
+	storagePlaceService := usecases.NewStoragePlaceService(storagePlaceRepository)
 	return &storagePlaceHandler{storagePlaceService}
 }
 

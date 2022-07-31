@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
+	"github.com/martinjirku/zasobar/usecases"
 )
 
 type (
@@ -32,8 +33,9 @@ type categoryHandler struct {
 }
 
 func createCategoryHandler() *categoryHandler {
-	var catService = repository.NewCategoryService(repository.SqlDb)
-	return &categoryHandler{catService}
+	categoryRepository := repository.NewCategoryService(repository.SqlDb)
+	categoryService := usecases.CreateCategoryService(categoryRepository)
+	return &categoryHandler{categoryService}
 }
 
 func mapCategoryItemToCategory(c categoryItemDto) domain.Category {
