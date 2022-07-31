@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
-	"github.com/martinjirku/zasobar/usecases"
 )
 
 type (
@@ -33,7 +32,7 @@ type categoryHandler struct {
 }
 
 func createCategoryHandler() *categoryHandler {
-	var catService = usecases.NewCategoryService(repository.SqlDb)
+	var catService = repository.NewCategoryService(repository.SqlDb)
 	return &categoryHandler{catService}
 }
 

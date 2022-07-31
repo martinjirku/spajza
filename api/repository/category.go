@@ -1,4 +1,4 @@
-package usecases
+package repository
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/martinjirku/zasobar/domain"
 )
 
-type CategoryService struct {
+type CategoryRepository struct {
 	db *sql.DB
 }
 
@@ -23,11 +23,11 @@ const (
 // we have recursive structure here,
 // TODO: refactor db model to handle trees properly https://www.mysqltutorial.org/mysql-adjacency-list-tree/
 
-func NewCategoryService(db *sql.DB) *CategoryService {
-	return &CategoryService{db}
+func NewCategoryService(db *sql.DB) *CategoryRepository {
+	return &CategoryRepository{db}
 }
 
-func (c *CategoryService) ListAll(ctx context.Context) ([]domain.Category, error) {
+func (c *CategoryRepository) ListAll(ctx context.Context) ([]domain.Category, error) {
 	categories := []domain.Category{}
 
 	rows, err := c.db.QueryContext(ctx, listAllStmt)
@@ -48,7 +48,7 @@ func (c *CategoryService) ListAll(ctx context.Context) ([]domain.Category, error
 	return categories, nil
 }
 
-func (cs *CategoryService) CreateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cs *CategoryRepository) CreateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
 	res, err := cs.db.ExecContext(ctx, insertCategory5Stmt, time.Now(), time.Now(), c.Title, c.Path, c.DefaultUnit)
 	if err != nil {
 		return c, err
@@ -61,7 +61,7 @@ func (cs *CategoryService) CreateItem(ctx context.Context, c domain.Category) (d
 	return c, nil
 }
 
-func (cs *CategoryService) UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cs *CategoryRepository) UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
 	c.UpdatedAt = time.Now()
 	res, err := cs.db.ExecContext(ctx, updateCategory5Stmt, c.UpdatedAt, c.Title, c.Path, c.DefaultUnit, c.ID)
 	if err != nil {
@@ -78,7 +78,7 @@ func (cs *CategoryService) UpdateItem(ctx context.Context, c domain.Category) (d
 
 }
 
-func (cs *CategoryService) DeleteItem(ctx context.Context, id uint) error {
+func (cs *CategoryRepository) DeleteItem(ctx context.Context, id uint) error {
 	res, err := cs.db.ExecContext(ctx, deleteCategory2Stmt, time.Now(), id)
 	if err != nil {
 		return err
