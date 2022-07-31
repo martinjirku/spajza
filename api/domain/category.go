@@ -1,4 +1,4 @@
-package categories
+package domain
 
 import (
 	"database/sql"

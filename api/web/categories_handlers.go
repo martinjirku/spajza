@@ -1,12 +1,14 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/martinjirku/zasobar/categories"
-	"github.com/martinjirku/zasobar/db"
+	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/repository"
+	"github.com/martinjirku/zasobar/usecases"
 )
 
 type (
@@ -19,8 +21,24 @@ type (
 	listAllResponse categoryItemDto
 )
 
-func mapCategoryItemToCategory(c categoryItemDto) categories.Category {
-	return categories.Category{
+type CategoryService interface {
+	ListAll(ctx context.Context) ([]domain.Category, error)
+	CreateItem(ctx context.Context, c domain.Category) (domain.Category, error)
+	UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error)
+	DeleteItem(ctx context.Context, id uint) error
+}
+
+type categoryHandler struct {
+	categoryService CategoryService
+}
+
+func createCategoryHandler() *categoryHandler {
+	var catService = usecases.NewCategoryService(repository.SqlDb)
+	return &categoryHandler{catService}
+}
+
+func mapCategoryItemToCategory(c categoryItemDto) domain.Category {
+	return domain.Category{
 		ID:          c.Id,
 		Title:       c.Title,
 		Path:        c.Path,
@@ -28,7 +46,7 @@ func mapCategoryItemToCategory(c categoryItemDto) categories.Category {
 	}
 }
 
-func mapCategoryToCategoryItem(c categories.Category) categoryItemDto {
+func mapCategoryToCategoryItem(c domain.Category) categoryItemDto {
 	return categoryItemDto{
 		Id:          c.ID,
 		Title:       c.Title,
@@ -37,10 +55,9 @@ func mapCategoryToCategoryItem(c categories.Category) categoryItemDto {
 	}
 }
 
-func listCategoriesHandler(c echo.Context) error {
-	categoryService := categories.NewCategoryService(db.SqlDb)
-	var response = []listAllResponse{}
-	var categories, err = categoryService.ListAll(c.Request().Context())
+func (h *categoryHandler) listCategories(c echo.Context) error {
+	response := []listAllResponse{}
+	categories, err := h.categoryService.ListAll(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -55,8 +72,7 @@ func listCategoriesHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func saveCategoryHandler(c echo.Context) error {
-	categoryService := categories.NewCategoryService(db.SqlDb)
+func (h *categoryHandler) saveCategory(c echo.Context) error {
 	providedCategory := categoryItemDto{}
 	if err := c.Bind(&providedCategory); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -64,7 +80,7 @@ func saveCategoryHandler(c echo.Context) error {
 	idStr := c.Param("id")
 	var category = mapCategoryItemToCategory(providedCategory)
 	if idStr == "" {
-		response, err := categoryService.CreateItem(c.Request().Context(), category)
+		response, err := h.categoryService.CreateItem(c.Request().Context(), category)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -75,24 +91,20 @@ func saveCategoryHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	category.ID = uint(id)
-	response, err := categoryService.UpdateItem(c.Request().Context(), category)
+	response, err := h.categoryService.UpdateItem(c.Request().Context(), category)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return c.JSON(http.StatusOK, mapCategoryToCategoryItem(response))
-
 }
 
-func deleteCategoryHandler(c echo.Context) error {
-	categoryService := categories.NewCategoryService(db.SqlDb)
+func (h *categoryHandler) deleteCategory(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	var category = categories.Category{}
-	category.ID = uint(id)
-	err = categoryService.DeleteItem(c.Request().Context(), category)
+	err = h.categoryService.DeleteItem(c.Request().Context(), uint(id))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

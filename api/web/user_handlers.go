@@ -1,14 +1,16 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/martinjirku/zasobar/config"
-	"github.com/martinjirku/zasobar/db"
-	"github.com/martinjirku/zasobar/users"
+	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/repository"
+	"github.com/martinjirku/zasobar/usecases"
 )
 
 type (
@@ -29,22 +31,37 @@ type (
 	}
 )
 
-func createUserService() users.UserService {
-	return users.NewUserService(db.SqlDb)
+type UserService interface {
+	ListAll() ([]*domain.User, error)
+	Register(ctx context.Context, email string, password string) (domain.User, error)
+	Login(ctx context.Context, email string, password string) error
 }
 
-func loginHandler(c echo.Context) error {
-	userService := createUserService()
+type TokenProvider interface {
+	GetToken(userName string, currentTime time.Time) (string, error)
+}
+
+type UserHandler struct {
+	userService   UserService
+	tokenProvider TokenProvider
+}
+
+func createUserHandler() *UserHandler {
+	userService := repository.NewUserRepository(repository.SqlDb)
+	tokenProvider := usecases.NewTokenProvider(config.DefaultConfiguration.JWTSecret, config.DefaultConfiguration.JWTValidity, config.DefaultConfiguration.JWTIssuer)
+	return &UserHandler{userService, tokenProvider}
+}
+
+func (h *UserHandler) login(c echo.Context) error {
 	data := UserLoginRequest{}
 	if err := c.Bind(&data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request")
 	}
-	err := userService.Login(c.Request().Context(), data.Username, data.Password)
+	err := h.userService.Login(c.Request().Context(), data.Username, data.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
-	tokenProvider := users.NewTokenProvider(config.DefaultConfiguration.JWTSecret, config.DefaultConfiguration.JWTValidity, config.DefaultConfiguration.JWTIssuer)
-	tokenString, err := tokenProvider.GetToken(data.Username, time.Now())
+	tokenString, err := h.tokenProvider.GetToken(data.Username, time.Now())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "WrongJwtToken")
 	}
@@ -58,14 +75,13 @@ func loginHandler(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func registerHandler(c echo.Context) error {
-	userService := createUserService()
+func (h *UserHandler) register(c echo.Context) error {
 	data := &UserRegistrationRequest{}
 	if err := c.Bind(data); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, echo.Map{"Message": "Bad request"})
 	}
 
-	response, err := userService.Register(c.Request().Context(), data.Username, data.Password)
+	response, err := h.userService.Register(c.Request().Context(), data.Username, data.Password)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -73,7 +89,7 @@ func registerHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, UserRegistrationResponse{Id: int(response.ID), Username: response.Email})
 }
 
-func logoutHandler(c echo.Context) error {
+func (h *UserHandler) logout(c echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:     "auth",
 		Value:    "",
@@ -84,7 +100,7 @@ func logoutHandler(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-func aboutMeHandler(c echo.Context) error {
+func (h *UserHandler) aboutMe(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(jwt.MapClaims)
 	sub := claims["sub"]

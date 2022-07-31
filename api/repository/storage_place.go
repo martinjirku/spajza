@@ -1,21 +1,23 @@
-package storage
+package repository
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/martinjirku/zasobar/domain"
 )
 
-type StoragePlacesService struct {
+type StoragePlaceRepository struct {
 	db *sql.DB
 }
 
-func NewStoragePlacesService(db *sql.DB) StoragePlacesService {
-	return StoragePlacesService{db}
+func NewStoragePlaceRepository(db *sql.DB) *StoragePlaceRepository {
+	return &StoragePlaceRepository{db}
 }
 
-func (s *StoragePlacesService) Create(ctx context.Context, storagePlace StoragePlace) (StoragePlace, error) {
+func (s *StoragePlaceRepository) Create(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error) {
 	storagePlace.CreatedAt = time.Now()
 	storagePlace.UpdatedAt = time.Now()
 	result, err := s.db.ExecContext(ctx, "INSERT INTO storage_places(created_at, updated_at, title, code) VALUES (?,?,?,?)", storagePlace.CreatedAt, storagePlace.UpdatedAt, storagePlace.Title, storagePlace.Code)
@@ -30,22 +32,22 @@ func (s *StoragePlacesService) Create(ctx context.Context, storagePlace StorageP
 	return storagePlace, nil
 }
 
-func (s *StoragePlacesService) Get(ctx context.Context, storagePlaceId uint) (StoragePlace, error) {
-	var storagePlace = StoragePlace{StoragePlaceId: storagePlaceId}
+func (s *StoragePlaceRepository) Get(ctx context.Context, storagePlaceId uint) (domain.StoragePlace, error) {
+	var storagePlace = domain.StoragePlace{StoragePlaceId: storagePlaceId}
 	err := s.db.QueryRowContext(ctx, "SELECT created_at, updated_at, title, code FROM storage_places WHERE deleted_at IS NULL && storage_place_id=?", storagePlaceId).
 		Scan(&storagePlace.CreatedAt, &storagePlace.UpdatedAt, &storagePlace.Title, &storagePlace.Code)
 	return storagePlace, err
 }
 
-func (s *StoragePlacesService) List(ctx context.Context) ([]StoragePlace, error) {
-	storagePlaces := []StoragePlace{}
+func (s *StoragePlaceRepository) List(ctx context.Context) ([]domain.StoragePlace, error) {
+	storagePlaces := []domain.StoragePlace{}
 	row, err := s.db.QueryContext(ctx, "SELECT storage_place_id, created_at, updated_at, title, code FROM storage_places WHERE deleted_at IS NULL")
 	if err != nil {
 		return storagePlaces, err
 	}
 	defer row.Close()
 	for row.Next() {
-		storagePlace := StoragePlace{}
+		storagePlace := domain.StoragePlace{}
 		err := row.Scan(&storagePlace.StoragePlaceId, &storagePlace.CreatedAt, &storagePlace.UpdatedAt, &storagePlace.Title, &storagePlace.Code)
 		if err != nil {
 			return storagePlaces, err
@@ -55,7 +57,7 @@ func (s *StoragePlacesService) List(ctx context.Context) ([]StoragePlace, error)
 	return storagePlaces, nil
 }
 
-func (s *StoragePlacesService) Update(ctx context.Context, storagePlace StoragePlace) (StoragePlace, error) {
+func (s *StoragePlaceRepository) Update(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error) {
 	storagePlace.UpdatedAt = time.Now()
 	result, err := s.db.ExecContext(ctx, "UPDATE storage_places SET updated_at=?,title=?,code=? WHERE storage_place_id=?",
 		storagePlace.UpdatedAt, storagePlace.Title, storagePlace.Code, storagePlace.StoragePlaceId)
@@ -74,7 +76,7 @@ func (s *StoragePlacesService) Update(ctx context.Context, storagePlace StorageP
 	return storagePlace, err
 }
 
-func (s *StoragePlacesService) Delete(ctx context.Context, storagePlaceId uint) error {
+func (s *StoragePlaceRepository) Delete(ctx context.Context, storagePlaceId uint) error {
 	result, err := s.db.ExecContext(ctx, "UPDATE storage_places SET deleted_at=? WHERE storage_place_id=?", time.Now(), storagePlaceId)
 	if err != nil {
 		return err

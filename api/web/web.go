@@ -8,7 +8,17 @@ import (
 
 func CreateWebServer(port string) (*echo.Echo, error) {
 	e := echo.New()
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Skipper: middleware.DefaultSkipper,
+		Format: `{"time":"${time_rfc3339}",` +
+			`"request":"${method}"${uri}",` +
+			`"status":${status},"error":"${error}"}` + "\n",
+		// Format: `{"time":"${time_rfc3339_nano}","id":"${id}","remote_ip":"${remote_ip}",` +
+		// 	`"host":"${host}","method":"${method}","uri":"${uri}","user_agent":"${user_agent}",` +
+		// 	`"status":${status},"error":"${error}","latency":${latency},"latency_human":"${latency_human}"` +
+		// 	`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}}` + "\n",
+		CustomTimeFormat: "2006-01-02 15:04:05.00000",
+	}))
 
 	e.Use(middleware.JWTWithConfig(middleware.JWTConfig{
 		SigningKey:  []byte(config.DefaultConfiguration.JWTSecret),
@@ -19,30 +29,36 @@ func CreateWebServer(port string) (*echo.Echo, error) {
 	}))
 
 	// users
-	e.POST("/api/user/login", loginHandler)
-	e.POST("/api/user/register", registerHandler)
-	e.POST("/api/user/logout", logoutHandler)
-	e.GET("/api/user/me", aboutMeHandler)
+	user := createUserHandler()
+	e.POST("/api/user/login", user.login)
+	e.POST("/api/user/register", user.register)
+	e.POST("/api/user/logout", user.logout)
+	e.GET("/api/user/me", user.aboutMe)
 
 	// units
-	e.GET("/api/units", listHandler)
-	e.GET("/api/units/:quantity", listUnitsByQuantityHandler)
+	units := createUnitHandler()
+	e.GET("/api/units", units.list)
+	e.GET("/api/units/:quantity", units.listUnitsByQuantity)
 
 	// categories
-	e.GET("/api/categories", listCategoriesHandler)
-	e.POST("/api/categories", saveCategoryHandler)
-	e.POST("/api/categories/:id", saveCategoryHandler)
-	e.DELETE("/api/categories/:id", deleteCategoryHandler)
+	categories := createCategoryHandler()
+	e.GET("/api/categories", categories.listCategories)
+	e.POST("/api/categories", categories.saveCategory)
+	e.POST("/api/categories/:id", categories.saveCategory)
+	e.DELETE("/api/categories/:id", categories.deleteCategory)
 
 	// storage places
-	e.POST("/api/storage/places", createStoragePlaceHandler)
-	e.GET("/api/storage/places", listStoragePlaceHandler)
-	e.POST("/api/storage/places/:storagePlaceId", updateStoragePlaceHandler)
-	e.GET("/api/storage/places/:storagePlaceId", getStoragePlaceHandler)
-	e.DELETE("/api/storage/places/:storagePlaceId", deleteStoragePlaceHandler)
+	storagePlaceHandler := createStoragePlaceHandler()
+	e.POST("/api/storage/places", storagePlaceHandler.createStoragePlace)
+	e.GET("/api/storage/places", storagePlaceHandler.listStoragePlace)
+	e.POST("/api/storage/places/:storagePlaceId", storagePlaceHandler.updateStoragePlace)
+	e.GET("/api/storage/places/:storagePlaceId", storagePlaceHandler.getStoragePlace)
+	e.DELETE("/api/storage/places/:storagePlaceId", storagePlaceHandler.deleteStoragePlace)
 
 	// storage items
-	e.POST("/api/storage/items", createStorageItemHandler)
+	storageItemHandler := createStorageItemHandler()
+	e.POST("/api/storage/items", storageItemHandler.createStorageItem)
+
 	return e, nil
 }
 

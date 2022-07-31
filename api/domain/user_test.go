@@ -1,7 +1,7 @@
-package users_test
+package domain_test
 
 import (
-	"github.com/martinjirku/zasobar/users"
+	"github.com/martinjirku/zasobar/domain"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -12,15 +12,15 @@ var _ = Describe("User", func() {
 		Context("with valid password", func() {
 
 			It("should create not be error", func() {
-				_, err := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				_, err := domain.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(err).To(BeNil())
 			})
 			It("should create new user with email", func() {
-				user, _ := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				user, _ := domain.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(user.Email).To(Equal("martinjirku@gmail.com"))
 			})
 			It("should create new user with hashed password", func() {
-				user, _ := users.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
+				user, _ := domain.NewUserWithPassword("martinjirku@gmail.com", "totalneDobreHeslo")
 				Expect(user.Password).NotTo(BeNil())
 				Expect(user.Password).NotTo(Equal("totalneDobreHeslo"))
 			})
@@ -28,12 +28,12 @@ var _ = Describe("User", func() {
 	})
 
 	Describe("Password validation", func() {
-		var user users.User
+		var user domain.User
 		var password string
 
 		BeforeEach(func() {
 			password = "totalneDobreHeslo"
-			user, _ = users.NewUserWithPassword("martinjirku@gmail.com", password)
+			user, _ = domain.NewUserWithPassword("martinjirku@gmail.com", password)
 		})
 
 		It("should successfully validate password", func() {

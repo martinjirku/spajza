@@ -1,10 +1,12 @@
-package categories
+package usecases
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/martinjirku/zasobar/domain"
 )
 
 type CategoryService struct {
@@ -21,21 +23,21 @@ const (
 // we have recursive structure here,
 // TODO: refactor db model to handle trees properly https://www.mysqltutorial.org/mysql-adjacency-list-tree/
 
-func NewCategoryService(db *sql.DB) CategoryService {
-	return CategoryService{db: db}
+func NewCategoryService(db *sql.DB) *CategoryService {
+	return &CategoryService{db}
 }
 
-func (cs *CategoryService) ListAll(ctx context.Context) ([]Category, error) {
-	categories := []Category{}
+func (c *CategoryService) ListAll(ctx context.Context) ([]domain.Category, error) {
+	categories := []domain.Category{}
 
-	rows, err := cs.db.QueryContext(ctx, listAllStmt)
+	rows, err := c.db.QueryContext(ctx, listAllStmt)
 	if err != nil {
 		return categories, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		var c Category
+		var c domain.Category
 		err := rows.Scan(&c.ID, &c.CreatedAt, &c.UpdatedAt, &c.DeletedAt, &c.Title, &c.DefaultUnit, &c.Path)
 		if err != nil {
 			return categories, err
@@ -46,7 +48,7 @@ func (cs *CategoryService) ListAll(ctx context.Context) ([]Category, error) {
 	return categories, nil
 }
 
-func (cs *CategoryService) CreateItem(ctx context.Context, c Category) (Category, error) {
+func (cs *CategoryService) CreateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
 	res, err := cs.db.ExecContext(ctx, insertCategory5Stmt, time.Now(), time.Now(), c.Title, c.Path, c.DefaultUnit)
 	if err != nil {
 		return c, err
@@ -59,7 +61,7 @@ func (cs *CategoryService) CreateItem(ctx context.Context, c Category) (Category
 	return c, nil
 }
 
-func (cs *CategoryService) UpdateItem(ctx context.Context, c Category) (Category, error) {
+func (cs *CategoryService) UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
 	c.UpdatedAt = time.Now()
 	res, err := cs.db.ExecContext(ctx, updateCategory5Stmt, c.UpdatedAt, c.Title, c.Path, c.DefaultUnit, c.ID)
 	if err != nil {
@@ -76,8 +78,8 @@ func (cs *CategoryService) UpdateItem(ctx context.Context, c Category) (Category
 
 }
 
-func (cs *CategoryService) DeleteItem(ctx context.Context, c Category) error {
-	res, err := cs.db.ExecContext(ctx, deleteCategory2Stmt, time.Now(), c.ID)
+func (cs *CategoryService) DeleteItem(ctx context.Context, id uint) error {
+	res, err := cs.db.ExecContext(ctx, deleteCategory2Stmt, time.Now(), id)
 	if err != nil {
 		return err
 	}

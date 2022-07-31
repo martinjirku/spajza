@@ -4,13 +4,19 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/martinjirku/zasobar/db"
-	"github.com/martinjirku/zasobar/storage"
+	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/repository"
 )
 
-func createStorageItemHandler(c echo.Context) error {
-	storageService := storage.NewStorageService(db.SqlDb)
-	var requestBody = storage.NewStorageItemRequest{}
+type storageItemHandler struct{}
+
+func createStorageItemHandler() *storageItemHandler {
+	return &storageItemHandler{}
+}
+
+func (h *storageItemHandler) createStorageItem(c echo.Context) error {
+	storageService := repository.NewStorageService(repository.SqlDb)
+	requestBody := domain.NewStorageItemRequest{}
 	err := c.Bind(&requestBody)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)

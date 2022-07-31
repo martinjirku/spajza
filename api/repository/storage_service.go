@@ -1,4 +1,4 @@
-package storage
+package repository
 
 import (
 	"context"
@@ -6,33 +6,33 @@ import (
 	"errors"
 	"time"
 
-	goUnits "github.com/bcicen/go-units"
-	"github.com/martinjirku/zasobar/units"
+	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/usecases"
 )
 
 type StorageService struct {
 	db *sql.DB
-	us *units.UnitService
+	us *usecases.UnitService
 }
 
 func NewStorageService(db *sql.DB) StorageService {
-	us := units.NewUnitService()
+	us := usecases.NewUnitService()
 	return StorageService{db: db, us: &us}
 }
 
-func (s *StorageService) Create(ctx context.Context, storageItem NewStorageItemRequest) (StorageItemResponse, error) {
+func (s *StorageService) Create(ctx context.Context, storageItem domain.NewStorageItemRequest) (domain.StorageItemResponse, error) {
 	unit, err := findUnit(s.us.ListAll(), storageItem.Unit)
 	if err != nil {
-		return StorageItemResponse{}, err
+		return domain.StorageItemResponse{}, err
 	}
 
-	res := StorageItemResponse{
+	res := domain.StorageItemResponse{
 		Title:          storageItem.Title,
 		BaselineAmount: storageItem.Amount,
 		CurrentAmount:  storageItem.Amount,
 		CategoryId:     storageItem.CategoryId,
 		StoragePlaceId: storageItem.StoragePlaceId,
-		Quantity:       units.Quantity(unit.Quantity),
+		Quantity:       domain.Quantity(unit.Quantity),
 		Unit:           unit.Name,
 		ExpirationDate: storageItem.ExpirationDate,
 	}
@@ -60,8 +60,8 @@ func (s *StorageService) Create(ctx context.Context, storageItem NewStorageItemR
 	return res, nil
 }
 
-func findUnit(units []goUnits.Unit, unitName string) (goUnits.Unit, error) {
-	var unit goUnits.Unit
+func findUnit(units []domain.Unit, unitName string) (domain.Unit, error) {
+	var unit domain.Unit
 	found := false
 	for _, u := range units {
 		if u.Name == unitName {

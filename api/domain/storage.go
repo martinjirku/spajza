@@ -1,10 +1,6 @@
-package storage
+package domain
 
-import (
-	"time"
-
-	"github.com/martinjirku/zasobar/units"
-)
+import "time"
 
 type StoragePlace struct {
 	StoragePlaceId uint
@@ -24,7 +20,7 @@ type StorageItem struct {
 	CategoryId      uint
 	StoragePlaceId  uint
 	StorageLocation string
-	Quantity        units.Quantity
+	Quantity        Quantity
 	ExpirationDate  time.Time
 }
 
@@ -38,14 +34,14 @@ type NewStorageItemRequest struct {
 }
 
 type StorageItemResponse struct {
-	StorageItemId   uint           `json:"storageItemId"`
-	Title           string         `json:"title"`
-	BaselineAmount  float32        `json:"baselineAmount"`
-	CurrentAmount   float32        `json:"currentAmount"`
-	CategoryId      uint           `json:"categoryId"`
-	StoragePlaceId  uint           `json:"storagePlaceId"`
-	StorageLocation string         `json:"storageLocation"`
-	Quantity        units.Quantity `json:"quantity"`
-	Unit            string         `json:"unit"`
-	ExpirationDate  time.Time      `json:"expirationDate"`
+	StorageItemId   uint      `json:"storageItemId"`
+	Title           string    `json:"title"`
+	BaselineAmount  float32   `json:"baselineAmount"`
+	CurrentAmount   float32   `json:"currentAmount"`
+	CategoryId      uint      `json:"categoryId"`
+	StoragePlaceId  uint      `json:"storagePlaceId"`
+	StorageLocation string    `json:"storageLocation"`
+	Quantity        Quantity  `json:"quantity"`
+	Unit            string    `json:"unit"`
+	ExpirationDate  time.Time `json:"expirationDate"`
 }
