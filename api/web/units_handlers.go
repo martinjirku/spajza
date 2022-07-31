@@ -1,17 +1,14 @@
-package units
+package web
 
 import (
 	"net/http"
 
 	goUnits "github.com/bcicen/go-units"
 	"github.com/labstack/echo/v4"
+	"github.com/martinjirku/zasobar/units"
 )
 
 type (
-	unitController struct {
-		unitService UnitService
-	}
-
 	unit struct {
 		Name       string   `json:"name"`
 		Names      []string `json:"names"`
@@ -21,10 +18,6 @@ type (
 		Quantity   string   `json:"quantity"`
 	}
 )
-
-func newUnitController() unitController {
-	return unitController{unitService: NewUnitService()}
-}
 
 func mapUnitToDto(u goUnits.Unit) unit {
 
@@ -46,17 +39,19 @@ func mapGoUnitsToUnits(u []goUnits.Unit) []unit {
 	return units
 }
 
-func (u *unitController) listAllUnits(c echo.Context) error {
-	return c.JSON(http.StatusOK, mapGoUnitsToUnits(u.unitService.ListAll()))
+func listHandler(c echo.Context) error {
+	unitService := units.NewUnitService()
+	return c.JSON(http.StatusOK, mapGoUnitsToUnits(unitService.ListAll()))
 }
 
-func (u *unitController) listUnitsByQuantity(c echo.Context) error {
-	var quantity Quantity
+func listUnitsByQuantityHandler(c echo.Context) error {
+	unitService := units.NewUnitService()
+	var quantity units.Quantity
 	err := quantity.Scan(c.Param("quantity"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	units, err := u.unitService.ListByQuantity(quantity)
+	units, err := unitService.ListByQuantity(quantity)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

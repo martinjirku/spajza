@@ -5,11 +5,10 @@ import (
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
-
 	config "github.com/martinjirku/zasobar/config"
 )
 
-func NewDB(params ...string) *sql.DB {
+func NewDB() *sql.DB {
 	var err error
 	conString := config.GetMariaDBSQLConnectionString()
 
@@ -21,3 +20,5 @@ func NewDB(params ...string) *sql.DB {
 
 	return DB
 }
+
+var SqlDb = NewDB()

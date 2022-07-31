@@ -18,6 +18,31 @@ func CreateWebServer(port string) (*echo.Echo, error) {
 		},
 	}))
 
+	// users
+	e.POST("/api/user/login", loginHandler)
+	e.POST("/api/user/register", registerHandler)
+	e.POST("/api/user/logout", logoutHandler)
+	e.GET("/api/user/me", aboutMeHandler)
+
+	// units
+	e.GET("/api/units", listHandler)
+	e.GET("/api/units/:quantity", listUnitsByQuantityHandler)
+
+	// categories
+	e.GET("/api/categories", listCategoriesHandler)
+	e.POST("/api/categories", saveCategoryHandler)
+	e.POST("/api/categories/:id", saveCategoryHandler)
+	e.DELETE("/api/categories/:id", deleteCategoryHandler)
+
+	// storage places
+	e.POST("/api/storage/places", createStoragePlaceHandler)
+	e.GET("/api/storage/places", listStoragePlaceHandler)
+	e.POST("/api/storage/places/:storagePlaceId", updateStoragePlaceHandler)
+	e.GET("/api/storage/places/:storagePlaceId", getStoragePlaceHandler)
+	e.DELETE("/api/storage/places/:storagePlaceId", deleteStoragePlaceHandler)
+
+	// storage items
+	e.POST("/api/storage/items", createStorageItemHandler)
 	return e, nil
 }
 

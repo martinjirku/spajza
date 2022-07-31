@@ -10,7 +10,7 @@ GOBUILD = $(GO) build
 
 
 build: deps
-	@cd $(API_PATH); $(GOBUILD) -o $(BUILD_PATH)/$(BINARY_NAME) ./server.go
+	@cd $(API_PATH); $(GOBUILD) -o $(BUILD_PATH)/$(BINARY_NAME) ./cmd/main.go
 
 deps:
 	@cd $(API_PATH); $(GOGET)
@@ -22,4 +22,4 @@ db-update:
 	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./000_changelog.xml update
 
 dev:
-	cd $(API_PATH); $(GO) run ./server.go
+	cd $(API_PATH); $(GO) run ./cmd/main.go

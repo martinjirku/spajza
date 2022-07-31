@@ -14,7 +14,7 @@ const (
 	TEMPERATURE Quantity = "temperature" // C
 	TIME        Quantity = "time"        // m
 	COUNT       Quantity = "count"       // ks
-	// AREA        UnitCategory = "area"        // m2
+	// AREA        UnitCategory = "area"      // m2
 )
 
 var (

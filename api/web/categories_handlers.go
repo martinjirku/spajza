@@ -1,15 +1,13 @@
-package categories
+package web
 
 import (
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/martinjirku/zasobar/categories"
+	"github.com/martinjirku/zasobar/db"
 )
-
-type controller struct {
-	cs CategoryService
-}
 
 type (
 	categoryItemDto struct {
@@ -21,19 +19,16 @@ type (
 	listAllResponse categoryItemDto
 )
 
-func NewController(cs CategoryService) controller {
-	return controller{cs: cs}
-}
-
-func mapCategoryItemToCategory(c categoryItemDto) Category {
-	return Category{
+func mapCategoryItemToCategory(c categoryItemDto) categories.Category {
+	return categories.Category{
 		ID:          c.Id,
 		Title:       c.Title,
 		Path:        c.Path,
 		DefaultUnit: c.DefaultUnit,
 	}
 }
-func mapCategoryToCategoryItem(c Category) categoryItemDto {
+
+func mapCategoryToCategoryItem(c categories.Category) categoryItemDto {
 	return categoryItemDto{
 		Id:          c.ID,
 		Title:       c.Title,
@@ -42,9 +37,10 @@ func mapCategoryToCategoryItem(c Category) categoryItemDto {
 	}
 }
 
-func (ctrl *controller) ListAll(c echo.Context) error {
+func listCategoriesHandler(c echo.Context) error {
+	categoryService := categories.NewCategoryService(db.SqlDb)
 	var response = []listAllResponse{}
-	var categories, err = ctrl.cs.ListAll(c.Request().Context())
+	var categories, err = categoryService.ListAll(c.Request().Context())
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -59,7 +55,8 @@ func (ctrl *controller) ListAll(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
-func (ctrl *controller) SaveCategory(c echo.Context) error {
+func saveCategoryHandler(c echo.Context) error {
+	categoryService := categories.NewCategoryService(db.SqlDb)
 	providedCategory := categoryItemDto{}
 	if err := c.Bind(&providedCategory); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -67,7 +64,7 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 	idStr := c.Param("id")
 	var category = mapCategoryItemToCategory(providedCategory)
 	if idStr == "" {
-		response, err := ctrl.cs.CreateItem(c.Request().Context(), category)
+		response, err := categoryService.CreateItem(c.Request().Context(), category)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
@@ -78,7 +75,7 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	category.ID = uint(id)
-	response, err := ctrl.cs.UpdateItem(c.Request().Context(), category)
+	response, err := categoryService.UpdateItem(c.Request().Context(), category)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
@@ -86,15 +83,16 @@ func (ctrl *controller) SaveCategory(c echo.Context) error {
 
 }
 
-func (ctrl *controller) DeleteCategory(c echo.Context) error {
+func deleteCategoryHandler(c echo.Context) error {
+	categoryService := categories.NewCategoryService(db.SqlDb)
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	var category = Category{}
+	var category = categories.Category{}
 	category.ID = uint(id)
-	err = ctrl.cs.DeleteItem(c.Request().Context(), category)
+	err = categoryService.DeleteItem(c.Request().Context(), category)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
