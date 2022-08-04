@@ -1,5 +1,5 @@
 import { addNewStorageItem, getStorageItems } from "@api";
-import { NewStorageItem, StorageItem } from "@api/storage";
+import { NewStorageItem } from "@api/storage";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 
 export const useStorageItems = () =>

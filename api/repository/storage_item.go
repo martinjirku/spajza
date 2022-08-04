@@ -20,13 +20,13 @@ func NewStorageItemRepository(db *sql.DB) StorageItemRepository {
 	return StorageItemRepository{db: db, us: &us}
 }
 
-func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.NewStorageItemRequest) (domain.StorageItemResponse, error) {
+func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error) {
 	unit, err := findUnit(s.us.ListAll(), storageItem.Unit)
 	if err != nil {
-		return domain.StorageItemResponse{}, err
+		return domain.StorageItem{}, err
 	}
 
-	res := domain.StorageItemResponse{
+	res := domain.StorageItem{
 		Title:          storageItem.Title,
 		BaselineAmount: storageItem.Amount,
 		CurrentAmount:  storageItem.Amount,
@@ -53,6 +53,66 @@ func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.N
 	}
 	res.StorageItemId = uint(storageItemId)
 	return res, nil
+}
+
+func (s *StorageItemRepository) List(ctx context.Context) ([]domain.StorageItem, error) {
+	query := "SELECT storage_item_id, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date FROM storage_items"
+	rows, err := s.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	resp := make([]domain.StorageItem, 0)
+
+	for rows.Next() {
+		s := domain.StorageItem{}
+		rows.Scan(&s.StorageItemId, &s.Title, &s.StoragePlaceId, &s.CategoryId, &s.BaselineAmount, &s.CurrentAmount, &s.Quantity, &s.Unit, &s.ExpirationDate)
+		resp = append(resp, s)
+	}
+	return resp, nil
+}
+
+func (s *StorageItemRepository) GetStorageItemById(ctx context.Context, storageItemId uint) (domain.StorageItem, error) {
+	query := "SELECT storage_item_id, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date FROM storage_items WHERE storage_item_id=?"
+	si := domain.StorageItem{}
+	row := s.db.QueryRowContext(ctx, query, storageItemId)
+	if row.Err() != nil {
+		return si, row.Err()
+	}
+	row.Scan(&si.StorageItemId, &si.Title, &si.StoragePlaceId, &si.CategoryId,
+		&si.BaselineAmount, &si.CurrentAmount, &si.Quantity, &si.Unit, &si.ExpirationDate)
+	return si, nil
+}
+
+func (s *StorageItemRepository) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]domain.StorageItemConsumption, error) {
+	query := "SELECT storage_item_consumption_id, normalized_amount, unit, storage_item_id FROM storage_consumptions WHERE storage_item_id=?"
+	sic := []domain.StorageItemConsumption{}
+	rows, err := s.db.QueryContext(ctx, query, storageItemId)
+	if err != nil {
+		return sic, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		c := domain.StorageItemConsumption{}
+		rows.Scan(&c.StorageItemConsumptionId, &c.NormalizedAmount, &c.Unit, &c.StorageItemId)
+		sic = append(sic, c)
+	}
+	return sic, nil
+}
+
+func (s *StorageItemRepository) AddStorageConsumption(ctx context.Context, sc domain.StorageItemConsumption) (domain.StorageItemConsumption, error) {
+	query := "INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount, unit, storage_item_id) VALUES (?,?,?,?,?)"
+	result, err := s.db.ExecContext(ctx, query, time.Now(), time.Now(), sc.NormalizedAmount, sc.Unit, sc.StorageItemId)
+	if err != nil {
+		return sc, err
+	}
+	lastInsertedId, err := result.LastInsertId()
+	if err != nil {
+		return sc, err
+	}
+	sc.StorageItemConsumptionId = uint(lastInsertedId)
+	return sc, nil
 }
 
 func findUnit(units []domain.Unit, unitName string) (domain.Unit, error) {

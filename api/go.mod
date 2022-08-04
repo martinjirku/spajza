@@ -12,6 +12,10 @@ require (
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/bcicen/bfstree v1.0.0 // indirect
+	github.com/bobappleyard/readline v0.0.0-20150707195538-7e300e02d38e // indirect
+	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/koyachi/go-term-ansicolor v0.0.0-20130114081603-6f81280f9360 // indirect
+	github.com/nathany/looper v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20220609170525-579cf78fd858 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
@@ -27,7 +31,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
-	golang.org/x/net v0.0.0-20220621193019-9d032be2e588 // indirect
-	golang.org/x/sys v0.0.0-20220615213510-4f61da869c0c // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
+	golang.org/x/sys v0.0.0-20220731174439-a90be440212d // indirect
 	golang.org/x/text v0.3.7 // indirect
+	gonum.org/v1/gonum v0.11.0
 )

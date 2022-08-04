@@ -57,7 +57,9 @@ func CreateWebServer(port string) (*echo.Echo, error) {
 
 	// storage items
 	storageItemHandler := createStorageItemHandler()
+	e.GET("/api/storage/items", storageItemHandler.list)
 	e.POST("/api/storage/items", storageItemHandler.createStorageItem)
+	e.POST("/api/storage/items/:storageItemId/consumpt", storageItemHandler.consumpt)
 
 	return e, nil
 }
