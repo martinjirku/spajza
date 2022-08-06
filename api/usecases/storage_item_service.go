@@ -11,6 +11,7 @@ type StorageItemRepository interface {
 	GetStorageItemById(ctx context.Context, storageItemId uint) (domain.StorageItem, error)
 	GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]domain.StorageItemConsumption, error)
 	AddStorageConsumption(ctx context.Context, storageConsumption domain.StorageItemConsumption) (domain.StorageItemConsumption, error)
+	UpdateColumn(ctx context.Context, id uint, fieldName string, fieldValue interface{}) error
 	List(ctx context.Context) ([]domain.StorageItem, error)
 }
 
@@ -41,6 +42,10 @@ func (s *StorageItemService) Consumpt(ctx context.Context, storageItemId uint, a
 		return storageItem, err
 	}
 	storageItem.Consumptions[idx].StorageItemConsumptionId = consumption.StorageItemId
+	err = s.storageItemRepository.UpdateColumn(ctx, storageItemId, "currentAmount", storageItem.CurrentAmount)
+	if err != nil {
+		return storageItem, err
+	}
 	return storageItem, nil
 }
 

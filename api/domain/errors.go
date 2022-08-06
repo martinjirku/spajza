@@ -7,4 +7,5 @@ var (
 	ErrorWrongPassword  = errors.New("wrong password")
 	ErrorNothingUpdated = errors.New("nothing update")
 	ErrorWrongParameter = errors.New("invalid parameter")
+	ErrorWrongField     = errors.New("invalid field")
 )

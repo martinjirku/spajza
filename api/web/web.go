@@ -59,7 +59,10 @@ func CreateWebServer(port string) (*echo.Echo, error) {
 	storageItemHandler := createStorageItemHandler()
 	e.GET("/api/storage/items", storageItemHandler.list)
 	e.POST("/api/storage/items", storageItemHandler.createStorageItem)
-	e.POST("/api/storage/items/:storageItemId/consumpt", storageItemHandler.consumpt)
+	storageItemGroup := e.Group("/api/storage/items/:storageItemId")
+	storageItemGroup.Use(storageItemHandler.StorageIdContextProvider)
+	storageItemGroup.POST("/title", storageItemHandler.updateTitle)
+	storageItemGroup.POST("/consumpt", storageItemHandler.consumpt)
 
 	return e, nil
 }

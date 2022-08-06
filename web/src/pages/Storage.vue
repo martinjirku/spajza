@@ -75,7 +75,7 @@
                 }}
               </div>
               <div>
-                {{ i.baselineAmount }}
+                {{ i.currentAmount }}
                 {{ units?.find((u) => u.name === i.unit)?.symbol }}
               </div>
             </q-card-section>
@@ -108,5 +108,4 @@ const isLoading = computed(() => {
     isLoadingStoragePlaces.value
   );
 });
-const tileClass = "col-12 col-sm-6 col-md-4 col-lg-3";
 </script>

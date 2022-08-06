@@ -12,10 +12,6 @@ require (
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/bcicen/bfstree v1.0.0 // indirect
-	github.com/bobappleyard/readline v0.0.0-20150707195538-7e300e02d38e // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/koyachi/go-term-ansicolor v0.0.0-20130114081603-6f81280f9360 // indirect
-	github.com/nathany/looper v0.3.3 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

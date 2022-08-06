@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/martinjirku/zasobar/domain"
@@ -53,6 +54,30 @@ func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.N
 	}
 	res.StorageItemId = uint(storageItemId)
 	return res, nil
+}
+
+// Allows to update specified column with the new value. Only
+// allowed columns are:
+//   - title
+//   - currentAmount
+//   - unit
+//   - expirationDate
+func (s *StorageItemRepository) UpdateColumn(ctx context.Context, id uint, fieldName string, fieldValue interface{}) error {
+	allowedFields := map[string]string{"title": "title", "currentAmount": "current_amount", "unit": "unit", "expirationDate": "expiration_date"}
+	fieldToChange := allowedFields[fieldName]
+	if fieldToChange == "" {
+		return domain.ErrorWrongField
+	}
+	query := fmt.Sprintf("UPDATE storage_items SET %s=? WHERE storage_item_id=?", fieldToChange)
+	result, err := s.db.ExecContext(ctx, query, fieldValue, id)
+	if err != nil {
+		return err
+	}
+	_, err = result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *StorageItemRepository) List(ctx context.Context) ([]domain.StorageItem, error) {

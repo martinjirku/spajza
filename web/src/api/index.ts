@@ -104,5 +104,5 @@ export const getStorageItems = () => {
     headers,
   })
     .then((r) => r.json())
-    .then((data) => data as { data: { items: StorageItem[] } });
+    .then((data) => data as { items: StorageItem[] });
 };

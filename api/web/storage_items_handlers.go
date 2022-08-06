@@ -21,6 +21,10 @@ type (
 	}
 )
 
+var (
+	contextKey = "storageItemId"
+)
+
 type StorageItemService interface {
 	Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error)
 	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error)
@@ -37,6 +41,17 @@ func createStorageItemHandler() *storageItemHandler {
 	return &storageItemHandler{storageItemService}
 }
 
+func (h *storageItemHandler) StorageIdContextProvider(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		storageItemId, err := strconv.ParseUint(c.Param("storageItemId"), 10, 64)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err)
+		}
+		c.Set(contextKey, uint(storageItemId))
+		return next(c)
+	}
+}
+
 func (h *storageItemHandler) createStorageItem(c echo.Context) error {
 	requestBody := domain.NewStorageItem{}
 	err := c.Bind(&requestBody)
@@ -50,17 +65,19 @@ func (h *storageItemHandler) createStorageItem(c echo.Context) error {
 	return c.JSON(http.StatusOK, response)
 }
 
+func (h *storageItemHandler) updateTitle(c echo.Context) error {
+	// storageItemId, err := strconv.ParseUint(c.Param("storageItemId"), 10, 64)
+	return nil
+}
+
 func (h *storageItemHandler) consumpt(c echo.Context) error {
 	consumptRequest := consumptRequest{}
 	err := c.Bind(&consumptRequest)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
-	storageItemId, err := strconv.ParseUint(c.Param("storageItemId"), 10, 64)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-	response, err := h.storageItemService.Consumpt(c.Request().Context(), uint(storageItemId), consumptRequest.Amount, consumptRequest.Unit)
+	id := c.Get(contextKey).(uint)
+	response, err := h.storageItemService.Consumpt(c.Request().Context(), id, consumptRequest.Amount, consumptRequest.Unit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "response")
 	}
