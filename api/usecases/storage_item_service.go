@@ -27,6 +27,10 @@ func (s *StorageItemService) Create(ctx context.Context, storageItem domain.NewS
 	return s.storageItemRepository.Create(ctx, storageItem)
 }
 
+func (s *StorageItemService) UpdateField(ctx context.Context, storageItemId uint, fieldName string, value interface{}) error {
+	return s.storageItemRepository.UpdateColumn(ctx, storageItemId, fieldName, value)
+}
+
 func (s *StorageItemService) Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error) {
 	storageItem, err := domain.LoadStorageItem(ctx, storageItemId, s.storageItemRepository)
 	if err != nil {

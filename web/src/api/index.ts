@@ -106,3 +106,15 @@ export const getStorageItems = () => {
     .then((r) => r.json())
     .then((data) => data as { items: StorageItem[] });
 };
+
+export const updateStorageItemField = (
+  storagePlaceId: number,
+  fieldName: string,
+  value: unknown
+) => {
+  return fetch(`/api/storage/items/${storagePlaceId}/${fieldName}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ value }),
+  });
+};

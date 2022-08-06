@@ -19,6 +19,9 @@ type (
 	listResponse struct {
 		Items []domain.StorageItem `json:"items"`
 	}
+	updateFieldRequest struct {
+		Value interface{} `json:"value"`
+	}
 )
 
 var (
@@ -28,6 +31,7 @@ var (
 type StorageItemService interface {
 	Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error)
 	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error)
+	UpdateField(ctx context.Context, storageItemI uint, fieldName string, value interface{}) error
 	List(ctx context.Context) ([]domain.StorageItem, error)
 }
 
@@ -66,8 +70,18 @@ func (h *storageItemHandler) createStorageItem(c echo.Context) error {
 }
 
 func (h *storageItemHandler) updateTitle(c echo.Context) error {
-	// storageItemId, err := strconv.ParseUint(c.Param("storageItemId"), 10, 64)
-	return nil
+	requestBody := updateFieldRequest{}
+	err := c.Bind(&requestBody)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	id := c.Get(contextKey).(uint)
+	err = h.storageItemService.UpdateField(c.Request().Context(), id, "title", requestBody.Value)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+	return c.NoContent(http.StatusNoContent)
+
 }
 
 func (h *storageItemHandler) consumpt(c echo.Context) error {

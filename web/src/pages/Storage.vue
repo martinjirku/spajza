@@ -54,7 +54,12 @@
             <q-card-section>
               <div class="text-h5">
                 {{ i.title }}
-                <q-popup-edit v-model="i.title" buttons v-slot="scope">
+                <q-popup-edit
+                  v-bind:model-value="i.title"
+                  buttons
+                  v-slot="scope"
+                  @save="(title: string) => updateTitle({storageItemId: i.storageItemId ?? 0, title})"
+                >
                   <q-input
                     v-model="scope.value"
                     dense
@@ -90,7 +95,10 @@ import imgUrl from "@assets/megan-thomas-xMh_ww8HN_Q-unsplash copy.png";
 import { useUnits } from "@categories/UnitQuery";
 import PageLayout from "@components/common/PageLayout.vue";
 import { useStoryPlaces } from "@storage/StoragePlaceQuery";
-import { useStorageItems } from "@storage/StorageQuery";
+import {
+  useStorageItems,
+  useUpdateStorageItemTitleMutation,
+} from "@storage/StorageQuery";
 import { computed, ref } from "vue";
 import StorageItemForm from "@storage/StorageItemForm.vue";
 
@@ -98,6 +106,7 @@ const createNew = ref(false);
 
 const { data: items, isLoading: isLoadingStorageItems } = useStorageItems();
 const { data: units, isLoading: isLoadingUnits } = useUnits();
+const { mutateAsync: updateTitle } = useUpdateStorageItemTitleMutation();
 const { data: storagePlaces, isLoading: isLoadingStoragePlaces } =
   useStoryPlaces();
 
