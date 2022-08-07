@@ -3,7 +3,7 @@ package web
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/usecases"
 )
@@ -52,19 +52,22 @@ func mapGoUnitsToUnits(u []domain.Unit) []unit {
 	return units
 }
 
-func (u *UnitsHandler) list(c echo.Context) error {
-	return c.JSON(http.StatusOK, mapGoUnitsToUnits(u.unitService.ListAll()))
+func (u *UnitsHandler) list(w http.ResponseWriter, r *http.Request) {
+	respondWithJSON(w, http.StatusOK, mapGoUnitsToUnits(u.unitService.ListAll()))
 }
 
-func (u *UnitsHandler) listUnitsByQuantity(c echo.Context) error {
+func (u *UnitsHandler) listUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
 	var quantity domain.Quantity
-	err := quantity.Scan(c.Param("quantity"))
+	val := chi.URLParam(r, "quantity")
+	err := quantity.Scan(val)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	units, err := u.unitService.ListByQuantity(quantity)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusOK, mapGoUnitsToUnits(units))
+	respondWithJSON(w, http.StatusOK, mapGoUnitsToUnits(units))
 }

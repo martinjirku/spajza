@@ -22,13 +22,16 @@ var (
 )
 
 func (ct *Quantity) Scan(value interface{}) error {
-	switch t := value.(type) {
+
+	switch typ := value.(type) {
 	case *string:
+		*ct = Quantity(value.(string))
+	case string:
 		*ct = Quantity(value.(string))
 	case []byte:
 		*ct = Quantity(string(value.([]byte)))
 	default:
-		return fmt.Errorf("could not scan value quantity: %s", t)
+		return fmt.Errorf("could not scan value quantity: %s", typ)
 	}
 	return ct.IsValid()
 }

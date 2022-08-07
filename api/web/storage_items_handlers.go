@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
 	"github.com/martinjirku/zasobar/usecases"
@@ -45,63 +45,64 @@ func createStorageItemHandler() *storageItemHandler {
 	return &storageItemHandler{storageItemService}
 }
 
-func (h *storageItemHandler) StorageIdContextProvider(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		storageItemId, err := strconv.ParseUint(c.Param("storageItemId"), 10, 64)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err)
-		}
-		c.Set(contextKey, uint(storageItemId))
-		return next(c)
-	}
-}
-
-func (h *storageItemHandler) createStorageItem(c echo.Context) error {
+func (h *storageItemHandler) createStorageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody := domain.NewStorageItem{}
-	err := c.Bind(&requestBody)
+	err := bindBody(r, &requestBody)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	response, err := h.storageItemService.Create(c.Request().Context(), requestBody)
+	response, err := h.storageItemService.Create(r.Context(), requestBody)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) updateTitle(c echo.Context) error {
+func (h *storageItemHandler) updateTitle(w http.ResponseWriter, r *http.Request) {
 	requestBody := updateFieldRequest{}
-	err := c.Bind(&requestBody)
+	err := bindBody(r, &requestBody)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	id := c.Get(contextKey).(uint)
-	err = h.storageItemService.UpdateField(c.Request().Context(), id, "title", requestBody.Value)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	err = h.storageItemService.UpdateField(r.Context(), uint(id), "title", requestBody.Value)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.NoContent(http.StatusNoContent)
-
+	respondNoContent(w)
 }
 
-func (h *storageItemHandler) consumpt(c echo.Context) error {
-	consumptRequest := consumptRequest{}
-	err := c.Bind(&consumptRequest)
+func (h *storageItemHandler) consumpt(w http.ResponseWriter, r *http.Request) {
+	requestBody := consumptRequest{}
+	err := bindBody(r, &requestBody)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	id := c.Get(contextKey).(uint)
-	response, err := h.storageItemService.Consumpt(c.Request().Context(), id, consumptRequest.Amount, consumptRequest.Unit)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "response")
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusAccepted, response)
+	response, err := h.storageItemService.Consumpt(r.Context(), uint(id), requestBody.Amount, requestBody.Unit)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	respondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) list(c echo.Context) error {
-	result, err := h.storageItemService.List(c.Request().Context())
+func (h *storageItemHandler) list(w http.ResponseWriter, r *http.Request) {
+	result, err := h.storageItemService.List(r.Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusOK, listResponse{result})
+	respondWithJSON(w, http.StatusOK, listResponse{result})
 }

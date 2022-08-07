@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
 	"github.com/martinjirku/zasobar/usecases"
@@ -56,11 +56,13 @@ func mapCategoryToCategoryItem(c domain.Category) categoryItemDto {
 	}
 }
 
-func (h *categoryHandler) listCategories(c echo.Context) error {
+func (h *categoryHandler) listCategories(w http.ResponseWriter, r *http.Request) {
 	response := []listAllResponse{}
-	categories, err := h.categoryService.ListAll(c.Request().Context())
+
+	categories, err := h.categoryService.ListAll(r.Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	for _, c := range categories {
 		response = append(response, listAllResponse{
@@ -70,44 +72,52 @@ func (h *categoryHandler) listCategories(c echo.Context) error {
 			DefaultUnit: c.DefaultUnit,
 		})
 	}
-	return c.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *categoryHandler) saveCategory(c echo.Context) error {
+func (h *categoryHandler) saveCategory(w http.ResponseWriter, r *http.Request) {
 	providedCategory := categoryItemDto{}
-	if err := c.Bind(&providedCategory); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	if err := bindBody(r, &providedCategory); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	idStr := c.Param("id")
-	var category = mapCategoryItemToCategory(providedCategory)
+	idStr := chi.URLParam(r, "id")
+	category := mapCategoryItemToCategory(providedCategory)
 	if idStr == "" {
-		response, err := h.categoryService.CreateItem(c.Request().Context(), category)
+		response, err := h.categoryService.CreateItem(r.Context(), category)
 		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
 		}
-		return c.JSON(http.StatusOK, mapCategoryToCategoryItem(response))
+		respondWithJSON(w, http.StatusOK, mapCategoryToCategoryItem(response))
+		return
 	}
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 	category.ID = uint(id)
-	response, err := h.categoryService.UpdateItem(c.Request().Context(), category)
+	response, err := h.categoryService.UpdateItem(r.Context(), category)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusOK, mapCategoryToCategoryItem(response))
+	respondWithJSON(w, http.StatusOK, mapCategoryToCategoryItem(response))
 }
 
-func (h *categoryHandler) deleteCategory(c echo.Context) error {
-	idStr := c.Param("id")
+func (h *categoryHandler) deleteCategory(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	err = h.categoryService.DeleteItem(c.Request().Context(), uint(id))
+	err = h.categoryService.DeleteItem(r.Context(), uint(id))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
 	}
-	return c.JSON(http.StatusNoContent, "")
+	respondNoContent(w)
 }

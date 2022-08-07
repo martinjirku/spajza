@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/repository"
 	"github.com/martinjirku/zasobar/usecases"
@@ -37,81 +37,92 @@ func createStoragePlaceHandler() *storagePlaceHandler {
 	return &storagePlaceHandler{storagePlaceService}
 }
 
-func (h *storagePlaceHandler) createStoragePlace(ctx echo.Context) error {
-	var storagePlace = domain.StoragePlace{}
-	err := ctx.Bind(&storagePlace)
+func (h *storagePlaceHandler) createStoragePlace(w http.ResponseWriter, r *http.Request) {
+	storagePlace := domain.StoragePlace{}
+	err := bindBody(r, &storagePlace)
 	if err != nil {
-		return echo.ErrBadRequest
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	storagePlace, err = h.storagePlaceService.Create(ctx.Request().Context(), storagePlace)
+	storagePlace, err = h.storagePlaceService.Create(r.Context(), storagePlace)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
 	response := storagePlaceResponseDto{
 		StoragePlaceId: storagePlace.StoragePlaceId,
 		Title:          storagePlace.Title,
 		Code:           storagePlace.Code,
 	}
-	return ctx.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) updateStoragePlace(ctx echo.Context) error {
+func (h *storagePlaceHandler) updateStoragePlace(w http.ResponseWriter, r *http.Request) {
 	storagePlace := domain.StoragePlace{}
-	err := ctx.Bind(&storagePlace)
+	err := bindBody(r, &storagePlace)
 	if err != nil {
-		return echo.ErrBadRequest
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	storagePlaceIdAsStr := ctx.Param("storagePlaceId")
-	storagePlaceId, err := strconv.ParseUint(storagePlaceIdAsStr, 10, 64)
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.ErrBadRequest
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	storagePlace.StoragePlaceId = uint(storagePlaceId)
-	storagePlace, err = h.storagePlaceService.Update(ctx.Request().Context(), storagePlace)
+	storagePlace.StoragePlaceId = uint(id)
+	storagePlace, err = h.storagePlaceService.Update(r.Context(), storagePlace)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
 	response := mapStoragePlaceResponseToDto(storagePlace)
-	return ctx.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) getStoragePlace(ctx echo.Context) error {
-	storagePlaceIdAsStr := ctx.Param("storagePlaceId")
-	storagePlaceId, err := strconv.ParseUint(storagePlaceIdAsStr, 10, 64)
+func (h *storagePlaceHandler) getStoragePlace(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	storagePlace, err := h.storagePlaceService.Get(ctx.Request().Context(), uint(storagePlaceId))
+	storagePlace, err := h.storagePlaceService.Get(r.Context(), uint(id))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
 	response := mapStoragePlaceResponseToDto(storagePlace)
-	return ctx.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) deleteStoragePlace(ctx echo.Context) error {
-	storagePlaceIdAsStr := ctx.Param("storagePlaceId")
-	storagePlaceId, err := strconv.ParseUint(storagePlaceIdAsStr, 10, 64)
+func (h *storagePlaceHandler) deleteStoragePlace(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	err = h.storagePlaceService.Delete(ctx.Request().Context(), uint(storagePlaceId))
+	err = h.storagePlaceService.Delete(r.Context(), uint(id))
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
-	return ctx.NoContent(http.StatusNoContent)
+	respondNoContent(w)
 }
 
-func (h *storagePlaceHandler) listStoragePlace(ctx echo.Context) error {
-	storagePlaces, err := h.storagePlaceService.List(ctx.Request().Context())
+func (h *storagePlaceHandler) listStoragePlace(w http.ResponseWriter, r *http.Request) {
+	storagePlaces, err := h.storagePlaceService.List(r.Context())
 	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err)
+		respondWithError(w, http.StatusBadRequest, "Bad Request")
+		return
 	}
 	response := make([]storagePlaceResponseDto, 0)
 	for _, p := range storagePlaces {
 		response = append(response, mapStoragePlaceResponseToDto(p))
 	}
-	return ctx.JSON(http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func mapStoragePlaceResponseToDto(storagePlace domain.StoragePlace) storagePlaceResponseDto {
