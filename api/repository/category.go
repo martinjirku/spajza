@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 type CategoryRepository struct {
@@ -66,7 +67,7 @@ func (cr *CategoryRepository) UpdateItem(ctx context.Context, c domain.Category)
 		return c, err
 	}
 	if affected != 1 {
-		return c, domain.ErrorNothingUpdated
+		return c, entity.ErrNothingUpdated
 	}
 	return c, nil
 

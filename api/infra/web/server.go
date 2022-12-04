@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/martinjirku/zasobar/config"
-	spajzaMiddleware "github.com/martinjirku/zasobar/web/middleware"
+	spajzaMiddleware "github.com/martinjirku/zasobar/infra/web/middleware"
 )
 
 func InitMiddlewares(r *chi.Mux) {

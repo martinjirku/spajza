@@ -1,7 +1,7 @@
 package main
 
 import (
-	web "github.com/martinjirku/zasobar/web"
+	web "github.com/martinjirku/zasobar/infra/web"
 )
 
 func main() {

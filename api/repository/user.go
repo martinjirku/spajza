@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 type UserRepository struct {
@@ -64,11 +65,11 @@ func (r *UserRepository) Login(ctx context.Context, email string, password strin
 		Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt, &user.Password, &user.Email)
 	switch {
 	case err == sql.ErrNoRows:
-		return domain.ErrorWrongUsername
+		return entity.ErrWrongUsername
 	case err != nil:
 		return err
 	case !user.VerifyPassword(password):
-		return domain.ErrorWrongPassword
+		return entity.ErrWrongPassword
 	default:
 		return nil
 	}

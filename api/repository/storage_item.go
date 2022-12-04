@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/usecases"
 )
 
@@ -66,7 +67,7 @@ func (s *StorageItemRepository) UpdateColumn(ctx context.Context, id uint, field
 	allowedFields := map[string]string{"title": "title", "currentAmount": "current_amount", "unit": "unit", "expirationDate": "expiration_date", "storagePlaceId": "storage_place_id"}
 	fieldToChange := allowedFields[fieldName]
 	if fieldToChange == "" {
-		return domain.ErrorWrongField
+		return entity.ErrWrongField
 	}
 	query := fmt.Sprintf("UPDATE storage_items SET %s=? WHERE storage_item_id=?", fieldToChange)
 	result, err := s.db.ExecContext(ctx, query, fieldValue, id)
