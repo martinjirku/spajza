@@ -7,7 +7,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { StoragePlace } from "@api/storagePlace";
 
-export const useStoryPlaces = () =>
+export const useStoragePlaces = () =>
   useQuery("storage-places", () => getStoragePlaces(), {
     refetchOnMount: false,
   });

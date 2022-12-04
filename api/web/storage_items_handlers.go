@@ -23,15 +23,10 @@ type (
 		Value interface{} `json:"value"`
 	}
 )
-
-var (
-	contextKey = "storageItemId"
-)
-
 type StorageItemService interface {
 	Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error)
 	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error)
-	UpdateField(ctx context.Context, storageItemI uint, fieldName string, value interface{}) error
+	UpdateField(ctx context.Context, storageItemId uint, fieldName string, value interface{}) error
 	List(ctx context.Context) ([]domain.StorageItem, error)
 }
 
@@ -60,16 +55,25 @@ func (h *storageItemHandler) createStorageItem(w http.ResponseWriter, r *http.Re
 	respondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) updateTitle(w http.ResponseWriter, r *http.Request) {
+func (h *storageItemHandler) updateField(w http.ResponseWriter, r *http.Request) {
 	requestBody := updateFieldRequest{}
 	err := bindBody(r, &requestBody)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	fieldName := chi.URLParam(r, "fieldName")
+	if fieldName != "title" && fieldName != "storagePlaceId" {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
-	err = h.storageItemService.UpdateField(r.Context(), uint(id), "title", requestBody.Value)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	err = h.storageItemService.UpdateField(r.Context(), uint(id), fieldName, requestBody.Value)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return

@@ -53,12 +53,14 @@
           <q-card flat square>
             <q-card-section>
               <div class="text-h5">
-                {{ i.title }}
+                <span class="text-dark cursor-pointer">
+                  {{ i.title }}
+                </span>
                 <q-popup-edit
                   v-bind:model-value="i.title"
                   buttons
                   v-slot="scope"
-                  @save="(title: string) => updateTitle({storageItemId: i.storageItemId ?? 0, title})"
+                  @save="(value: string) => updateTitle({storageItemId: i.storageItemId ?? 0, value})"
                 >
                   <q-input
                     v-model="scope.value"
@@ -69,19 +71,58 @@
                   />
                 </q-popup-edit>
               </div>
+              <div class="row inline no-wrap items-center">
+                <q-icon name="place" class="q-mr-sm text-accent" size="xs" />
+                <span class="text-subtitle2 text-primary cursor-pointer">
+                  {{
+                    storagePlaces?.find(
+                      (s) => s.storagePlaceId === i.storagePlaceId
+                    )?.title
+                  }}
+                </span>
+                <q-popup-edit
+                  v-bind:model-value="i.storagePlaceId"
+                  buttons
+                  v-slot="scope"
+                  @save="(value: number) => updateLocation({storageItemId: i.storageItemId ?? 0, value})"
+                >
+                  <q-select
+                    label="Miesto uloženia"
+                    v-model="scope.value"
+                    :options="storagePlaceOptions"
+                    v-bind="scope.value"
+                    map-options
+                    emit-value
+                  >
+                    <template v-slot:no-option>
+                      <q-item>
+                        <q-item-section class="text-grey">
+                          Neexistujú žiadne miesta
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </q-popup-edit>
+              </div>
             </q-card-section>
             <q-separator />
             <q-card-section>
-              <div>
-                {{
-                  storagePlaces?.find(
-                    (s) => s.storagePlaceId === i.storagePlaceId
-                  )?.title
-                }}
-              </div>
-              <div>
-                {{ i.currentAmount }}
-                {{ units?.find((u) => u.name === i.unit)?.symbol }}
+              <div class="row">
+                <div class="col-6 col-md-4">
+                  <div class="text-subtitle2">Váha</div>
+                  <div class="text-h5 text-weight-bold">
+                    {{ i.currentAmount }}
+                    <span class="text-weight-regular">
+                      {{ units?.find((u) => u.name === i.unit)?.symbol }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-6 col-md-8">
+                  <q-btn class="fit" outline flat>
+                    <q-icon left size="1.5em" name="remove_circle_outline" />
+                    Upotrebiť
+                  </q-btn>
+                </div>
               </div>
             </q-card-section>
           </q-card>
@@ -94,21 +135,28 @@
 import imgUrl from "@assets/megan-thomas-xMh_ww8HN_Q-unsplash copy.png";
 import { useUnits } from "@categories/UnitQuery";
 import PageLayout from "@components/common/PageLayout.vue";
-import { useStoryPlaces } from "@storage/StoragePlaceQuery";
+import { useStoragePlaces } from "@storage/StoragePlaceQuery";
 import {
   useStorageItems,
   useUpdateStorageItemTitleMutation,
+  useUpdateStorageItemLocationMutation,
 } from "@storage/StorageQuery";
 import { computed, ref } from "vue";
 import StorageItemForm from "@storage/StorageItemForm.vue";
+import { createStoragePlaceOptions } from "@storage/StoragaPlace";
 
 const createNew = ref(false);
 
 const { data: items, isLoading: isLoadingStorageItems } = useStorageItems();
 const { data: units, isLoading: isLoadingUnits } = useUnits();
 const { mutateAsync: updateTitle } = useUpdateStorageItemTitleMutation();
+const { mutateAsync: updateLocation } = useUpdateStorageItemLocationMutation();
 const { data: storagePlaces, isLoading: isLoadingStoragePlaces } =
-  useStoryPlaces();
+  useStoragePlaces();
+
+const storagePlaceOptions = computed(() =>
+  createStoragePlaceOptions(storagePlaces.value)
+);
 
 const isLoading = computed(() => {
   return (

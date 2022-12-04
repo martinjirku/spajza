@@ -15,7 +15,6 @@ func InitMiddlewares(r *chi.Mux) {
 	r.Use(middleware.DefaultLogger)
 	r.Use(middleware.Recoverer)
 	// r.Use(middleware.Timeout(30 * time.Second))
-	r.Use(spajzaMiddleware.JwtMiddleware)
 }
 
 func InitServer() *chi.Mux {
@@ -60,8 +59,8 @@ func InitServer() *chi.Mux {
 			// storage item
 			r.Get("/storage/items", storageItemHandler.list)
 			r.Post("/storage/items", storageItemHandler.createStorageItem)
-			r.Post("/storage/items/{id}/title", storageItemHandler.updateTitle)
 			r.Post("/storage/items/{id}/consumpt", storageItemHandler.consumpt)
+			r.Post("/storage/items/{id}/{fieldName}", storageItemHandler.updateField)
 		})
 	})
 	http.ListenAndServe(fmt.Sprintf("%s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port), r)

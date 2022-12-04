@@ -137,7 +137,6 @@
                 :use-input="false"
                 emit-value
                 use-chips
-                use-input
                 v-bind="field"
                 :error="!!errorMessage"
                 :error-message="errorMessage"
@@ -199,12 +198,12 @@
 import { FormContext, SubmissionHandler } from "vee-validate";
 import { computed, ref, watch } from "vue";
 import { useNewStorageItemMutation } from "./StorageQuery";
-import { schema, NewStorageItem } from "./StorageItem";
+import { schema } from "./StorageItem";
 import { Field, Form } from "vee-validate";
-import { StorageItem } from "@api/storage";
+import { NewStorageItem, StorageItem } from "@api/storage";
 import { useCategories } from "@categories/CategoryQuery";
 import { createTreeLikeCategoryOptions } from "@categories/Category";
-import { useStoryPlaces } from "./StoragePlaceQuery";
+import { useStoragePlaces } from "./StoragePlaceQuery";
 import { createStoragePlaceOptions } from "./StoragaPlace";
 import { useUnits } from "@categories/UnitQuery";
 import { createUnitOptions } from "@units/units";
@@ -217,7 +216,7 @@ const formRef = ref<FormContext<NewStorageItem>>();
 
 const { data: dataCategories, isLoading: isCategoryLoading } = useCategories();
 const { data: storagePlaces, isLoading: isStoragePlacesLoading } =
-  useStoryPlaces();
+  useStoragePlaces();
 const { data: units, isLoading: isUnitsLoading } = useUnits();
 const { mutateAsync, isLoading: isSubmittingNewStorageItem } =
   useNewStorageItemMutation();
@@ -269,7 +268,7 @@ watch(isLoading, () => {
 });
 
 const onSubmit = ((value) => {
-  mutateAsync(value as StorageItem).then(({ data }) => {
+  mutateAsync(value as NewStorageItem).then(({ data }) => {
     emit("submitted", data);
   });
 }) as SubmissionHandler;

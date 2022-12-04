@@ -63,7 +63,7 @@ func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.N
 //   - unit
 //   - expirationDate
 func (s *StorageItemRepository) UpdateColumn(ctx context.Context, id uint, fieldName string, fieldValue interface{}) error {
-	allowedFields := map[string]string{"title": "title", "currentAmount": "current_amount", "unit": "unit", "expirationDate": "expiration_date"}
+	allowedFields := map[string]string{"title": "title", "currentAmount": "current_amount", "unit": "unit", "expirationDate": "expiration_date", "storagePlaceId": "storage_place_id"}
 	fieldToChange := allowedFields[fieldName]
 	if fieldToChange == "" {
 		return domain.ErrorWrongField

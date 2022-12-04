@@ -130,7 +130,7 @@ StoragePlace
   height: 1200px;
 }
 .q-table__card {
-  background-color: transparent;
+  background-color: var(--bg-darktransparent);
 }
 .q-card {
   background-color: var(--bg-semitransparent);
@@ -144,7 +144,7 @@ import StoragePlaceForm from "@storage/StoragePlaceForm.vue";
 import { QTable, useQuasar } from "quasar";
 import {
   useDeleteStoragePlaceMutation,
-  useStoryPlaces,
+  useStoragePlaces,
 } from "@storage/StoragePlaceQuery";
 import { StoragePlace } from "@api/storagePlace";
 
@@ -153,7 +153,7 @@ const itemsTableRef = ref<QTable>();
 
 const $q = useQuasar();
 
-const { data: storagePlaces, isLoading } = useStoryPlaces();
+const { data: storagePlaces, isLoading } = useStoragePlaces();
 const { mutateAsync } = useDeleteStoragePlaceMutation();
 
 const onSubmitted = ([data, updated]: [StoragePlace, boolean]) => {

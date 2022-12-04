@@ -53,7 +53,10 @@
 <script lang="ts" setup>
 import { FormContext, SubmissionHandler } from "vee-validate";
 import { ref, watch, computed } from "vue";
-import { useStoragePlacesMutation, useStoryPlaces } from "./StoragePlaceQuery";
+import {
+  useStoragePlacesMutation,
+  useStoragePlaces,
+} from "./StoragePlaceQuery";
 import { schema } from "./StoragaPlace";
 import { Field, Form } from "vee-validate";
 import { StoragePlace } from "@api/storagePlace";
@@ -69,7 +72,7 @@ const emit = defineEmits<{
 }>();
 const formRef = ref<FormContext<Record<string, any>>>();
 
-const { data: storagePlaces } = useStoryPlaces();
+const { data: storagePlaces } = useStoragePlaces();
 const category = computed(() => {
   return (
     storagePlaces.value?.find((c) => c.storagePlaceId === storagePlaceId) ?? {}
