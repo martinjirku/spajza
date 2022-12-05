@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/repository"
 	"github.com/martinjirku/zasobar/usecases"
 )
 

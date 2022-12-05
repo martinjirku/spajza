@@ -6,7 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/martinjirku/zasobar/adapters/handler"
 	"github.com/martinjirku/zasobar/config"
+	"github.com/martinjirku/zasobar/infra/db"
 	spajzaMiddleware "github.com/martinjirku/zasobar/infra/web/middleware"
 )
 
@@ -20,7 +22,7 @@ func InitMiddlewares(r *chi.Mux) {
 func InitServer() *chi.Mux {
 	r := chi.NewRouter()
 	InitMiddlewares(r)
-	user := createUserHandler()
+	user := handler.CreateUserHandler(db.SqlDb, config.DefaultConfiguration)
 	units := createUnitHandler()
 	categories := createCategoryHandler()
 	storagePlaceHandler := createStoragePlaceHandler()
@@ -28,16 +30,16 @@ func InitServer() *chi.Mux {
 
 	r.Route("/api", func(r chi.Router) {
 		// Unauthorized routes
-		r.Post("/user/login", user.login)
+		r.Post("/user/login", user.Login)
 
 		// Authorized routes
 		r.Group(func(r chi.Router) {
 			r.Use(spajzaMiddleware.JwtMiddleware)
 
 			// user
-			r.Post("/user/logout", user.logout)
-			r.Post("/user/register", user.register)
-			r.Get("/user/me", user.aboutMe)
+			r.Post("/user/logout", user.Logout)
+			r.Post("/user/register", user.Register)
+			r.Get("/user/me", user.AboutMe)
 
 			// units
 			r.Get("/units", units.list)

@@ -1,4 +1,4 @@
-package web
+package handler
 
 type (
 	UserRegistrationRequest struct {

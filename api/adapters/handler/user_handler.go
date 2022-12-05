@@ -1,26 +1,26 @@
-package web
+package handler
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/config"
-	"github.com/martinjirku/zasobar/domain"
-	"github.com/martinjirku/zasobar/infra/db"
+	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/infra/web/middleware"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/repository"
+	"github.com/martinjirku/zasobar/usecase"
 	"github.com/martinjirku/zasobar/usecases"
 )
 
-type UserService interface {
-	ListAll() ([]*domain.User, error)
-	Register(ctx context.Context, email string, password string) (domain.User, error)
-	Login(ctx context.Context, email string, password string) error
+type UserGateway interface {
+	Register(string, password string) (entity.User, error)
+	Login(email string, password string) error
 }
 
 type TokenProvider interface {
@@ -28,17 +28,22 @@ type TokenProvider interface {
 }
 
 type UserHandler struct {
-	userService   UserService
+	db            *sql.DB
+	config        config.Configuration
 	tokenProvider TokenProvider
 }
 
-func createUserHandler() *UserHandler {
-	userService := repository.NewUserRepository(db.SqlDb)
-	tokenProvider := usecases.NewTokenProvider(config.DefaultConfiguration.JWTSecret, config.DefaultConfiguration.JWTValidity, config.DefaultConfiguration.JWTIssuer)
-	return &UserHandler{userService, tokenProvider}
+func CreateUserHandler(db *sql.DB, config config.Configuration) *UserHandler {
+	tokenProvider := usecases.NewTokenProvider(config.JWTSecret, config.JWTValidity, config.JWTIssuer)
+	return &UserHandler{db, config, tokenProvider}
 }
 
-func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) getUsecase(ctx context.Context) usecase.UserUsecase {
+	userRepository := repository.NewUserRepository(ctx, h.db)
+	return usecase.GetUserUsecase(userRepository)
+}
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -47,8 +52,8 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 	}
 	data := UserLoginRequest{}
 	json.Unmarshal(body, &data)
-
-	err = h.userService.Login(r.Context(), data.Username, data.Password)
+	usecase := h.getUsecase(r.Context())
+	err = usecase.Login(data.Username, data.Password)
 	if err != nil {
 		web.RespondWithError(w, http.StatusUnauthorized, err.Error())
 		return
@@ -68,15 +73,15 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 	web.RespondNoContent(w)
 }
 
-func (h *UserHandler) register(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	data := UserRegistrationRequest{}
 	err := web.BindBody(r, &data)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad request")
 		return
 	}
-
-	response, err := h.userService.Register(r.Context(), data.Username, data.Password)
+	usecase := h.getUsecase(r.Context())
+	response, err := usecase.Register(data.Username, data.Password)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -84,7 +89,7 @@ func (h *UserHandler) register(w http.ResponseWriter, r *http.Request) {
 	web.RespondWithJSON(w, http.StatusOK, UserRegistrationResponse{Id: int(response.ID), Username: response.Email})
 }
 
-func (h *UserHandler) logout(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "auth",
 		Value:    "",
@@ -95,7 +100,7 @@ func (h *UserHandler) logout(w http.ResponseWriter, r *http.Request) {
 	web.RespondNoContent(w)
 }
 
-func (h *UserHandler) aboutMe(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) AboutMe(w http.ResponseWriter, r *http.Request) {
 	userVal := r.Context().Value(middleware.UserKey)
 	if userVal == nil {
 		web.RespondWithError(w, http.StatusBadRequest, "JwtMalformedSubNotProvided")
