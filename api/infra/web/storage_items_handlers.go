@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecases"
@@ -19,17 +19,17 @@ type (
 		Unit   string  `json:"unit"`
 	}
 	listResponse struct {
-		Items []domain.StorageItem `json:"items"`
+		Items []entity.StorageItem `json:"items"`
 	}
 	updateFieldRequest struct {
 		Value interface{} `json:"value"`
 	}
 )
 type StorageItemService interface {
-	Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error)
-	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error)
+	Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error)
+	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (entity.StorageItem, error)
 	UpdateField(ctx context.Context, storageItemId uint, fieldName string, value interface{}) error
-	List(ctx context.Context) ([]domain.StorageItem, error)
+	List(ctx context.Context) ([]entity.StorageItem, error)
 }
 
 type storageItemHandler struct {
@@ -43,7 +43,7 @@ func createStorageItemHandler() *storageItemHandler {
 }
 
 func (h *storageItemHandler) createStorageItem(w http.ResponseWriter, r *http.Request) {
-	requestBody := domain.NewStorageItem{}
+	requestBody := entity.NewStorageItem{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())

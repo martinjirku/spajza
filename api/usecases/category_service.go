@@ -3,13 +3,13 @@ package usecases
 import (
 	"context"
 
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 type CategoryRepository interface {
-	ListAll(ctx context.Context) ([]domain.Category, error)
-	CreateItem(ctx context.Context, c domain.Category) (domain.Category, error)
-	UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error)
+	ListAll(ctx context.Context) ([]entity.Category, error)
+	CreateItem(ctx context.Context, c entity.Category) (entity.Category, error)
+	UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error)
 	DeleteItem(ctx context.Context, id uint) error
 }
 
@@ -21,15 +21,15 @@ func CreateCategoryService(categoryRepository CategoryRepository) *CategoryServi
 	return &CategoryService{categoryRepository}
 }
 
-func (cs *CategoryService) ListAll(ctx context.Context) ([]domain.Category, error) {
+func (cs *CategoryService) ListAll(ctx context.Context) ([]entity.Category, error) {
 	return cs.repository.ListAll(ctx)
 }
 
-func (cs *CategoryService) CreateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cs *CategoryService) CreateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
 	return cs.repository.CreateItem(ctx, c)
 }
 
-func (cs *CategoryService) UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cs *CategoryService) UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
 	return cs.repository.UpdateItem(ctx, c)
 }
 

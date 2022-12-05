@@ -6,7 +6,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/entity"
 )
 
@@ -21,8 +20,8 @@ func NewCategoryService(db *sql.DB) *CategoryRepository {
 	return &CategoryRepository{db}
 }
 
-func (cr *CategoryRepository) ListAll(ctx context.Context) ([]domain.Category, error) {
-	categories := []domain.Category{}
+func (cr *CategoryRepository) ListAll(ctx context.Context) ([]entity.Category, error) {
+	categories := []entity.Category{}
 
 	rows, err := cr.db.QueryContext(ctx, "SELECT id, title, default_unit, path FROM categories WHERE deleted_at IS null")
 	if err != nil {
@@ -31,7 +30,7 @@ func (cr *CategoryRepository) ListAll(ctx context.Context) ([]domain.Category, e
 	defer rows.Close()
 
 	for rows.Next() {
-		var c domain.Category
+		var c entity.Category
 		err := rows.Scan(&c.ID, &c.Title, &c.DefaultUnit, &c.Path)
 		if err != nil {
 			return categories, err
@@ -42,7 +41,7 @@ func (cr *CategoryRepository) ListAll(ctx context.Context) ([]domain.Category, e
 	return categories, nil
 }
 
-func (cr *CategoryRepository) CreateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cr *CategoryRepository) CreateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
 	res, err := cr.db.ExecContext(ctx,
 		"INSERT INTO categories(created_at, updated_at, title, path, default_unit) VALUES (?,?,?,?,?)",
 		time.Now(), time.Now(), c.Title, c.Path, c.DefaultUnit)
@@ -57,7 +56,7 @@ func (cr *CategoryRepository) CreateItem(ctx context.Context, c domain.Category)
 	return c, nil
 }
 
-func (cr *CategoryRepository) UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error) {
+func (cr *CategoryRepository) UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
 	res, err := cr.db.ExecContext(ctx, "UPDATE categories SET updated_at=?,title=?,path=?,default_unit=? WHERE id=?", time.Now(), c.Title, c.Path, c.DefaultUnit, c.ID)
 	if err != nil {
 		return c, err

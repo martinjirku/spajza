@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecases"
@@ -24,9 +24,9 @@ type (
 )
 
 type CategoryService interface {
-	ListAll(ctx context.Context) ([]domain.Category, error)
-	CreateItem(ctx context.Context, c domain.Category) (domain.Category, error)
-	UpdateItem(ctx context.Context, c domain.Category) (domain.Category, error)
+	ListAll(ctx context.Context) ([]entity.Category, error)
+	CreateItem(ctx context.Context, c entity.Category) (entity.Category, error)
+	UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error)
 	DeleteItem(ctx context.Context, id uint) error
 }
 
@@ -40,8 +40,8 @@ func createCategoryHandler() *categoryHandler {
 	return &categoryHandler{categoryService}
 }
 
-func mapCategoryItemToCategory(c categoryItemDto) domain.Category {
-	return domain.Category{
+func mapCategoryItemToCategory(c categoryItemDto) entity.Category {
+	return entity.Category{
 		ID:          c.Id,
 		Title:       c.Title,
 		Path:        c.Path,
@@ -49,7 +49,7 @@ func mapCategoryItemToCategory(c categoryItemDto) domain.Category {
 	}
 }
 
-func mapCategoryToCategoryItem(c domain.Category) categoryItemDto {
+func mapCategoryToCategoryItem(c entity.Category) categoryItemDto {
 	return categoryItemDto{
 		Id:          c.ID,
 		Title:       c.Title,

@@ -3,14 +3,14 @@ package usecases
 import (
 	"context"
 
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 type StoragePlaceRepository interface {
-	Create(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error)
-	Get(ctx context.Context, storagePlaceId uint) (domain.StoragePlace, error)
-	List(ctx context.Context) ([]domain.StoragePlace, error)
-	Update(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error)
+	Create(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
+	Get(ctx context.Context, storagePlaceId uint) (entity.StoragePlace, error)
+	List(ctx context.Context) ([]entity.StoragePlace, error)
+	Update(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
 	Delete(ctx context.Context, storagePlaceId uint) error
 }
 
@@ -22,19 +22,19 @@ func NewStoragePlaceService(storagePlaceRepository StoragePlaceRepository) *Stor
 	return &StoragePlaceService{storagePlaceRepository}
 }
 
-func (s *StoragePlaceService) Create(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error) {
+func (s *StoragePlaceService) Create(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error) {
 	return s.storagePlaceRepository.Create(ctx, storagePlace)
 }
 
-func (s *StoragePlaceService) Get(ctx context.Context, storagePlaceId uint) (domain.StoragePlace, error) {
+func (s *StoragePlaceService) Get(ctx context.Context, storagePlaceId uint) (entity.StoragePlace, error) {
 	return s.storagePlaceRepository.Get(ctx, storagePlaceId)
 }
 
-func (s *StoragePlaceService) List(ctx context.Context) ([]domain.StoragePlace, error) {
+func (s *StoragePlaceService) List(ctx context.Context) ([]entity.StoragePlace, error) {
 	return s.storagePlaceRepository.List(ctx)
 }
 
-func (s *StoragePlaceService) Update(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error) {
+func (s *StoragePlaceService) Update(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error) {
 	return s.storagePlaceRepository.Update(ctx, storagePlace)
 }
 

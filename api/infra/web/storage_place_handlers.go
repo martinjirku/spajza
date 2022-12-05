@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecases"
@@ -22,10 +22,10 @@ type (
 )
 
 type StoragePlaceService interface {
-	Create(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error)
-	Get(ctx context.Context, storagePlaceId uint) (domain.StoragePlace, error)
-	List(ctx context.Context) ([]domain.StoragePlace, error)
-	Update(ctx context.Context, storagePlace domain.StoragePlace) (domain.StoragePlace, error)
+	Create(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
+	Get(ctx context.Context, storagePlaceId uint) (entity.StoragePlace, error)
+	List(ctx context.Context) ([]entity.StoragePlace, error)
+	Update(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
 	Delete(ctx context.Context, storagePlaceId uint) error
 }
 
@@ -40,7 +40,7 @@ func createStoragePlaceHandler() *storagePlaceHandler {
 }
 
 func (h *storagePlaceHandler) createStoragePlace(w http.ResponseWriter, r *http.Request) {
-	storagePlace := domain.StoragePlace{}
+	storagePlace := entity.StoragePlace{}
 	err := web.BindBody(r, &storagePlace)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
@@ -60,7 +60,7 @@ func (h *storagePlaceHandler) createStoragePlace(w http.ResponseWriter, r *http.
 }
 
 func (h *storagePlaceHandler) updateStoragePlace(w http.ResponseWriter, r *http.Request) {
-	storagePlace := domain.StoragePlace{}
+	storagePlace := entity.StoragePlace{}
 	err := web.BindBody(r, &storagePlace)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
@@ -127,7 +127,7 @@ func (h *storagePlaceHandler) listStoragePlace(w http.ResponseWriter, r *http.Re
 	web.RespondWithJSON(w, http.StatusOK, response)
 }
 
-func mapStoragePlaceResponseToDto(storagePlace domain.StoragePlace) storagePlaceResponseDto {
+func mapStoragePlaceResponseToDto(storagePlace entity.StoragePlace) storagePlaceResponseDto {
 	return storagePlaceResponseDto{
 		StoragePlaceId: storagePlace.StoragePlaceId,
 		Title:          storagePlace.Title,

@@ -3,16 +3,16 @@ package usecases
 import (
 	"context"
 
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 type StorageItemRepository interface {
-	Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error)
-	GetStorageItemById(ctx context.Context, storageItemId uint) (domain.StorageItem, error)
-	GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]domain.StorageItemConsumption, error)
-	AddStorageConsumption(ctx context.Context, storageConsumption domain.StorageItemConsumption) (domain.StorageItemConsumption, error)
+	Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error)
+	GetStorageItemById(ctx context.Context, storageItemId uint) (entity.StorageItem, error)
+	GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]entity.StorageItemConsumption, error)
+	AddStorageConsumption(ctx context.Context, storageConsumption entity.StorageItemConsumption) (entity.StorageItemConsumption, error)
 	UpdateColumn(ctx context.Context, id uint, fieldName string, fieldValue interface{}) error
-	List(ctx context.Context) ([]domain.StorageItem, error)
+	List(ctx context.Context) ([]entity.StorageItem, error)
 }
 
 type StorageItemService struct {
@@ -23,7 +23,7 @@ func NewStorageItemService(storageItemRepository StorageItemRepository) *Storage
 	return &StorageItemService{storageItemRepository}
 }
 
-func (s *StorageItemService) Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error) {
+func (s *StorageItemService) Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error) {
 	return s.storageItemRepository.Create(ctx, storageItem)
 }
 
@@ -31,8 +31,8 @@ func (s *StorageItemService) UpdateField(ctx context.Context, storageItemId uint
 	return s.storageItemRepository.UpdateColumn(ctx, storageItemId, fieldName, value)
 }
 
-func (s *StorageItemService) Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (domain.StorageItem, error) {
-	storageItem, err := domain.LoadStorageItem(ctx, storageItemId, s.storageItemRepository)
+func (s *StorageItemService) Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (entity.StorageItem, error) {
+	storageItem, err := entity.LoadStorageItem(ctx, storageItemId, s.storageItemRepository)
 	if err != nil {
 		return storageItem, err
 	}
@@ -53,7 +53,7 @@ func (s *StorageItemService) Consumpt(ctx context.Context, storageItemId uint, a
 	return storageItem, nil
 }
 
-func (s *StorageItemService) List(ctx context.Context) ([]domain.StorageItem, error) {
+func (s *StorageItemService) List(ctx context.Context) ([]entity.StorageItem, error) {
 	result, err := s.storageItemRepository.List(ctx)
 	if err != nil {
 		return nil, err

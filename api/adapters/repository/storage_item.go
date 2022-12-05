@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/martinjirku/zasobar/domain"
 	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/usecases"
 )
@@ -22,13 +21,13 @@ func NewStorageItemRepository(db *sql.DB) StorageItemRepository {
 	return StorageItemRepository{db: db, us: &us}
 }
 
-func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.NewStorageItem) (domain.StorageItem, error) {
+func (s *StorageItemRepository) Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error) {
 	unit, err := findUnit(s.us.ListAll(), storageItem.Unit)
 	if err != nil {
-		return domain.StorageItem{}, err
+		return entity.StorageItem{}, err
 	}
 
-	res := domain.StorageItem{
+	res := entity.StorageItem{
 		Title:          storageItem.Title,
 		BaselineAmount: storageItem.Amount,
 		CurrentAmount:  storageItem.Amount,
@@ -81,7 +80,7 @@ func (s *StorageItemRepository) UpdateColumn(ctx context.Context, id uint, field
 	return nil
 }
 
-func (s *StorageItemRepository) List(ctx context.Context) ([]domain.StorageItem, error) {
+func (s *StorageItemRepository) List(ctx context.Context) ([]entity.StorageItem, error) {
 	query := "SELECT storage_item_id, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date FROM storage_items"
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
@@ -89,19 +88,19 @@ func (s *StorageItemRepository) List(ctx context.Context) ([]domain.StorageItem,
 	}
 	defer rows.Close()
 
-	resp := make([]domain.StorageItem, 0)
+	resp := make([]entity.StorageItem, 0)
 
 	for rows.Next() {
-		s := domain.StorageItem{}
+		s := entity.StorageItem{}
 		rows.Scan(&s.StorageItemId, &s.Title, &s.StoragePlaceId, &s.CategoryId, &s.BaselineAmount, &s.CurrentAmount, &s.Quantity, &s.Unit, &s.ExpirationDate)
 		resp = append(resp, s)
 	}
 	return resp, nil
 }
 
-func (s *StorageItemRepository) GetStorageItemById(ctx context.Context, storageItemId uint) (domain.StorageItem, error) {
+func (s *StorageItemRepository) GetStorageItemById(ctx context.Context, storageItemId uint) (entity.StorageItem, error) {
 	query := "SELECT storage_item_id, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date FROM storage_items WHERE storage_item_id=?"
-	si := domain.StorageItem{}
+	si := entity.StorageItem{}
 	row := s.db.QueryRowContext(ctx, query, storageItemId)
 	if row.Err() != nil {
 		return si, row.Err()
@@ -111,23 +110,23 @@ func (s *StorageItemRepository) GetStorageItemById(ctx context.Context, storageI
 	return si, nil
 }
 
-func (s *StorageItemRepository) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]domain.StorageItemConsumption, error) {
+func (s *StorageItemRepository) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]entity.StorageItemConsumption, error) {
 	query := "SELECT storage_item_consumption_id, normalized_amount, unit, storage_item_id FROM storage_consumptions WHERE storage_item_id=?"
-	sic := []domain.StorageItemConsumption{}
+	sic := []entity.StorageItemConsumption{}
 	rows, err := s.db.QueryContext(ctx, query, storageItemId)
 	if err != nil {
 		return sic, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		c := domain.StorageItemConsumption{}
+		c := entity.StorageItemConsumption{}
 		rows.Scan(&c.StorageItemConsumptionId, &c.NormalizedAmount, &c.Unit, &c.StorageItemId)
 		sic = append(sic, c)
 	}
 	return sic, nil
 }
 
-func (s *StorageItemRepository) AddStorageConsumption(ctx context.Context, sc domain.StorageItemConsumption) (domain.StorageItemConsumption, error) {
+func (s *StorageItemRepository) AddStorageConsumption(ctx context.Context, sc entity.StorageItemConsumption) (entity.StorageItemConsumption, error) {
 	query := "INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount, unit, storage_item_id) VALUES (?,?,?,?,?)"
 	result, err := s.db.ExecContext(ctx, query, time.Now(), time.Now(), sc.NormalizedAmount, sc.Unit, sc.StorageItemId)
 	if err != nil {

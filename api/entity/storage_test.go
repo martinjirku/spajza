@@ -1,36 +1,36 @@
-package domain_test
+package entity_test
 
 import (
 	"context"
 	"math"
 	"testing"
 
-	d "github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	floats "gonum.org/v1/gonum/floats/scalar"
 )
 
 type StorageItemLoaderMock struct {
-	s d.StorageItem
+	s entity.StorageItem
 }
 
-func (s *StorageItemLoaderMock) GetStorageItemById(ctx context.Context, storageItemId uint) (d.StorageItem, error) {
+func (s *StorageItemLoaderMock) GetStorageItemById(ctx context.Context, storageItemId uint) (entity.StorageItem, error) {
 	return s.s, nil
 }
-func (s *StorageItemLoaderMock) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]d.StorageItemConsumption, error) {
+func (s *StorageItemLoaderMock) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]entity.StorageItemConsumption, error) {
 	return s.s.Consumptions, nil
 }
 
 func TestLoadStorageItem(t *testing.T) {
-	loader := StorageItemLoaderMock{d.StorageItem{
+	loader := StorageItemLoaderMock{entity.StorageItem{
 		Title:          "Halusky",
 		StorageItemId:  1,
 		BaselineAmount: 1000,
 		CurrentAmount:  1000,
 		Quantity:       "mass",
 		Unit:           "gram",
-		Consumptions:   []d.StorageItemConsumption{},
+		Consumptions:   []entity.StorageItemConsumption{},
 	}}
-	storageItem, _ := d.LoadStorageItem(context.Background(), 1, &loader)
+	storageItem, _ := entity.LoadStorageItem(context.Background(), 1, &loader)
 	if storageItem.Title != "Halusky" {
 		t.Errorf("Expected %s got %s", "Halusky", storageItem.Title)
 	}
@@ -41,11 +41,11 @@ func FuzzConsumptSameUnit(f *testing.F) {
 	f.Add(float64(100), float64(1000))
 	f.Add(float64(1000), float64(1000))
 	f.Fuzz(func(t *testing.T, baselineAmount float64, amount float64) {
-		storageItem := d.StorageItem{
+		storageItem := entity.StorageItem{
 			BaselineAmount: baselineAmount,
 			CurrentAmount:  baselineAmount,
 			Unit:           "gram",
-			Consumptions:   []d.StorageItemConsumption{},
+			Consumptions:   []entity.StorageItemConsumption{},
 		}
 		storageItem.Consumpt(amount, "gram")
 		result := math.Max(baselineAmount-amount, 0)
@@ -62,11 +62,11 @@ func FuzzConsumptSameUnit(f *testing.F) {
 }
 
 func TestConsumptDifferentUnit(t *testing.T) {
-	storageItem := d.StorageItem{
+	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,
 		Unit:           "gram",
-		Consumptions:   []d.StorageItemConsumption{},
+		Consumptions:   []entity.StorageItemConsumption{},
 	}
 	storageItem.Consumpt(1, "kilogram")
 	if !floats.EqualWithinULP(storageItem.CurrentAmount, 1000, 5) {
@@ -81,11 +81,11 @@ func TestConsumptDifferentUnit(t *testing.T) {
 }
 
 func TestConsumptUnknownUnitInStorageItem(t *testing.T) {
-	storageItem := d.StorageItem{
+	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,
 		Unit:           "unknown",
-		Consumptions:   []d.StorageItemConsumption{},
+		Consumptions:   []entity.StorageItemConsumption{},
 	}
 	err := storageItem.Consumpt(1, "kilogram")
 	if err == nil {
@@ -93,11 +93,11 @@ func TestConsumptUnknownUnitInStorageItem(t *testing.T) {
 	}
 }
 func TestConsumptUnknownUnitInConsumpt(t *testing.T) {
-	storageItem := d.StorageItem{
+	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,
 		Unit:           "gram",
-		Consumptions:   []d.StorageItemConsumption{},
+		Consumptions:   []entity.StorageItemConsumption{},
 	}
 	err := storageItem.Consumpt(1, "asdfasdf")
 	if err == nil {

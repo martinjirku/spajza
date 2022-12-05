@@ -1,4 +1,4 @@
-package domain
+package entity
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	u "github.com/bcicen/go-units"
-	"github.com/martinjirku/zasobar/entity"
 )
 
 type StoragePlace struct {
@@ -35,7 +34,7 @@ type StorageItem struct {
 	CategoryId      uint                     `json:"categoryId"`
 	StoragePlaceId  uint                     `json:"storagePlaceId"`
 	StorageLocation string                   `json:"storageLocation"`
-	Quantity        entity.Quantity          `json:"quantity"`
+	Quantity        Quantity                 `json:"quantity"`
 	Unit            string                   `json:"unit"`
 	ExpirationDate  time.Time                `json:"expirationDate"`
 	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`
