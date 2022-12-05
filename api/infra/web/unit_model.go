@@ -1,6 +1,8 @@
 package web
 
-import "github.com/martinjirku/zasobar/domain"
+import (
+	"github.com/martinjirku/zasobar/entity"
+)
 
 type (
 	unitDto struct {
@@ -9,11 +11,11 @@ type (
 		PluralName string          `json:"pluralName"`
 		Symbol     string          `json:"symbol"`
 		System     string          `json:"system"`
-		Quantity   domain.Quantity `json:"quantity"`
+		Quantity   entity.Quantity `json:"quantity"`
 	}
 )
 
-func UnitDto(u domain.Unit) unitDto {
+func UnitDto(u entity.Unit) unitDto {
 	return unitDto{
 		Name:       u.Name,
 		Quantity:   u.Quantity,
@@ -24,7 +26,7 @@ func UnitDto(u domain.Unit) unitDto {
 	}
 }
 
-func mapGoUnitsToUnitDto(u []domain.Unit) []unitDto {
+func mapGoUnitsToUnitDto(u []entity.Unit) []unitDto {
 	var units = make([]unitDto, len(u))
 	for i, unit := range u {
 		units[i] = UnitDto(unit)

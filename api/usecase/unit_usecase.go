@@ -1,12 +1,11 @@
-package usecases
+package usecase
 
 import (
 	goUnits "github.com/bcicen/go-units"
 	"github.com/martinjirku/zasobar/entity"
 )
 
-type UnitService struct {
-}
+type UnitUsecase struct{}
 
 var isInitialized = false
 var supportedUnits = []string{
@@ -18,11 +17,11 @@ var supportedUnits = []string{
 	"count", // count
 }
 
-func NewUnitService() UnitService {
+func NewUnitService() UnitUsecase {
 	if isInitialized {
 		initUnits()
 	}
-	return UnitService{}
+	return UnitUsecase{}
 }
 
 func initUnits() {
@@ -30,7 +29,7 @@ func initUnits() {
 	isInitialized = true
 }
 
-func (u UnitService) ListAll() []entity.Unit {
+func (u UnitUsecase) ListAll() []entity.Unit {
 	result := []entity.Unit{}
 	for _, unit := range supportedUnits {
 		u, err := goUnits.Find(unit)
@@ -49,7 +48,7 @@ func (u UnitService) ListAll() []entity.Unit {
 	return result
 }
 
-func (u UnitService) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error) {
+func (u UnitUsecase) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error) {
 	var units = []entity.Unit{}
 	for _, unit := range u.ListAll() {
 		q, err := quantity.Value()

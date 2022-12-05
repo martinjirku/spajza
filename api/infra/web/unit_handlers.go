@@ -4,14 +4,14 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecases"
 )
 
 type UnitService interface {
-	ListAll() []domain.Unit
-	ListByQuantity(quantity domain.Quantity) ([]domain.Unit, error)
+	ListAll() []entity.Unit
+	ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error)
 }
 
 type UnitsHandler struct {
@@ -28,7 +28,7 @@ func (u *UnitsHandler) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UnitsHandler) listUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
-	var quantity domain.Quantity
+	var quantity entity.Quantity
 	val := chi.URLParam(r, "quantity")
 	if err := quantity.Scan(val); err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())

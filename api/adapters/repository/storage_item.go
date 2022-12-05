@@ -34,7 +34,7 @@ func (s *StorageItemRepository) Create(ctx context.Context, storageItem domain.N
 		CurrentAmount:  storageItem.Amount,
 		CategoryId:     storageItem.CategoryId,
 		StoragePlaceId: storageItem.StoragePlaceId,
-		Quantity:       domain.Quantity(unit.Quantity),
+		Quantity:       entity.Quantity(unit.Quantity),
 		Unit:           unit.Name,
 		ExpirationDate: storageItem.ExpirationDate,
 	}
@@ -141,8 +141,8 @@ func (s *StorageItemRepository) AddStorageConsumption(ctx context.Context, sc do
 	return sc, nil
 }
 
-func findUnit(units []domain.Unit, unitName string) (domain.Unit, error) {
-	var unit domain.Unit
+func findUnit(units []entity.Unit, unitName string) (entity.Unit, error) {
+	var unit entity.Unit
 	found := false
 	for _, u := range units {
 		if u.Name == unitName {

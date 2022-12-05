@@ -1,26 +1,26 @@
-package domain_test
+package entity_test
 
 import (
 	"testing"
 
-	"github.com/martinjirku/zasobar/domain"
+	"github.com/martinjirku/zasobar/entity"
 )
 
 func TestQuantityScanString(t *testing.T) {
 	massStr := "mass"
-	var quantity domain.Quantity
+	var quantity entity.Quantity
 	err := quantity.Scan(massStr)
 	if err != nil {
 		t.Errorf("During scan error occured `%s`", err.Error())
 	}
-	if quantity != domain.MASS {
-		t.Errorf("Expected `%s`, but received `%s`", domain.MASS, quantity)
+	if quantity != entity.MASS {
+		t.Errorf("Expected `%s`, but received `%s`", entity.MASS, quantity)
 	}
 }
 
 func TestQuantityScanInvalidString(t *testing.T) {
 	massStr := "masses"
-	var quantity domain.Quantity
+	var quantity entity.Quantity
 	err := quantity.Scan(massStr)
 	if err == nil {
 		t.Errorf("Expected error, but no error returned")
