@@ -1,4 +1,4 @@
-package web
+package handler
 
 import (
 	"net/http"
@@ -13,16 +13,16 @@ type UnitsHandler struct {
 	unitUsecase usecase.UnitUsecase
 }
 
-func createUnitHandler() *UnitsHandler {
+func CreateUnitHandler() *UnitsHandler {
 	unitUsecase := usecase.UnitUsecase{}
 	return &UnitsHandler{unitUsecase}
 }
 
-func (u *UnitsHandler) list(w http.ResponseWriter, r *http.Request) {
+func (u *UnitsHandler) List(w http.ResponseWriter, r *http.Request) {
 	web.RespondWithJSON(w, http.StatusOK, mapGoUnitsToUnitDto(u.unitUsecase.ListAll()))
 }
 
-func (u *UnitsHandler) listUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
+func (u *UnitsHandler) ListUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
 	var quantity entity.Quantity
 	val := chi.URLParam(r, "quantity")
 	if err := quantity.Scan(val); err != nil {

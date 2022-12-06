@@ -12,7 +12,6 @@ import (
 	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/config"
 	"github.com/martinjirku/zasobar/entity"
-	"github.com/martinjirku/zasobar/infra/web/middleware"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecase"
 )
@@ -100,7 +99,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) AboutMe(w http.ResponseWriter, r *http.Request) {
-	userVal := r.Context().Value(middleware.UserKey)
+	userVal := r.Context().Value(web.UserKey)
 	if userVal == nil {
 		web.RespondWithError(w, http.StatusBadRequest, "JwtMalformedSubNotProvided")
 		return

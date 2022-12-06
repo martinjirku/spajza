@@ -1,67 +1,43 @@
-package web
+package handler
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/entity"
-	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/usecases"
-)
-
-type (
-	categoryItemDto struct {
-		Id          uint   `json:"id"`
-		Title       string `json:"title"`
-		Path        string `json:"path"`
-		DefaultUnit string `json:"defaultUnit"`
-	}
-	listAllResponse categoryItemDto
+	"github.com/martinjirku/zasobar/usecase"
 )
 
 type CategoryService interface {
-	ListAll(ctx context.Context) ([]entity.Category, error)
-	CreateItem(ctx context.Context, c entity.Category) (entity.Category, error)
-	UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error)
-	DeleteItem(ctx context.Context, id uint) error
+	ListAll() ([]entity.Category, error)
+	CreateItem(c entity.Category) (entity.Category, error)
+	UpdateItem(c entity.Category) (entity.Category, error)
+	DeleteItem(id uint) error
 }
 
 type categoryHandler struct {
-	categoryService CategoryService
+	db *sql.DB
 }
 
-func createCategoryHandler() *categoryHandler {
-	categoryRepository := repository.NewCategoryService(db.SqlDb)
-	categoryService := usecases.CreateCategoryService(categoryRepository)
-	return &categoryHandler{categoryService}
+func CreateCategoryHandler(db *sql.DB) *categoryHandler {
+	return &categoryHandler{db}
 }
 
-func mapCategoryItemToCategory(c categoryItemDto) entity.Category {
-	return entity.Category{
-		ID:          c.Id,
-		Title:       c.Title,
-		Path:        c.Path,
-		DefaultUnit: c.DefaultUnit,
-	}
+func (h *categoryHandler) getUsecase(ctx context.Context) CategoryService {
+	categoryRepository := repository.NewCategoryService(ctx, h.db)
+	return usecase.CreateCategoryService(categoryRepository)
 }
 
-func mapCategoryToCategoryItem(c entity.Category) categoryItemDto {
-	return categoryItemDto{
-		Id:          c.ID,
-		Title:       c.Title,
-		Path:        c.Path,
-		DefaultUnit: c.DefaultUnit,
-	}
-}
-
-func (h *categoryHandler) listCategories(w http.ResponseWriter, r *http.Request) {
+func (h *categoryHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
 	response := []listAllResponse{}
 
-	categories, err := h.categoryService.ListAll(r.Context())
+	usecase := h.getUsecase(r.Context())
+	categories, err := usecase.ListAll()
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -77,7 +53,8 @@ func (h *categoryHandler) listCategories(w http.ResponseWriter, r *http.Request)
 	web.RespondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *categoryHandler) saveCategory(w http.ResponseWriter, r *http.Request) {
+func (h *categoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
+	usecase := h.getUsecase(r.Context())
 	providedCategory := categoryItemDto{}
 	if err := web.BindBody(r, &providedCategory); err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
@@ -86,7 +63,7 @@ func (h *categoryHandler) saveCategory(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	category := mapCategoryItemToCategory(providedCategory)
 	if idStr == "" {
-		response, err := h.categoryService.CreateItem(r.Context(), category)
+		response, err := usecase.CreateItem(category)
 		if err != nil {
 			web.RespondWithError(w, http.StatusBadRequest, err.Error())
 			return
@@ -100,7 +77,7 @@ func (h *categoryHandler) saveCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	category.ID = uint(id)
-	response, err := h.categoryService.UpdateItem(r.Context(), category)
+	response, err := usecase.UpdateItem(category)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -108,14 +85,15 @@ func (h *categoryHandler) saveCategory(w http.ResponseWriter, r *http.Request) {
 	web.RespondWithJSON(w, http.StatusOK, mapCategoryToCategoryItem(response))
 }
 
-func (h *categoryHandler) deleteCategory(w http.ResponseWriter, r *http.Request) {
+func (h *categoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
+	usecase := h.getUsecase(r.Context())
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	err = h.categoryService.DeleteItem(r.Context(), uint(id))
+	err = usecase.DeleteItem(uint(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return

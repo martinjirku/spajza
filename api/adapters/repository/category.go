@@ -10,20 +10,21 @@ import (
 )
 
 type CategoryRepository struct {
-	db *sql.DB
+	ctx context.Context
+	db  *sql.DB
 }
 
 // we have recursive structure here,
 // TODO: refactor db model to handle trees properly https://www.mysqltutorial.org/mysql-adjacency-list-tree/
 
-func NewCategoryService(db *sql.DB) *CategoryRepository {
-	return &CategoryRepository{db}
+func NewCategoryService(ctx context.Context, db *sql.DB) *CategoryRepository {
+	return &CategoryRepository{ctx, db}
 }
 
-func (cr *CategoryRepository) ListAll(ctx context.Context) ([]entity.Category, error) {
+func (cr *CategoryRepository) ListAll() ([]entity.Category, error) {
 	categories := []entity.Category{}
 
-	rows, err := cr.db.QueryContext(ctx, "SELECT id, title, default_unit, path FROM categories WHERE deleted_at IS null")
+	rows, err := cr.db.QueryContext(cr.ctx, "SELECT id, title, default_unit, path FROM categories WHERE deleted_at IS null")
 	if err != nil {
 		return categories, err
 	}
@@ -41,8 +42,8 @@ func (cr *CategoryRepository) ListAll(ctx context.Context) ([]entity.Category, e
 	return categories, nil
 }
 
-func (cr *CategoryRepository) CreateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
-	res, err := cr.db.ExecContext(ctx,
+func (cr *CategoryRepository) CreateItem(c entity.Category) (entity.Category, error) {
+	res, err := cr.db.ExecContext(cr.ctx,
 		"INSERT INTO categories(created_at, updated_at, title, path, default_unit) VALUES (?,?,?,?,?)",
 		time.Now(), time.Now(), c.Title, c.Path, c.DefaultUnit)
 	if err != nil {
@@ -56,8 +57,8 @@ func (cr *CategoryRepository) CreateItem(ctx context.Context, c entity.Category)
 	return c, nil
 }
 
-func (cr *CategoryRepository) UpdateItem(ctx context.Context, c entity.Category) (entity.Category, error) {
-	res, err := cr.db.ExecContext(ctx, "UPDATE categories SET updated_at=?,title=?,path=?,default_unit=? WHERE id=?", time.Now(), c.Title, c.Path, c.DefaultUnit, c.ID)
+func (cr *CategoryRepository) UpdateItem(c entity.Category) (entity.Category, error) {
+	res, err := cr.db.ExecContext(cr.ctx, "UPDATE categories SET updated_at=?,title=?,path=?,default_unit=? WHERE id=?", time.Now(), c.Title, c.Path, c.DefaultUnit, c.ID)
 	if err != nil {
 		return c, err
 	}
@@ -72,8 +73,8 @@ func (cr *CategoryRepository) UpdateItem(ctx context.Context, c entity.Category)
 
 }
 
-func (cr *CategoryRepository) DeleteItem(ctx context.Context, id uint) error {
-	res, err := cr.db.ExecContext(ctx, "UPDATE categories SET deleted_at=? WHERE id=?", time.Now(), id)
+func (cr *CategoryRepository) DeleteItem(id uint) error {
+	res, err := cr.db.ExecContext(cr.ctx, "UPDATE categories SET deleted_at=? WHERE id=?", time.Now(), id)
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/martinjirku/zasobar/adapters/handler"
 	"github.com/martinjirku/zasobar/config"
 	"github.com/martinjirku/zasobar/infra/db"
-	spajzaMiddleware "github.com/martinjirku/zasobar/infra/web/middleware"
+	"github.com/martinjirku/zasobar/pkg/web"
 )
 
 func InitMiddlewares(r *chi.Mux) {
@@ -24,8 +24,8 @@ func InitServer() *chi.Mux {
 	r := chi.NewRouter()
 	InitMiddlewares(r)
 	user := handler.CreateUserHandler(db.SqlDb, config.DefaultConfiguration)
-	units := createUnitHandler()
-	categories := createCategoryHandler()
+	units := handler.CreateUnitHandler()
+	categories := handler.CreateCategoryHandler(db.SqlDb)
 	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
 	storageItemHandler := handler.CreateStorageItemHandler(db.SqlDb)
 
@@ -35,7 +35,7 @@ func InitServer() *chi.Mux {
 
 		// Authorized routes
 		r.Group(func(r chi.Router) {
-			r.Use(spajzaMiddleware.JwtMiddleware)
+			r.Use(web.JwtMiddlware(config.GetJwtSecret))
 
 			// user
 			r.Post("/user/logout", user.Logout)
@@ -43,14 +43,14 @@ func InitServer() *chi.Mux {
 			r.Get("/user/me", user.AboutMe)
 
 			// units
-			r.Get("/units", units.list)
-			r.Get("/units/{quantity}", units.listUnitsByQuantity)
+			r.Get("/units", units.List)
+			r.Get("/units/{quantity}", units.ListUnitsByQuantity)
 
 			// categories
-			r.Get("/categories", categories.listCategories)
-			r.Delete("/categories/{id}", categories.deleteCategory)
-			r.Post("/categories", categories.saveCategory)
-			r.Post("/categories/{id}", categories.saveCategory)
+			r.Get("/categories", categories.ListCategories)
+			r.Delete("/categories/{id}", categories.DeleteCategory)
+			r.Post("/categories", categories.SaveCategory)
+			r.Post("/categories/{id}", categories.SaveCategory)
 
 			// storage place
 			r.Post("/storage/places", storagePlaceHandler.CreateStoragePlace)
