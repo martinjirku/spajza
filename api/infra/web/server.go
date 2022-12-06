@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -26,7 +27,7 @@ func InitServer() *chi.Mux {
 	units := createUnitHandler()
 	categories := createCategoryHandler()
 	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
-	storageItemHandler := createStorageItemHandler()
+	storageItemHandler := handler.CreateStorageItemHandler(db.SqlDb)
 
 	r.Route("/api", func(r chi.Router) {
 		// Unauthorized routes
@@ -59,12 +60,13 @@ func InitServer() *chi.Mux {
 			r.Delete("/storage/places/{id}", storagePlaceHandler.DeleteStoragePlace)
 
 			// storage item
-			r.Get("/storage/items", storageItemHandler.list)
-			r.Post("/storage/items", storageItemHandler.createStorageItem)
-			r.Post("/storage/items/{id}/consumpt", storageItemHandler.consumpt)
-			r.Post("/storage/items/{id}/{fieldName}", storageItemHandler.updateField)
+			r.Get("/storage/items", storageItemHandler.List)
+			r.Post("/storage/items", storageItemHandler.CreateStorageItem)
+			r.Post("/storage/items/{id}/consumpt", storageItemHandler.Consumpt)
+			r.Post("/storage/items/{id}/{fieldName}", storageItemHandler.UpdateField)
 		})
 	})
+	log.Printf("Application start, listening on %s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port)
 	http.ListenAndServe(fmt.Sprintf("%s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port), r)
 	return r
 }

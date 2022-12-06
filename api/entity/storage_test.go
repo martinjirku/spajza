@@ -1,7 +1,6 @@
 package entity_test
 
 import (
-	"context"
 	"math"
 	"testing"
 
@@ -13,10 +12,10 @@ type StorageItemLoaderMock struct {
 	s entity.StorageItem
 }
 
-func (s *StorageItemLoaderMock) GetStorageItemById(ctx context.Context, storageItemId uint) (entity.StorageItem, error) {
+func (s *StorageItemLoaderMock) GetStorageItemById(storageItemId uint) (entity.StorageItem, error) {
 	return s.s, nil
 }
-func (s *StorageItemLoaderMock) GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]entity.StorageItemConsumption, error) {
+func (s *StorageItemLoaderMock) GetStorageConsumptionById(storageItemId uint) ([]entity.StorageItemConsumption, error) {
 	return s.s.Consumptions, nil
 }
 
@@ -30,7 +29,7 @@ func TestLoadStorageItem(t *testing.T) {
 		Unit:           "gram",
 		Consumptions:   []entity.StorageItemConsumption{},
 	}}
-	storageItem, _ := entity.LoadStorageItem(context.Background(), 1, &loader)
+	storageItem, _ := entity.LoadStorageItem(1, &loader)
 	if storageItem.Title != "Halusky" {
 		t.Errorf("Expected %s got %s", "Halusky", storageItem.Title)
 	}

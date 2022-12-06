@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"context"
 	"math"
 	"time"
 
@@ -48,27 +47,25 @@ type StorageItemConsumption struct {
 }
 
 type StorageItemLoader interface {
-	GetStorageItemById(ctx context.Context, storageItemId uint) (StorageItem, error)
-	GetStorageConsumptionById(ctx context.Context, storageItemId uint) ([]StorageItemConsumption, error)
+	GetStorageItemById(storageItemId uint) (StorageItem, error)
+	GetStorageConsumptionById(storageItemId uint) ([]StorageItemConsumption, error)
 }
 
 // "LoadStorageItem" loads StorageItem from database.
 //
 // One needs to provide storageItemId, context and loader.
-func LoadStorageItem(ctx context.Context, id uint, loader StorageItemLoader) (StorageItem, error) {
-	storageItem, err := loader.GetStorageItemById(ctx, id)
+func LoadStorageItem(id uint, loader StorageItemLoader) (StorageItem, error) {
+	storageItem, err := loader.GetStorageItemById(id)
 	if err != nil {
 		return storageItem, err
 	}
-	consumptions, err := loader.GetStorageConsumptionById(ctx, id)
+	consumptions, err := loader.GetStorageConsumptionById(id)
 	if err != nil {
 		return storageItem, err
 	}
 	storageItem.Consumptions = consumptions
 	return storageItem, nil
 }
-
-// func PersistStorageItem(ctx context.Context)
 
 // When Consumpt is called, specified amount will be removed
 // from the current amount.

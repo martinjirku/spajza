@@ -1,30 +1,18 @@
-package web
+package handler
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/entity"
-	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/usecases"
+	"github.com/martinjirku/zasobar/usecase"
 )
 
-type (
-	consumptRequest struct {
-		Amount float64 `json:"amount"`
-		Unit   string  `json:"unit"`
-	}
-	listResponse struct {
-		Items []entity.StorageItem `json:"items"`
-	}
-	updateFieldRequest struct {
-		Value interface{} `json:"value"`
-	}
-)
 type StorageItemService interface {
 	Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error)
 	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (entity.StorageItem, error)
@@ -33,23 +21,27 @@ type StorageItemService interface {
 }
 
 type storageItemHandler struct {
-	storageItemService StorageItemService
+	db *sql.DB
 }
 
-func createStorageItemHandler() *storageItemHandler {
-	storageItemRepository := repository.NewStorageItemRepository(db.SqlDb)
-	storageItemService := usecases.NewStorageItemService(&storageItemRepository)
-	return &storageItemHandler{storageItemService}
+func CreateStorageItemHandler(db *sql.DB) *storageItemHandler {
+	return &storageItemHandler{db}
 }
 
-func (h *storageItemHandler) createStorageItem(w http.ResponseWriter, r *http.Request) {
+func (h *storageItemHandler) getUsecase(ctx context.Context) *usecase.StorageItemService {
+	storageItemRepository := repository.NewStorageItemRepository(ctx, h.db)
+	return usecase.NewStorageItemService(&storageItemRepository)
+}
+
+func (h *storageItemHandler) CreateStorageItem(w http.ResponseWriter, r *http.Request) {
 	requestBody := entity.NewStorageItem{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response, err := h.storageItemService.Create(r.Context(), requestBody)
+	usecase := h.getUsecase(r.Context())
+	response, err := usecase.Create(requestBody)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -57,7 +49,7 @@ func (h *storageItemHandler) createStorageItem(w http.ResponseWriter, r *http.Re
 	web.RespondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) updateField(w http.ResponseWriter, r *http.Request) {
+func (h *storageItemHandler) UpdateField(w http.ResponseWriter, r *http.Request) {
 	requestBody := updateFieldRequest{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
@@ -75,7 +67,8 @@ func (h *storageItemHandler) updateField(w http.ResponseWriter, r *http.Request)
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	err = h.storageItemService.UpdateField(r.Context(), uint(id), fieldName, requestBody.Value)
+	usecase := h.getUsecase(r.Context())
+	err = usecase.UpdateField(uint(id), fieldName, requestBody.Value)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -83,7 +76,7 @@ func (h *storageItemHandler) updateField(w http.ResponseWriter, r *http.Request)
 	web.RespondNoContent(w)
 }
 
-func (h *storageItemHandler) consumpt(w http.ResponseWriter, r *http.Request) {
+func (h *storageItemHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 	requestBody := consumptRequest{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
@@ -96,7 +89,8 @@ func (h *storageItemHandler) consumpt(w http.ResponseWriter, r *http.Request) {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response, err := h.storageItemService.Consumpt(r.Context(), uint(id), requestBody.Amount, requestBody.Unit)
+	usecase := h.getUsecase(r.Context())
+	response, err := usecase.Consumpt(uint(id), requestBody.Amount, requestBody.Unit)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -104,8 +98,9 @@ func (h *storageItemHandler) consumpt(w http.ResponseWriter, r *http.Request) {
 	web.RespondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) list(w http.ResponseWriter, r *http.Request) {
-	result, err := h.storageItemService.List(r.Context())
+func (h *storageItemHandler) List(w http.ResponseWriter, r *http.Request) {
+	usecase := h.getUsecase(r.Context())
+	result, err := usecase.List()
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
