@@ -15,7 +15,6 @@ import (
 	"github.com/martinjirku/zasobar/infra/web/middleware"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecase"
-	"github.com/martinjirku/zasobar/usecases"
 )
 
 type UserGateway interface {
@@ -34,7 +33,7 @@ type UserHandler struct {
 }
 
 func CreateUserHandler(db *sql.DB, config config.Configuration) *UserHandler {
-	tokenProvider := usecases.NewTokenProvider(config.JWTSecret, config.JWTValidity, config.JWTIssuer)
+	tokenProvider := web.NewTokenProvider(config.JWTSecret, config.JWTValidity, config.JWTIssuer)
 	return &UserHandler{db, config, tokenProvider}
 }
 

@@ -6,25 +6,20 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/entity"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/usecases"
+	"github.com/martinjirku/zasobar/usecase"
 )
 
-type UnitService interface {
-	ListAll() []entity.Unit
-	ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error)
-}
-
 type UnitsHandler struct {
-	unitService UnitService
+	unitUsecase usecase.UnitUsecase
 }
 
 func createUnitHandler() *UnitsHandler {
-	unitService := usecases.UnitService{}
-	return &UnitsHandler{unitService}
+	unitUsecase := usecase.UnitUsecase{}
+	return &UnitsHandler{unitUsecase}
 }
 
 func (u *UnitsHandler) list(w http.ResponseWriter, r *http.Request) {
-	web.RespondWithJSON(w, http.StatusOK, mapGoUnitsToUnitDto(u.unitService.ListAll()))
+	web.RespondWithJSON(w, http.StatusOK, mapGoUnitsToUnitDto(u.unitUsecase.ListAll()))
 }
 
 func (u *UnitsHandler) listUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +29,7 @@ func (u *UnitsHandler) listUnitsByQuantity(w http.ResponseWriter, r *http.Reques
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	units, err := u.unitService.ListByQuantity(quantity)
+	units, err := u.unitUsecase.ListByQuantity(quantity)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return

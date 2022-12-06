@@ -8,16 +8,16 @@ import (
 	"time"
 
 	"github.com/martinjirku/zasobar/entity"
-	"github.com/martinjirku/zasobar/usecases"
+	"github.com/martinjirku/zasobar/usecase"
 )
 
 type StorageItemRepository struct {
 	db *sql.DB
-	us *usecases.UnitService
+	us *usecase.UnitUsecase
 }
 
 func NewStorageItemRepository(db *sql.DB) StorageItemRepository {
-	us := usecases.NewUnitService()
+	us := usecase.NewUnitUsecase()
 	return StorageItemRepository{db: db, us: &us}
 }
 

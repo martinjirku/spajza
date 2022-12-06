@@ -17,7 +17,7 @@ var supportedUnits = []string{
 	"count", // count
 }
 
-func NewUnitService() UnitUsecase {
+func NewUnitUsecase() UnitUsecase {
 	if isInitialized {
 		initUnits()
 	}
@@ -29,7 +29,7 @@ func initUnits() {
 	isInitialized = true
 }
 
-func (u UnitUsecase) ListAll() []entity.Unit {
+func (u *UnitUsecase) ListAll() []entity.Unit {
 	result := []entity.Unit{}
 	for _, unit := range supportedUnits {
 		u, err := goUnits.Find(unit)
@@ -48,7 +48,7 @@ func (u UnitUsecase) ListAll() []entity.Unit {
 	return result
 }
 
-func (u UnitUsecase) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error) {
+func (u *UnitUsecase) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error) {
 	var units = []entity.Unit{}
 	for _, unit := range u.ListAll() {
 		q, err := quantity.Value()
