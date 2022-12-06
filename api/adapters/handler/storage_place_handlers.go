@@ -1,52 +1,48 @@
-package web
+package handler
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/entity"
-	"github.com/martinjirku/zasobar/infra/db"
 	web "github.com/martinjirku/zasobar/pkg/web"
-	"github.com/martinjirku/zasobar/usecases"
-)
-
-type (
-	storagePlaceResponseDto struct {
-		StoragePlaceId uint   `json:"storagePlaceId"`
-		Title          string `json:"title,omitempty"`
-		Code           string `json:"code"`
-	}
+	"github.com/martinjirku/zasobar/usecase"
 )
 
 type StoragePlaceService interface {
-	Create(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
-	Get(ctx context.Context, storagePlaceId uint) (entity.StoragePlace, error)
-	List(ctx context.Context) ([]entity.StoragePlace, error)
-	Update(ctx context.Context, storagePlace entity.StoragePlace) (entity.StoragePlace, error)
-	Delete(ctx context.Context, storagePlaceId uint) error
+	Create(storagePlace entity.StoragePlace) (entity.StoragePlace, error)
+	Get(storagePlaceId uint) (entity.StoragePlace, error)
+	List() ([]entity.StoragePlace, error)
+	Update(storagePlace entity.StoragePlace) (entity.StoragePlace, error)
+	Delete(storagePlaceId uint) error
 }
 
 type storagePlaceHandler struct {
-	storagePlaceService StoragePlaceService
+	db *sql.DB
 }
 
-func createStoragePlaceHandler() *storagePlaceHandler {
-	storagePlaceRepository := repository.NewStoragePlaceRepository(db.SqlDb)
-	storagePlaceService := usecases.NewStoragePlaceService(storagePlaceRepository)
-	return &storagePlaceHandler{storagePlaceService}
+func CreateStoragePlaceHandler(db *sql.DB) *storagePlaceHandler {
+	return &storagePlaceHandler{db}
 }
 
-func (h *storagePlaceHandler) createStoragePlace(w http.ResponseWriter, r *http.Request) {
+func (h *storagePlaceHandler) getUsecase(ctx context.Context) *usecase.StoragePlaceUsecase {
+	storagePlaceRepository := repository.NewStoragePlaceRepository(ctx, h.db)
+	return usecase.NewStoragePlaceUsecase(storagePlaceRepository)
+}
+
+func (h *storagePlaceHandler) CreateStoragePlace(w http.ResponseWriter, r *http.Request) {
 	storagePlace := entity.StoragePlace{}
 	err := web.BindBody(r, &storagePlace)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
-	storagePlace, err = h.storagePlaceService.Create(r.Context(), storagePlace)
+	usecase := h.getUsecase(r.Context())
+	storagePlace, err = usecase.Create(storagePlace)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
@@ -59,7 +55,7 @@ func (h *storagePlaceHandler) createStoragePlace(w http.ResponseWriter, r *http.
 	web.RespondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) updateStoragePlace(w http.ResponseWriter, r *http.Request) {
+func (h *storagePlaceHandler) UpdateStoragePlace(w http.ResponseWriter, r *http.Request) {
 	storagePlace := entity.StoragePlace{}
 	err := web.BindBody(r, &storagePlace)
 	if err != nil {
@@ -74,7 +70,8 @@ func (h *storagePlaceHandler) updateStoragePlace(w http.ResponseWriter, r *http.
 		return
 	}
 	storagePlace.StoragePlaceId = uint(id)
-	storagePlace, err = h.storagePlaceService.Update(r.Context(), storagePlace)
+	usecase := h.getUsecase(r.Context())
+	storagePlace, err = usecase.Update(storagePlace)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
@@ -83,14 +80,15 @@ func (h *storagePlaceHandler) updateStoragePlace(w http.ResponseWriter, r *http.
 	web.RespondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) getStoragePlace(w http.ResponseWriter, r *http.Request) {
+func (h *storagePlaceHandler) GetStoragePlace(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
-	storagePlace, err := h.storagePlaceService.Get(r.Context(), uint(id))
+	usecase := h.getUsecase(r.Context())
+	storagePlace, err := usecase.Get(uint(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
@@ -99,14 +97,15 @@ func (h *storagePlaceHandler) getStoragePlace(w http.ResponseWriter, r *http.Req
 	web.RespondWithJSON(w, http.StatusOK, response)
 }
 
-func (h *storagePlaceHandler) deleteStoragePlace(w http.ResponseWriter, r *http.Request) {
+func (h *storagePlaceHandler) DeleteStoragePlace(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
-	err = h.storagePlaceService.Delete(r.Context(), uint(id))
+	usecase := h.getUsecase(r.Context())
+	err = usecase.Delete(uint(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
@@ -114,8 +113,9 @@ func (h *storagePlaceHandler) deleteStoragePlace(w http.ResponseWriter, r *http.
 	web.RespondNoContent(w)
 }
 
-func (h *storagePlaceHandler) listStoragePlace(w http.ResponseWriter, r *http.Request) {
-	storagePlaces, err := h.storagePlaceService.List(r.Context())
+func (h *storagePlaceHandler) ListStoragePlace(w http.ResponseWriter, r *http.Request) {
+	usecase := h.getUsecase(r.Context())
+	storagePlaces, err := usecase.List()
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return

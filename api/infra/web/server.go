@@ -25,7 +25,7 @@ func InitServer() *chi.Mux {
 	user := handler.CreateUserHandler(db.SqlDb, config.DefaultConfiguration)
 	units := createUnitHandler()
 	categories := createCategoryHandler()
-	storagePlaceHandler := createStoragePlaceHandler()
+	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
 	storageItemHandler := createStorageItemHandler()
 
 	r.Route("/api", func(r chi.Router) {
@@ -52,11 +52,11 @@ func InitServer() *chi.Mux {
 			r.Post("/categories/{id}", categories.saveCategory)
 
 			// storage place
-			r.Post("/storage/places", storagePlaceHandler.createStoragePlace)
-			r.Get("/storage/places", storagePlaceHandler.listStoragePlace)
-			r.Post("/storage/places/{id}", storagePlaceHandler.updateStoragePlace)
-			r.Get("/storage/places/{id}", storagePlaceHandler.getStoragePlace)
-			r.Delete("/storage/places/{id}", storagePlaceHandler.deleteStoragePlace)
+			r.Post("/storage/places", storagePlaceHandler.CreateStoragePlace)
+			r.Get("/storage/places", storagePlaceHandler.ListStoragePlace)
+			r.Post("/storage/places/{id}", storagePlaceHandler.UpdateStoragePlace)
+			r.Get("/storage/places/{id}", storagePlaceHandler.GetStoragePlace)
+			r.Delete("/storage/places/{id}", storagePlaceHandler.DeleteStoragePlace)
 
 			// storage item
 			r.Get("/storage/items", storageItemHandler.list)
