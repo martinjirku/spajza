@@ -6,7 +6,7 @@ import (
 	"github.com/martinjirku/zasobar/entity"
 )
 
-func TestQuantityScanString(t *testing.T) {
+func Test_QuantityScanString(t *testing.T) {
 	massStr := "mass"
 	var quantity entity.Quantity
 	err := quantity.Scan(massStr)
@@ -18,7 +18,7 @@ func TestQuantityScanString(t *testing.T) {
 	}
 }
 
-func TestQuantityScanInvalidString(t *testing.T) {
+func Test_QuantityScanInvalidString(t *testing.T) {
 	massStr := "masses"
 	var quantity entity.Quantity
 	err := quantity.Scan(massStr)

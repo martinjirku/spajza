@@ -43,14 +43,14 @@ func mapCategoryItemToCategory(c categoryItemDto) entity.Category {
 	return entity.Category{
 		ID:          c.Id,
 		Title:       c.Title,
-		Path:        c.Path,
+		Path:        entity.CategoryPath(c.Path),
 		DefaultUnit: c.DefaultUnit,
 	}
 }
 
 type (
 	categoryItemDto struct {
-		Id          uint   `json:"id"`
+		Id          int64  `json:"id"`
 		Title       string `json:"title"`
 		Path        string `json:"path"`
 		DefaultUnit string `json:"defaultUnit"`
@@ -62,7 +62,7 @@ func mapCategoryToCategoryItem(c entity.Category) categoryItemDto {
 	return categoryItemDto{
 		Id:          c.ID,
 		Title:       c.Title,
-		Path:        c.Path,
+		Path:        string(c.Path),
 		DefaultUnit: c.DefaultUnit,
 	}
 }

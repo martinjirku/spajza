@@ -19,7 +19,7 @@ func (s *StorageItemLoaderMock) GetStorageConsumptionById(storageItemId uint) ([
 	return s.s.Consumptions, nil
 }
 
-func TestLoadStorageItem(t *testing.T) {
+func Test_LoadStorageItem(t *testing.T) {
 	loader := StorageItemLoaderMock{entity.StorageItem{
 		Title:          "Halusky",
 		StorageItemId:  1,
@@ -35,7 +35,7 @@ func TestLoadStorageItem(t *testing.T) {
 	}
 }
 
-func FuzzConsumptSameUnit(f *testing.F) {
+func Fuzz_ConsumptSameUnit(f *testing.F) {
 	f.Add(float64(1000), float64(500))
 	f.Add(float64(100), float64(1000))
 	f.Add(float64(1000), float64(1000))
@@ -60,7 +60,7 @@ func FuzzConsumptSameUnit(f *testing.F) {
 	})
 }
 
-func TestConsumptDifferentUnit(t *testing.T) {
+func Test_ConsumptDifferentUnit(t *testing.T) {
 	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,
@@ -79,7 +79,7 @@ func TestConsumptDifferentUnit(t *testing.T) {
 	}
 }
 
-func TestConsumptUnknownUnitInStorageItem(t *testing.T) {
+func Test_ConsumptUnknownUnitInStorageItem(t *testing.T) {
 	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,
@@ -91,7 +91,7 @@ func TestConsumptUnknownUnitInStorageItem(t *testing.T) {
 		t.Errorf("Expected to renturn error")
 	}
 }
-func TestConsumptUnknownUnitInConsumpt(t *testing.T) {
+func Test_ConsumptUnknownUnitInConsumpt(t *testing.T) {
 	storageItem := entity.StorageItem{
 		BaselineAmount: 2000,
 		CurrentAmount:  2000,

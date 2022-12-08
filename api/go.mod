@@ -5,6 +5,7 @@ go 1.18
 require github.com/bcicen/go-units v1.0.3
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
 	github.com/bcicen/bfstree v1.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

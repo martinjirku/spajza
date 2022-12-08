@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -8,9 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/martinjirku/zasobar/adapters/handler"
+	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/config"
 	"github.com/martinjirku/zasobar/infra/db"
 	"github.com/martinjirku/zasobar/pkg/web"
+	"github.com/martinjirku/zasobar/usecase"
 )
 
 func InitMiddlewares(r *chi.Mux) {
@@ -25,7 +28,7 @@ func InitServer() *chi.Mux {
 	InitMiddlewares(r)
 	user := handler.CreateUserHandler(db.SqlDb, config.DefaultConfiguration)
 	units := handler.CreateUnitHandler()
-	categories := handler.CreateCategoryHandler(db.SqlDb)
+	categories := handler.CreateCategoryHandler(CategoryUsecaseProvider)
 	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
 	storageItemHandler := handler.CreateStorageItemHandler(db.SqlDb)
 
@@ -69,4 +72,10 @@ func InitServer() *chi.Mux {
 	log.Printf("Application start, listening on %s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port)
 	http.ListenAndServe(fmt.Sprintf("%s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port), r)
 	return r
+}
+
+func CategoryUsecaseProvider(ctx context.Context) *usecase.CategoryUsecase {
+	repository := repository.NewCategoryRepository(ctx, db.SqlDb)
+	usecase := usecase.CreateCategoryUsecase(repository)
+	return usecase
 }
