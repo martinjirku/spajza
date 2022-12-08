@@ -35,7 +35,7 @@ func (s *StorageItemRepository) Create(storageItem entity.NewStorageItem) (entit
 		CategoryId:     storageItem.CategoryId,
 		StoragePlaceId: storageItem.StoragePlaceId,
 		Quantity:       entity.Quantity(unit.Quantity),
-		Unit:           unit.Name,
+		Unit:           string(unit.Name),
 		ExpirationDate: storageItem.ExpirationDate,
 	}
 
@@ -145,7 +145,7 @@ func findUnit(units []entity.Unit, unitName string) (entity.Unit, error) {
 	var unit entity.Unit
 	found := false
 	for _, u := range units {
-		if u.Name == unitName {
+		if string(u.Name) == unitName {
 			unit = u
 			found = true
 			break

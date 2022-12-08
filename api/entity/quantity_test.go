@@ -13,8 +13,8 @@ func Test_QuantityScanString(t *testing.T) {
 	if err != nil {
 		t.Errorf("During scan error occured `%s`", err.Error())
 	}
-	if quantity != entity.MASS {
-		t.Errorf("Expected `%s`, but received `%s`", entity.MASS, quantity)
+	if quantity != entity.QuantityMass {
+		t.Errorf("Expected `%s`, but received `%s`", entity.QuantityMass, quantity)
 	}
 }
 

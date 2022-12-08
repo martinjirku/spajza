@@ -8,14 +8,6 @@ import (
 type UnitUsecase struct{}
 
 var isInitialized = false
-var supportedUnits = []string{
-	"gram", "milligram", "kilogram", "decagram", "pound", "ounce", // mass
-	"meter", "centimeter", "decimeter", "foot", "inch", "kilometer", "mile", "yard", // length
-	"gallon", "hectoliter", "liter", "milliliter", "pint", // volume
-	"celsius", "fahrenheit", "kelvin", // temperature
-	"century", "day", "decade", "hour", "millisecond", "minute", "month", "year", // time
-	"count", // count
-}
 
 func NewUnitUsecase() UnitUsecase {
 	if isInitialized {
@@ -31,8 +23,8 @@ func initUnits() {
 
 func (u *UnitUsecase) ListAll() []entity.Unit {
 	result := []entity.Unit{}
-	for _, unit := range supportedUnits {
-		u, err := goUnits.Find(unit)
+	for _, unit := range entity.SupportedUnits {
+		u, err := goUnits.Find(string(unit))
 		if err != nil {
 			if unit == "count" {
 				result = append(result, entity.Unit{
@@ -64,7 +56,7 @@ func (u *UnitUsecase) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, e
 
 func mapGoUnitsToDomain(u goUnits.Unit) entity.Unit {
 	return entity.Unit{
-		Name:       u.Name,
+		Name:       entity.UnitName(u.Name),
 		Symbol:     u.Symbol,
 		Quantity:   entity.Quantity(u.Quantity),
 		PluralName: u.PluralName(),

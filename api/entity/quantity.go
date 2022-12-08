@@ -8,17 +8,17 @@ import (
 type Quantity string
 
 const (
-	MASS        Quantity = "mass"        // kg
-	LENGTH      Quantity = "length"      // m
-	VOLUME      Quantity = "volume"      // l
-	TEMPERATURE Quantity = "temperature" // C
-	TIME        Quantity = "time"        // m
-	COUNT       Quantity = "count"       // ks
+	QuantityMass        Quantity = "mass"        // kg
+	QuantityLength      Quantity = "length"      // m
+	QuantityVolume      Quantity = "volume"      // l
+	QuantityTemperature Quantity = "temperature" // C
+	QuantityTime        Quantity = "time"        // m
+	QuantityCount       Quantity = "count"       // ks
 	// AREA        UnitCategory = "area"      // m2
 )
 
 var (
-	quantities = []Quantity{MASS, LENGTH, VOLUME, TEMPERATURE, TIME, COUNT}
+	quantities = []Quantity{QuantityMass, QuantityLength, QuantityVolume, QuantityTemperature, QuantityTime, QuantityCount}
 )
 
 func (ct *Quantity) Scan(value interface{}) error {

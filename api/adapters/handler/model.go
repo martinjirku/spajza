@@ -80,7 +80,7 @@ type (
 
 func UnitDto(u entity.Unit) unitDto {
 	return unitDto{
-		Name:       u.Name,
+		Name:       string(u.Name),
 		Quantity:   u.Quantity,
 		Symbol:     u.Symbol,
 		System:     u.System,
