@@ -23,7 +23,7 @@ func (u *UnitsHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UnitsHandler) ListUnitsByQuantity(w http.ResponseWriter, r *http.Request) {
-	var quantity entity.Quantity
+	var quantity entity.QuantityType
 	val := chi.URLParam(r, "quantity")
 	if err := quantity.Scan(val); err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())

@@ -3,7 +3,7 @@ package entity
 type Unit struct {
 	Name       UnitName
 	Symbol     string
-	Quantity   Quantity
+	Quantity   QuantityType
 	System     string
 	PluralName string
 	Names      []string

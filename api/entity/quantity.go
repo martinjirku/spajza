@@ -5,38 +5,38 @@ import (
 	"fmt"
 )
 
-type Quantity string
+type QuantityType string
 
 const (
-	QuantityMass        Quantity = "mass"        // kg
-	QuantityLength      Quantity = "length"      // m
-	QuantityVolume      Quantity = "volume"      // l
-	QuantityTemperature Quantity = "temperature" // C
-	QuantityTime        Quantity = "time"        // m
-	QuantityCount       Quantity = "count"       // ks
+	QuantityMass        QuantityType = "mass"        // kg
+	QuantityLength      QuantityType = "length"      // m
+	QuantityVolume      QuantityType = "volume"      // l
+	QuantityTemperature QuantityType = "temperature" // C
+	QuantityTime        QuantityType = "time"        // m
+	QuantityCount       QuantityType = "count"       // ks
 	// AREA        UnitCategory = "area"      // m2
 )
 
 var (
-	quantities = []Quantity{QuantityMass, QuantityLength, QuantityVolume, QuantityTemperature, QuantityTime, QuantityCount}
+	quantities = []QuantityType{QuantityMass, QuantityLength, QuantityVolume, QuantityTemperature, QuantityTime, QuantityCount}
 )
 
-func (ct *Quantity) Scan(value interface{}) error {
+func (ct *QuantityType) Scan(value interface{}) error {
 
 	switch typ := value.(type) {
 	case *string:
-		*ct = Quantity(value.(string))
+		*ct = QuantityType(value.(string))
 	case string:
-		*ct = Quantity(value.(string))
+		*ct = QuantityType(value.(string))
 	case []byte:
-		*ct = Quantity(string(value.([]byte)))
+		*ct = QuantityType(string(value.([]byte)))
 	default:
 		return fmt.Errorf("could not scan value quantity: %s", typ)
 	}
 	return ct.IsValid()
 }
 
-func (ct *Quantity) IsValid() error {
+func (ct *QuantityType) IsValid() error {
 	for _, item := range quantities {
 		if item == *ct {
 			return nil
@@ -45,6 +45,6 @@ func (ct *Quantity) IsValid() error {
 	return errors.New("unknown quantity")
 }
 
-func (ct Quantity) Value() (string, error) {
+func (ct QuantityType) Value() (string, error) {
 	return string(ct), nil
 }

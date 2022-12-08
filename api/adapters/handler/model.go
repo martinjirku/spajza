@@ -69,12 +69,12 @@ func mapCategoryToCategoryItem(c entity.Category) categoryItemDto {
 
 type (
 	unitDto struct {
-		Name       string          `json:"name"`
-		Names      []string        `json:"names"`
-		PluralName string          `json:"pluralName"`
-		Symbol     string          `json:"symbol"`
-		System     string          `json:"system"`
-		Quantity   entity.Quantity `json:"quantity"`
+		Name       string              `json:"name"`
+		Names      []string            `json:"names"`
+		PluralName string              `json:"pluralName"`
+		Symbol     string              `json:"symbol"`
+		System     string              `json:"system"`
+		Quantity   entity.QuantityType `json:"quantity"`
 	}
 )
 

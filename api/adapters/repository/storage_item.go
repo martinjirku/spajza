@@ -34,7 +34,7 @@ func (s *StorageItemRepository) Create(storageItem entity.NewStorageItem) (entit
 		CurrentAmount:  storageItem.Amount,
 		CategoryId:     storageItem.CategoryId,
 		StoragePlaceId: storageItem.StoragePlaceId,
-		Quantity:       entity.Quantity(unit.Quantity),
+		Quantity:       entity.QuantityType(unit.Quantity),
 		Unit:           string(unit.Name),
 		ExpirationDate: storageItem.ExpirationDate,
 	}

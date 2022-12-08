@@ -40,14 +40,14 @@ func (u *UnitUsecase) ListAll() []entity.Unit {
 	return result
 }
 
-func (u *UnitUsecase) ListByQuantity(quantity entity.Quantity) ([]entity.Unit, error) {
+func (u *UnitUsecase) ListByQuantity(quantity entity.QuantityType) ([]entity.Unit, error) {
 	var units = []entity.Unit{}
 	for _, unit := range u.ListAll() {
 		q, err := quantity.Value()
 		if err != nil {
 			return units, err
 		}
-		if entity.Quantity(q) == unit.Quantity {
+		if entity.QuantityType(q) == unit.Quantity {
 			units = append(units, unit)
 		}
 	}
@@ -58,7 +58,7 @@ func mapGoUnitsToDomain(u goUnits.Unit) entity.Unit {
 	return entity.Unit{
 		Name:       entity.UnitName(u.Name),
 		Symbol:     u.Symbol,
-		Quantity:   entity.Quantity(u.Quantity),
+		Quantity:   entity.QuantityType(u.Quantity),
 		PluralName: u.PluralName(),
 		Names:      u.Names(),
 		System:     u.System(),

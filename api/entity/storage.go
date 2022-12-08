@@ -33,7 +33,7 @@ type StorageItem struct {
 	CategoryId      uint                     `json:"categoryId"`
 	StoragePlaceId  uint                     `json:"storagePlaceId"`
 	StorageLocation string                   `json:"storageLocation"`
-	Quantity        Quantity                 `json:"quantity"`
+	Quantity        QuantityType             `json:"quantity"`
 	Unit            string                   `json:"unit"`
 	ExpirationDate  time.Time                `json:"expirationDate"`
 	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`

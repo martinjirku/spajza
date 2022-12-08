@@ -8,7 +8,7 @@ import (
 
 func Test_QuantityScanString(t *testing.T) {
 	massStr := "mass"
-	var quantity entity.Quantity
+	var quantity entity.QuantityType
 	err := quantity.Scan(massStr)
 	if err != nil {
 		t.Errorf("During scan error occured `%s`", err.Error())
@@ -20,7 +20,7 @@ func Test_QuantityScanString(t *testing.T) {
 
 func Test_QuantityScanInvalidString(t *testing.T) {
 	massStr := "masses"
-	var quantity entity.Quantity
+	var quantity entity.QuantityType
 	err := quantity.Scan(massStr)
 	if err == nil {
 		t.Errorf("Expected error, but no error returned")
