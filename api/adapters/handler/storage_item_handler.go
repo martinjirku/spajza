@@ -2,54 +2,52 @@ package handler
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/martinjirku/zasobar/adapters/repository"
 	"github.com/martinjirku/zasobar/entity"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecase"
 )
 
-type StorageItemService interface {
-	Create(ctx context.Context, storageItem entity.NewStorageItem) (entity.StorageItem, error)
-	Consumpt(ctx context.Context, storageItemId uint, amount float64, unit string) (entity.StorageItem, error)
-	UpdateField(ctx context.Context, storageItemId uint, fieldName string, value interface{}) error
-	List(ctx context.Context) ([]entity.StorageItem, error)
+type StorageItemUsecaseProvider func(ctx context.Context) *usecase.StorageItemUsecase
+
+type usecaseHandler struct {
+	provideUsecase StorageItemUsecaseProvider
 }
 
-type storageItemHandler struct {
-	db *sql.DB
+func CreateStorageItemHandler(provider StorageItemUsecaseProvider) usecaseHandler {
+	return usecaseHandler{provider}
 }
 
-func CreateStorageItemHandler(db *sql.DB) *storageItemHandler {
-	return &storageItemHandler{db}
-}
-
-func (h *storageItemHandler) getUsecase(ctx context.Context) *usecase.StorageItemService {
-	storageItemRepository := repository.NewStorageItemRepository(ctx, h.db)
-	return usecase.NewStorageItemService(&storageItemRepository)
-}
-
-func (h *storageItemHandler) CreateStorageItem(w http.ResponseWriter, r *http.Request) {
-	requestBody := entity.NewStorageItem{}
+func (h *usecaseHandler) CreateStorageItem(w http.ResponseWriter, r *http.Request) {
+	requestBody := NewStorageItem{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	usecase := h.getUsecase(r.Context())
-	response, err := usecase.Create(requestBody)
+	usecase := h.provideUsecase(r.Context())
+	item := entity.StorageItem{
+		StorageItemId:  requestBody.StoragePlaceId,
+		Title:          requestBody.Title,
+		CategoryId:     requestBody.CategoryId,
+		StoragePlaceId: requestBody.StoragePlaceId,
+		ExpirationDate: time.Time{},
+	}
+	item.Init()
+	item, err = usecase.Create(item)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	response := fromEntityStorageItem(item)
 	web.RespondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) UpdateField(w http.ResponseWriter, r *http.Request) {
+func (h *usecaseHandler) UpdateField(w http.ResponseWriter, r *http.Request) {
 	requestBody := updateFieldRequest{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
@@ -67,8 +65,8 @@ func (h *storageItemHandler) UpdateField(w http.ResponseWriter, r *http.Request)
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	usecase := h.getUsecase(r.Context())
-	err = usecase.UpdateField(uint(id), fieldName, requestBody.Value)
+	usecase := h.provideUsecase(r.Context())
+	_, err = usecase.UpdateField(uint(id), fieldName, requestBody.Value)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -76,7 +74,7 @@ func (h *storageItemHandler) UpdateField(w http.ResponseWriter, r *http.Request)
 	web.RespondNoContent(w)
 }
 
-func (h *storageItemHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
+func (h *usecaseHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 	requestBody := consumptRequest{}
 	err := web.BindBody(r, &requestBody)
 	if err != nil {
@@ -89,8 +87,8 @@ func (h *storageItemHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	usecase := h.getUsecase(r.Context())
-	response, err := usecase.Consumpt(uint(id), requestBody.Amount, requestBody.Unit)
+	usecase := h.provideUsecase(r.Context())
+	response, err := usecase.Consumpt(uint(id), requestBody.Amount, entity.UnitName(requestBody.Unit))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -98,12 +96,16 @@ func (h *storageItemHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 	web.RespondWithJSON(w, http.StatusAccepted, response)
 }
 
-func (h *storageItemHandler) List(w http.ResponseWriter, r *http.Request) {
-	usecase := h.getUsecase(r.Context())
-	result, err := usecase.List()
+func (h *usecaseHandler) List(w http.ResponseWriter, r *http.Request) {
+	usecase := h.provideUsecase(r.Context())
+	items, err := usecase.List()
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
+	}
+	result := make([]StorageItem, len(items))
+	for i, si := range items {
+		result[i] = fromEntityStorageItem(si)
 	}
 	web.RespondWithJSON(w, http.StatusOK, listResponse{result})
 }

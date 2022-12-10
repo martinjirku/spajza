@@ -30,7 +30,7 @@ func InitServer() *chi.Mux {
 	units := handler.CreateUnitHandler()
 	categories := handler.CreateCategoryHandler(CategoryUsecaseProvider)
 	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
-	storageItemHandler := handler.CreateStorageItemHandler(db.SqlDb)
+	storageItemHandler := handler.CreateStorageItemHandler(StorageItemUsecaseProvider)
 
 	r.Route("/api", func(r chi.Router) {
 		// Unauthorized routes
@@ -77,5 +77,10 @@ func InitServer() *chi.Mux {
 func CategoryUsecaseProvider(ctx context.Context) *usecase.CategoryUsecase {
 	repository := repository.NewCategoryRepository(ctx, db.SqlDb)
 	usecase := usecase.CreateCategoryUsecase(repository)
+	return usecase
+}
+func StorageItemUsecaseProvider(ctx context.Context) *usecase.StorageItemUsecase {
+	repository := repository.NewStorageItemRepository(ctx, db.SqlDb)
+	usecase := usecase.NewStorageItemUsecase(repository)
 	return usecase
 }

@@ -4,55 +4,67 @@ import (
 	"github.com/martinjirku/zasobar/entity"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . StorageItemRepository
+
 type StorageItemRepository interface {
-	Create(storageItem entity.NewStorageItem) (entity.StorageItem, error)
-	GetStorageItemById(storageItemId uint) (entity.StorageItem, error)
-	GetStorageConsumptionById(storageItemId uint) ([]entity.StorageItemConsumption, error)
-	AddStorageConsumption(storageConsumption entity.StorageItemConsumption) (entity.StorageItemConsumption, error)
-	UpdateColumn(id uint, fieldName string, fieldValue interface{}) error
+	Create(storageItem entity.StorageItem) (entity.StorageItem, error)
+	ById(storageItemId uint) (entity.StorageItem, error)
+	Update(storageItem entity.StorageItem) error
 	List() ([]entity.StorageItem, error)
 }
 
-type StorageItemService struct {
-	storageItemRepository StorageItemRepository
+type StorageItemUsecase struct {
+	repo StorageItemRepository
 }
 
-func NewStorageItemService(storageItemRepository StorageItemRepository) *StorageItemService {
-	return &StorageItemService{storageItemRepository}
+func NewStorageItemUsecase(repo StorageItemRepository) *StorageItemUsecase {
+	return &StorageItemUsecase{repo}
 }
 
-func (s *StorageItemService) Create(storageItem entity.NewStorageItem) (entity.StorageItem, error) {
-	return s.storageItemRepository.Create(storageItem)
+func (s *StorageItemUsecase) Create(storageItem entity.StorageItem) (entity.StorageItem, error) {
+	return s.repo.Create(storageItem)
 }
 
-func (s *StorageItemService) UpdateField(storageItemId uint, fieldName string, value interface{}) error {
-	return s.storageItemRepository.UpdateColumn(storageItemId, fieldName, value)
-}
-
-func (s *StorageItemService) Consumpt(storageItemId uint, amount float64, unit string) (entity.StorageItem, error) {
-	storageItem, err := entity.LoadStorageItem(storageItemId, s.storageItemRepository)
+func (s *StorageItemUsecase) UpdateField(id uint, fieldName string, value interface{}) (entity.StorageItem, error) {
+	item, err := s.repo.ById(id)
 	if err != nil {
-		return storageItem, err
+		return item, err
 	}
-	err = storageItem.Consumpt(amount, unit)
-	if err != nil {
-		return storageItem, err
+	if fieldName == "storagePlaceId" {
+		parsedValue, ok := value.(float64)
+		if !ok {
+			return item, entity.ErrInvalidParameter
+		}
+		item.StoragePlaceId = uint(parsedValue)
 	}
-	idx := len(storageItem.Consumptions) - 1
-	consumption, err := s.storageItemRepository.AddStorageConsumption(storageItem.Consumptions[idx])
-	if err != nil {
-		return storageItem, err
+	if fieldName == "title" {
+		parsedValue, ok := value.(string)
+		if !ok {
+			return item, entity.ErrInvalidParameter
+		}
+		item.Title = parsedValue
 	}
-	storageItem.Consumptions[idx].StorageItemConsumptionId = consumption.StorageItemId
-	err = s.storageItemRepository.UpdateColumn(storageItemId, "currentAmount", storageItem.CurrentAmount)
-	if err != nil {
-		return storageItem, err
-	}
-	return storageItem, nil
+	return item, s.repo.Update(item)
 }
 
-func (s *StorageItemService) List() ([]entity.StorageItem, error) {
-	result, err := s.storageItemRepository.List()
+func (s *StorageItemUsecase) Consumpt(id uint, amount float64, unit entity.UnitName) (entity.StorageItem, error) {
+	item, err := s.repo.ById(id)
+	if err != nil {
+		return item, err
+	}
+	err = item.Consumpt(amount, unit)
+	if err != nil {
+		return item, err
+	}
+	err = s.repo.Update(item)
+	if err != nil {
+		return item, err
+	}
+	return item, nil
+}
+
+func (s *StorageItemUsecase) List() ([]entity.StorageItem, error) {
+	result, err := s.repo.List()
 	if err != nil {
 		return nil, err
 	}

@@ -1,50 +1,53 @@
 package entity
 
-import (
-	"errors"
-	"fmt"
-)
+import goUnits "github.com/bcicen/go-units"
 
-type QuantityType string
-
-const (
-	QuantityMass        QuantityType = "mass"        // kg
-	QuantityLength      QuantityType = "length"      // m
-	QuantityVolume      QuantityType = "volume"      // l
-	QuantityTemperature QuantityType = "temperature" // C
-	QuantityTime        QuantityType = "time"        // m
-	QuantityCount       QuantityType = "count"       // ks
-	// AREA        UnitCategory = "area"      // m2
-)
-
-var (
-	quantities = []QuantityType{QuantityMass, QuantityLength, QuantityVolume, QuantityTemperature, QuantityTime, QuantityCount}
-)
-
-func (ct *QuantityType) Scan(value interface{}) error {
-
-	switch typ := value.(type) {
-	case *string:
-		*ct = QuantityType(value.(string))
-	case string:
-		*ct = QuantityType(value.(string))
-	case []byte:
-		*ct = QuantityType(string(value.([]byte)))
-	default:
-		return fmt.Errorf("could not scan value quantity: %s", typ)
-	}
-	return ct.IsValid()
+type Quantity struct {
+	Value float64
+	Unit  UnitName
 }
 
-func (ct *QuantityType) IsValid() error {
-	for _, item := range quantities {
-		if item == *ct {
-			return nil
-		}
+func (q Quantity) ToUnit(u UnitName) (Quantity, error) {
+	if u == q.Unit {
+		return Quantity{q.Value, u}, nil
 	}
-	return errors.New("unknown quantity")
+	toUnit, err := goUnits.Find(string(u))
+	if err != nil {
+		return q, ErrInvalidParameter
+	}
+	fromUnit, err := goUnits.Find(string(q.Unit))
+	if err != nil {
+		return q, ErrInvalidEntity
+	}
+	valueToAdd, err := goUnits.ConvertFloat(q.Value, fromUnit, toUnit)
+	if err != nil {
+		return q, ErrInvalidParameter
+	}
+	return Quantity{valueToAdd.Float(), u}, nil
 }
 
-func (ct QuantityType) Value() (string, error) {
-	return string(ct), nil
+func (q Quantity) Add(quantity Quantity) (Quantity, error) {
+	valueToAdd, err := quantity.ToUnit(q.Unit)
+	if err != nil {
+		return q, err
+	}
+	q.Value += valueToAdd.Value
+	return q, nil
+}
+
+func (q Quantity) Subtract(quantity Quantity) (Quantity, error) {
+	valueToAdd, err := quantity.ToUnit(q.Unit)
+	if err != nil {
+		return q, err
+	}
+	q.Value -= valueToAdd.Value
+	return q, nil
+}
+
+func (q Quantity) Verify() error {
+	_, err := goUnits.Find(string(q.Unit))
+	if err != nil {
+		return ErrInvalidEntity
+	}
+	return nil
 }

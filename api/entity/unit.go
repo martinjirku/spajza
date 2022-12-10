@@ -109,3 +109,22 @@ var (
 	temperatureUnits = []UnitName{UnitCentury, UnitDay, UnitDecade, UnitHour, UnitMillisecond, UnitMinute, UnitMonth, UnitYear}
 	countUnits       = []UnitName{UnitCount}
 )
+
+func (u UnitName) GetQuantityType() QuantityType {
+	if isOneOf(u, massUnits) {
+		return QuantityMass
+	}
+	if isOneOf(u, lengthUnits) {
+		return QuantityLength
+	}
+	if isOneOf(u, volummeUnits) {
+		return QuantityVolume
+	}
+	if isOneOf(u, temperatureUnits) {
+		return QuantityTemperature
+	}
+	if isOneOf(u, countUnits) {
+		return QuantityCount
+	}
+	return QuantityUnknown
+}

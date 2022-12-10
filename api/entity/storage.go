@@ -1,10 +1,7 @@
 package entity
 
 import (
-	"math"
 	"time"
-
-	u "github.com/bcicen/go-units"
 )
 
 type StoragePlace struct {
@@ -15,35 +12,85 @@ type StoragePlace struct {
 	Code           string
 }
 
-type NewStorageItem struct {
-	CategoryId     uint      `json:"categoryId"`
-	StoragePlaceId uint      `json:"storagePlaceId"`
-	Title          string    `json:"title"`
-	Amount         float64   `json:"amount"`
-	Unit           string    `json:"unit"`
-	ExpirationDate time.Time `json:"expirationDate"`
-}
-
 // StorageItem is struct to track item in storage and its consumption
 type StorageItem struct {
-	StorageItemId   uint                     `json:"storageItemId"`
-	Title           string                   `json:"title"`
-	BaselineAmount  float64                  `json:"baselineAmount"`
-	CurrentAmount   float64                  `json:"currentAmount"`
-	CategoryId      uint                     `json:"categoryId"`
-	StoragePlaceId  uint                     `json:"storagePlaceId"`
-	StorageLocation string                   `json:"storageLocation"`
-	Quantity        QuantityType             `json:"quantity"`
-	Unit            string                   `json:"unit"`
-	ExpirationDate  time.Time                `json:"expirationDate"`
-	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`
+	StorageItemId    uint
+	Title            string
+	CategoryId       uint
+	StoragePlaceId   uint
+	ExpirationDate   time.Time
+	baselineQuantity Quantity
+	consumptions     []StorageItemConsumption
+}
+
+func (s *StorageItem) Init() *StorageItem {
+	if s.consumptions == nil {
+		s.consumptions = []StorageItemConsumption{}
+	}
+	return s
+}
+
+func (s *StorageItem) Validate() error {
+	if validateConsumption(s.consumptions, s.baselineQuantity.Unit.GetQuantityType()) {
+		return ErrInvalidEntity
+	}
+	return nil
+}
+
+func (s *StorageItem) BaselineQuantity() Quantity {
+	return s.baselineQuantity
+}
+
+func (s *StorageItem) SetBaselineQuantity(q Quantity) error {
+	if !validateConsumption(s.consumptions, q.Unit.GetQuantityType()) {
+		return ErrInvalidParameter
+	}
+	s.baselineQuantity = q
+	return nil
+}
+
+func (s *StorageItem) Consumptions() []StorageItemConsumption {
+	return s.consumptions
+}
+
+func (s *StorageItem) SetConsumptions(consumptions []StorageItemConsumption) error {
+	s.consumptions = consumptions
+	return nil
+}
+
+func (s *StorageItem) Consumpt(v float64, u UnitName) error {
+	if u.GetQuantityType() != s.baselineQuantity.Unit.GetQuantityType() {
+		return ErrInvalidParameter
+	}
+	consumption := StorageItemConsumption{Quantity: Quantity{v, u}}
+	err := consumption.Quantity.Verify()
+	if err != nil {
+		return err
+	}
+	s.consumptions = append(s.consumptions, consumption)
+	return nil
+}
+
+func (s *StorageItem) CurrentQuantity() Quantity {
+	result := s.baselineQuantity
+	for _, c := range s.consumptions {
+		result, _ = result.Subtract(c.Quantity)
+	}
+	return result
+}
+
+func validateConsumption(consumptions []StorageItemConsumption, quantityType QuantityType) bool {
+	for _, c := range consumptions {
+		if c.Quantity.Unit.GetQuantityType() != quantityType {
+			return false
+		}
+	}
+	return true
 }
 
 type StorageItemConsumption struct {
 	StorageItemConsumptionId uint
-	NormalizedAmount         float64
-	Unit                     string
-	StorageItemId            uint
+	Quantity                 Quantity
 }
 
 type StorageItemLoader interface {
@@ -63,33 +110,9 @@ func LoadStorageItem(id uint, loader StorageItemLoader) (StorageItem, error) {
 	if err != nil {
 		return storageItem, err
 	}
-	storageItem.Consumptions = consumptions
-	return storageItem, nil
-}
-
-// When Consumpt is called, specified amount will be removed
-// from the current amount.
-func (s *StorageItem) Consumpt(amount float64, un string) error {
-	normalizedAmount := amount
-	if s.Unit != un {
-		itemUnit, err := u.Find(s.Unit)
-		if err != nil {
-			return err
-		}
-		consumptedUnit, err := u.Find(un)
-		if err != nil {
-			return err
-		}
-		normalizedAmountValue, err := u.ConvertFloat(amount, consumptedUnit, itemUnit)
-		if err != nil {
-			return err
-		}
-		normalizedAmount = normalizedAmountValue.Float()
+	if consumptions == nil {
+		consumptions = []StorageItemConsumption{}
 	}
-	consumption := StorageItemConsumption{NormalizedAmount: normalizedAmount, StorageItemId: s.StorageItemId, Unit: un}
-	s.Consumptions = append(s.Consumptions, consumption)
-
-	currentAmount := s.CurrentAmount - normalizedAmount
-	s.CurrentAmount = math.Max(currentAmount, 0)
-	return nil
+	storageItem.consumptions = consumptions
+	return storageItem, nil
 }

@@ -1,6 +1,10 @@
 package handler
 
-import "github.com/martinjirku/zasobar/entity"
+import (
+	"time"
+
+	"github.com/martinjirku/zasobar/entity"
+)
 
 type (
 	UserRegistrationRequest struct {
@@ -32,7 +36,7 @@ type (
 		Unit   string  `json:"unit"`
 	}
 	listResponse struct {
-		Items []entity.StorageItem `json:"items"`
+		Items []StorageItem `json:"items"`
 	}
 	updateFieldRequest struct {
 		Value interface{} `json:"value"`
@@ -95,4 +99,55 @@ func mapGoUnitsToUnitDto(u []entity.Unit) []unitDto {
 		units[i] = UnitDto(unit)
 	}
 	return units
+}
+
+type StorageItem struct {
+	StorageItemId   uint                     `json:"storageItemId"`
+	Title           string                   `json:"title"`
+	BaselineAmount  float64                  `json:"baselineAmount"`
+	CurrentAmount   float64                  `json:"currentAmount"`
+	CategoryId      uint                     `json:"categoryId"`
+	StoragePlaceId  uint                     `json:"storagePlaceId"`
+	StorageLocation string                   `json:"storageLocation"`
+	Quantity        entity.QuantityType      `json:"quantity"`
+	Unit            string                   `json:"unit"`
+	ExpirationDate  time.Time                `json:"expirationDate"`
+	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`
+}
+
+func fromEntityStorageItem(si entity.StorageItem) StorageItem {
+	unit := si.BaselineQuantity().Unit
+	consumptions := make([]StorageItemConsumption, len(si.Consumptions()))
+	for i, c := range si.Consumptions() {
+		consumptions[i] = StorageItemConsumption{
+			Amount: c.Quantity.Value,
+			Unit:   string(c.Quantity.Unit),
+		}
+	}
+	return StorageItem{
+		StorageItemId:  si.StorageItemId,
+		Title:          si.Title,
+		BaselineAmount: si.BaselineQuantity().Value,
+		CurrentAmount:  si.CurrentQuantity().Value,
+		CategoryId:     si.CategoryId,
+		StoragePlaceId: si.StoragePlaceId,
+		Quantity:       unit.GetQuantityType(),
+		Unit:           string(unit),
+		ExpirationDate: si.ExpirationDate,
+		Consumptions:   consumptions,
+	}
+}
+
+type StorageItemConsumption struct {
+	Amount float64 `json:"amount"`
+	Unit   string  `json:"unit"`
+}
+
+type NewStorageItem struct {
+	CategoryId     uint      `json:"categoryId"`
+	StoragePlaceId uint      `json:"storagePlaceId"`
+	Title          string    `json:"title"`
+	Amount         float64   `json:"amount"`
+	Unit           string    `json:"unit"`
+	ExpirationDate time.Time `json:"expirationDate"`
 }
