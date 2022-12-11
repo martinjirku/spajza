@@ -115,7 +115,7 @@ type StorageItem struct {
 	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`
 }
 
-func fromEntityStorageItem(si entity.StorageItem) StorageItem {
+func mapEntityToStorageItem(si entity.StorageItem) StorageItem {
 	unit := si.BaselineQuantity().Unit
 	consumptions := make([]StorageItemConsumption, len(si.Consumptions()))
 	for i, c := range si.Consumptions() {

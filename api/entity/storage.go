@@ -92,27 +92,3 @@ type StorageItemConsumption struct {
 	StorageItemConsumptionId uint
 	Quantity                 Quantity
 }
-
-type StorageItemLoader interface {
-	GetStorageItemById(storageItemId uint) (StorageItem, error)
-	GetStorageConsumptionById(storageItemId uint) ([]StorageItemConsumption, error)
-}
-
-// "LoadStorageItem" loads StorageItem from database.
-//
-// One needs to provide storageItemId, context and loader.
-func LoadStorageItem(id uint, loader StorageItemLoader) (StorageItem, error) {
-	storageItem, err := loader.GetStorageItemById(id)
-	if err != nil {
-		return storageItem, err
-	}
-	consumptions, err := loader.GetStorageConsumptionById(id)
-	if err != nil {
-		return storageItem, err
-	}
-	if consumptions == nil {
-		consumptions = []StorageItemConsumption{}
-	}
-	storageItem.consumptions = consumptions
-	return storageItem, nil
-}

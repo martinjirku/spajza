@@ -1,6 +1,7 @@
 package usecase_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/martinjirku/zasobar/entity"
@@ -19,7 +20,9 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 		repo := usecasefakes.FakeStorageItemRepository{}
 		usecase := usecase.NewStorageItemUsecase(&repo)
 		item := getStorageItem()
-		var storagePlaceId uint = 2
+		storagePlaceIdJson := "2"
+		var storagePlaceId interface{}
+		json.Unmarshal([]byte(storagePlaceIdJson), &storagePlaceId)
 
 		repo.ByIdCalls(func(id uint) (entity.StorageItem, error) {
 			if id == 1 {
@@ -28,8 +31,8 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 			return item, entity.ErrEntityNotFound
 		})
 		repo.UpdateCalls(func(si entity.StorageItem) error {
-			if si.StoragePlaceId != storagePlaceId {
-				t.Errorf("expected call with storagePlaceId %d, not %d", storagePlaceId, si.StoragePlaceId)
+			if si.StoragePlaceId != 2 {
+				t.Errorf("expected call with storagePlaceId %f, not %d", storagePlaceId, si.StoragePlaceId)
 				return entity.ErrEntityNotFound
 			}
 			return nil

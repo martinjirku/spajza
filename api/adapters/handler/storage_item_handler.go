@@ -43,7 +43,7 @@ func (h *usecaseHandler) CreateStorageItem(w http.ResponseWriter, r *http.Reques
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	response := fromEntityStorageItem(item)
+	response := mapEntityToStorageItem(item)
 	web.RespondWithJSON(w, http.StatusAccepted, response)
 }
 
@@ -105,7 +105,7 @@ func (h *usecaseHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	result := make([]StorageItem, len(items))
 	for i, si := range items {
-		result[i] = fromEntityStorageItem(si)
+		result[i] = mapEntityToStorageItem(si)
 	}
 	web.RespondWithJSON(w, http.StatusOK, listResponse{result})
 }

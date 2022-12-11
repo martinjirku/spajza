@@ -71,30 +71,3 @@ func Test_StorageItem_CurrentQuantity(t *testing.T) {
 		t.Errorf("Expected %f consumptions, but received %f", 8.0, storageItem.CurrentQuantity().Value)
 	}
 }
-
-// type StorageItemLoaderMock struct {
-// 	s entity.StorageItem
-// 	c []entity.StorageItemConsumption
-// }
-
-// func (s *StorageItemLoaderMock) GetStorageItemById(storageItemId uint) (entity.StorageItem, error) {
-// 	return s.s, nil
-// }
-// func (s *StorageItemLoaderMock) GetStorageConsumptionById(storageItemId uint) ([]entity.StorageItemConsumption, error) {
-// 	return s.c, nil
-// }
-
-// func Test_LoadStorageItem(t *testing.T) {
-// 	loader := StorageItemLoaderMock{entity.StorageItem{
-// 		StorageItemId:    1,
-// 		Title:            "Halusky",
-// 		BaselineQuantity: entity.Quantity{1000.0, entity.UnitGram},
-// 	}, []entity.StorageItemConsumption{}}
-// 	storageItem, _ := entity.LoadStorageItem(1, &loader)
-// 	if storageItem.Title != "Halusky" {
-// 		t.Errorf("Expected %s got %s", "Halusky", storageItem.Title)
-// 	}
-// 	if len(storageItem.GetConsumptions()) != 0 {
-// 		t.Errorf("Expected %d got %d", 0, len(storageItem.GetConsumptions()))
-// 	}
-// }
