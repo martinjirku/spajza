@@ -38,6 +38,7 @@ func (h *usecaseHandler) CreateStorageItem(w http.ResponseWriter, r *http.Reques
 		ExpirationDate: time.Time{},
 	}
 	item.Init()
+	item.SetBaselineQuantity(entity.Quantity{Value: requestBody.Amount, Unit: entity.UnitName(requestBody.Unit)})
 	item, err = usecase.Create(item)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
