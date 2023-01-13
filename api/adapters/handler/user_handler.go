@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"github.com/martinjirku/zasobar/entity"
 	web "github.com/martinjirku/zasobar/pkg/web"
 	"github.com/martinjirku/zasobar/usecase"
+	"google.golang.org/api/idtoken"
 )
 
 type UserGateway interface {
@@ -113,4 +115,59 @@ func (h *UserHandler) AboutMe(w http.ResponseWriter, r *http.Request) {
 	} else {
 		web.RespondWithError(w, http.StatusBadRequest, "JwtMalformedSubNotProvided")
 	}
+}
+
+func (h *UserHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	redirect := r.URL.Query().Get("redirect")
+
+	r.ParseForm()
+	idToken := r.PostForm.Get("credential")
+	clientID := "1089933053808-glhibpnso4vbc38beorao10b30p64d84.apps.googleusercontent.com" //"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"
+	payload, err := idtoken.Validate(r.Context(), idToken, clientID)
+	if err != nil {
+		web.RespondWithError(w, 400, fmt.Sprint(err))
+		return
+	}
+	uc := h.getUsecase(r.Context())
+	googleOptions := usecase.GoogleProviderOptions{
+		Email:         payload.Claims["email"].(string),
+		Name:          payload.Claims["name"].(string),
+		GivenName:     payload.Claims["given_name"].(string),
+		FamilyName:    payload.Claims["family_name"].(string),
+		Picture:       payload.Claims["picture"].(string),
+		EmailVerified: payload.Claims["email_verified"].(bool),
+	}
+	errByLogin := uc.LoginByProvider(usecase.LoginOptions{
+		Provider:       entity.AuthProviderGoogle,
+		GoogleProvider: googleOptions,
+	})
+
+	w.Header().Set("Content-Type", "text/html")
+
+	if errByLogin != nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`<html><head></head><script>window.location="/prihlasenie/?googleFailed"</script></html>`))
+		return
+	}
+	tokenString, err := h.tokenProvider.GetToken(googleOptions.Email, time.Now())
+
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`<html><head></head><script>window.location="/prihlasenie/?googleFailed"</script></html>`))
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth",
+		Value:    tokenString,
+		Path:     "/",
+		MaxAge:   int((config.DefaultConfiguration.JWTValidity + 2) * 60),
+		HttpOnly: true,
+	})
+	if redirect == "" {
+		redirect = "/"
+	}
+	w.WriteHeader(http.StatusOK)
+	html := fmt.Sprintf(`<html><head></head><script>window.location="%s"</script></html>`, redirect)
+	w.Write([]byte(html))
 }

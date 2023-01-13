@@ -17,7 +17,7 @@ import (
 )
 
 func InitMiddlewares(r *chi.Mux) {
-	r.Use(middleware.AllowContentType("application/json"))
+	r.Use(middleware.AllowContentType("application/json", "application/x-www-form-urlencoded"))
 	r.Use(middleware.DefaultLogger)
 	r.Use(middleware.Recoverer)
 	// r.Use(middleware.Timeout(30 * time.Second))
@@ -35,6 +35,7 @@ func InitServer() *chi.Mux {
 	r.Route("/api", func(r chi.Router) {
 		// Unauthorized routes
 		r.Post("/user/login", user.Login)
+		r.Post("/user/auth/google", user.GoogleLogin)
 
 		// Authorized routes
 		r.Group(func(r chi.Router) {

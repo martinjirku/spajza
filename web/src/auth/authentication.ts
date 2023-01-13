@@ -64,6 +64,7 @@ export const useAuthenticationStore = defineStore("auth", {
       });
       if (response.ok) {
         this.loggedIn = false;
+        (window as any).location = "/prihlasenie";
       }
       return response;
     },

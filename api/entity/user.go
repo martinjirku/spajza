@@ -9,13 +9,34 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type AuthProvider int
+
+const (
+	AuthProviderUnknown AuthProvider = iota
+	AuthProviderLocal   AuthProvider = 1 << iota
+	AuthProviderGoogle
+)
+
+func (a AuthProvider) Contains(provider AuthProvider) bool {
+	if AuthProviderUnknown == provider {
+		return true
+	}
+	return (a & provider) > 0
+}
+
 type User struct {
-	ID        uint
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt sql.NullTime
-	Password  string
-	Email     string
+	ID            uint
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     sql.NullTime
+	Password      string
+	Email         string
+	Name          string
+	GivenName     string
+	FamilyName    string
+	Picture       string
+	EmailVerified bool
+	AuthProvider  AuthProvider
 }
 
 func isEmailValid(e string) bool {
@@ -25,6 +46,14 @@ func isEmailValid(e string) bool {
 
 func isPasswordValid(p string) bool {
 	return len(p) > 3
+}
+
+func NewUser(email string) (User, error) {
+	user := User{Email: email}
+	if !isEmailValid(email) {
+		return user, errors.New("InvalidEmail")
+	}
+	return user, nil
 }
 
 func NewUserWithPassword(email string, password string) (User, error) {

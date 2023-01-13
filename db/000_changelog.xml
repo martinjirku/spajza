@@ -27,4 +27,10 @@
             <sqlFile path="./005_storage_item_consumption_down.sql" />
         </rollback>
     </changeSet>
+    <changeSet id="006" author="harry.hole">
+        <sqlFile path="./006_users_auth_provider_up.sql" />
+        <rollback>
+            <sqlFile path="./006_users_auth_provider_down.sql" />
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

@@ -22,4 +22,7 @@ db-update:
 	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./000_changelog.xml update
 
 dev:
-	cd $(API_PATH); $(GO) run ./cmd/server/main.go
+	@cd $(API_PATH); $(GO) run ./cmd/server/main.go
+
+generate:
+	@cd $(API_PATH); mockery -r --with-expecter --dir="./usecase" --name="UserGateway"
