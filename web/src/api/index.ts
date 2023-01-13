@@ -1,5 +1,5 @@
 import { Category } from "./category";
-import { NewStorageItem, StorageItem } from "./storage";
+import { ConsumptionRequest, NewStorageItem, StorageItem } from "./storage";
 import { CreateStoragePlace, StoragePlace } from "./storagePlace";
 import { Unit } from "./unit";
 
@@ -117,4 +117,15 @@ export const updateStorageItemField = (
     headers,
     body: JSON.stringify({ value }),
   });
+};
+
+export const consumptSstorageItemField = (
+  storageItemId: number,
+  request: ConsumptionRequest
+) => {
+  return fetch(`/api/storage/items/${storageItemId}/consumpt`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(request),
+  }).then((r) => r.json());
 };

@@ -48,7 +48,7 @@
       <div v-if="!isLoading" class="row fit q-col-gutter-sm q-pt-md">
         <div
           class="col-12 col-sm-6 col-md-4 col-lg-3"
-          v-for="i in items?.items"
+          v-for="(i, index) in items?.items"
         >
           <q-card flat square>
             <q-card-section>
@@ -109,6 +109,15 @@
             <q-card-section>
               <div class="row">
                 <div class="col-6 col-md-4">
+                  <q-popup-proxy>
+                    <q-list bordered separator>
+                      <q-item v-for="p in i.consumptions">{{
+                        `-${p.amount} ${
+                          units?.find((u) => u.name === p.unit)?.symbol ?? ""
+                        }`
+                      }}</q-item>
+                    </q-list>
+                  </q-popup-proxy>
                   <div class="text-subtitle2">Váha</div>
                   <div class="text-h5 text-weight-bold">
                     {{ i.currentAmount }}
@@ -119,6 +128,14 @@
                 </div>
                 <div class="col-6 col-md-8">
                   <q-btn class="fit" outline flat>
+                    <q-popup-proxy ref="consumptPopup">
+                      <StorageItemConsumptForm
+                        :id="i.storageItemId ?? 0"
+                        :default-unit="i.unit ?? ''"
+                        :default-value="i.currentAmount ?? 0"
+                        :close="consumptPopup?.[index]?.hide"
+                      />
+                    </q-popup-proxy>
                     <q-icon left size="1.5em" name="remove_circle_outline" />
                     Upotrebiť
                   </q-btn>
@@ -141,11 +158,14 @@ import {
   useUpdateStorageItemTitleMutation,
   useUpdateStorageItemLocationMutation,
 } from "@storage/StorageQuery";
-import { computed, ref } from "vue";
+import StorageItemConsumptForm from "@storage/StorageItemConsumptForm.vue";
+import { computed, ref, watch } from "vue";
 import StorageItemForm from "@storage/StorageItemForm.vue";
 import { createStoragePlaceOptions } from "@storage/StoragaPlace";
+import { QPopupProxy } from "quasar";
 
 const createNew = ref(false);
+const consumptPopup = ref<QPopupProxy[]>();
 
 const { data: items, isLoading: isLoadingStorageItems } = useStorageItems();
 const { data: units, isLoading: isLoadingUnits } = useUnits();

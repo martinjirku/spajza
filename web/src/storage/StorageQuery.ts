@@ -1,9 +1,10 @@
 import {
   addNewStorageItem,
+  consumptSstorageItemField,
   getStorageItems,
   updateStorageItemField,
 } from "@api";
-import { NewStorageItem, StorageItem } from "@api/storage";
+import { ConsumptionRequest, NewStorageItem, StorageItem } from "@api/storage";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 
 export const useStorageItems = () =>
@@ -50,6 +51,23 @@ export const useNewStorageItemMutation = () => {
         amount: Number(storageItem.amount),
         expirationDate,
       });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("storage-items");
+      },
+    }
+  );
+};
+
+export const useConsumptMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({
+      storageItemId,
+      ...rest
+    }: ConsumptionRequest & { storageItemId: number }) => {
+      return consumptSstorageItemField(storageItemId, rest);
     },
     {
       onSuccess: () => {

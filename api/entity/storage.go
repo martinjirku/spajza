@@ -63,7 +63,14 @@ func (s *StorageItem) Consumpt(v float64, u UnitName) error {
 		return ErrInvalidParameter
 	}
 	consumption := StorageItemConsumption{Quantity: Quantity{v, u}}
-	err := consumption.Quantity.Verify()
+	result, err := s.CurrentQuantity().Subtract(consumption.Quantity)
+	if err != nil {
+		return err
+	}
+	if result.Value < 0. {
+		return ErrStorageItemNotEnoughQuantity
+	}
+	err = consumption.Quantity.Verify()
 	if err != nil {
 		return err
 	}

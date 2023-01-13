@@ -1,5 +1,10 @@
 import { QuantityType } from "./unit";
 
+export type Consumption = {
+  amount: number;
+  unit: string;
+};
+
 export type StorageItem = {
   storageItemId?: number;
   title?: string;
@@ -10,6 +15,7 @@ export type StorageItem = {
   quantityType?: QuantityType;
   unit?: string;
   expirationDate?: string;
+  consumptions?: Consumption[];
 };
 
 export type NewStorageItem = {
@@ -20,3 +26,5 @@ export type NewStorageItem = {
   unit: string;
   expirationDate?: Date;
 };
+
+export type ConsumptionRequest = Consumption;

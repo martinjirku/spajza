@@ -59,6 +59,15 @@ func Test_StorageItem_SetConsumptions(t *testing.T) {
 			t.Errorf("Expected %d consumptions, but received %d", 1, len(storageItem.Consumptions()))
 		}
 	})
+	t.Run("Should return an error, when consumpt is more than available capacity", func(t *testing.T) {
+		storageItem := entity.StorageItem{}
+		storageItem.Init()
+		storageItem.SetBaselineQuantity(entity.Quantity{100, entity.UnitGram})
+		err := storageItem.Consumpt(1, entity.UnitKilogram)
+		if err != entity.ErrStorageItemNotEnoughQuantity {
+			t.Errorf("expected an error %s, but received %s", entity.ErrStorageItemNotEnoughQuantity, err)
+		}
+	})
 }
 
 func Test_StorageItem_CurrentQuantity(t *testing.T) {

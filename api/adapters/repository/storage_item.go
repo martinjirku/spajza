@@ -52,9 +52,14 @@ func (s *StorageItemRepository) Create(storageItem entity.StorageItem) (entity.S
 }
 
 func (s *StorageItemRepository) Update(si entity.StorageItem) error {
+	tx, err := s.db.BeginTx(s.ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
 	unit := string(si.BaselineQuantity().Unit)
 	query := "UPDATE storage_items SET updated_at=?, title=?, storage_place_id=?, category_id=?, baseline_amount=?, unit=?, expiration_date=? WHERE storage_item_id=?"
-	result, err := s.db.ExecContext(s.ctx, query, time.Now(), si.Title, si.StoragePlaceId,
+	result, err := tx.ExecContext(s.ctx, query, time.Now(), si.Title, si.StoragePlaceId,
 		si.CategoryId, si.BaselineQuantity().Value, unit, si.ExpirationDate, si.StorageItemId)
 	if err != nil {
 		return err
@@ -63,7 +68,18 @@ func (s *StorageItemRepository) Update(si entity.StorageItem) error {
 	if err != nil {
 		return err
 	}
-	return nil
+	consumptions := si.Consumptions()
+	insertConsumptionQuery := "INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount, unit, storage_item_id) VALUES (?,?,?,?,?)"
+	for _, c := range consumptions {
+		if c.StorageItemConsumptionId == 0 {
+			_, err := tx.ExecContext(s.ctx, insertConsumptionQuery, time.Now(), time.Now(), c.Quantity.Value, c.Quantity.Unit, si.StorageItemId)
+			if err != nil {
+				return err
+			}
+
+		}
+	}
+	return tx.Commit()
 }
 
 func (s *StorageItemRepository) List() ([]entity.StorageItem, error) {
