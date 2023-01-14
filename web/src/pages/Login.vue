@@ -5,6 +5,8 @@
       :data-client_id="google.clientId"
       :data-login_uri="google.loginUri"
       :data-ux_mode="google.uxMode"
+      :data-type="google.type"
+      :data-locale="google.locale"
       data-context="signin"
       data-itp_support="true"
     ></div>
@@ -17,18 +19,19 @@
                 Špajza - Prihlásenie
               </h4>
             </div>
-            <!-- <div class="col-12">
+            <div class="col-6 col-md-4 col-lg-3">
               <div
                 class="g_id_signin"
-                data-type="standard"
+                :data-type="google.type"
+                :data-locale="google.locale"
                 data-shape="rectangular"
                 data-theme="outline"
                 data-text="signin_with"
-                data-size="medium"
-                data-logo_alignment="center"
+                data-size="large"
+                data-logo_alignment="left"
                 data-width="100%"
               ></div>
-            </div> -->
+            </div>
             <div class="col-12">
               <q-input
                 for="username"
@@ -132,6 +135,8 @@ const google = ref({
     auth?.returnUrl ?? "/"
   )}`,
   uxMode: "popup",
+  type: "standard",
+  locale: "sk",
 });
 const onSubmit = handleSubmit(async (values) => {
   try {

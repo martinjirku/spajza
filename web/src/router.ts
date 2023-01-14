@@ -14,34 +14,42 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      name: "home",
       path: "/",
-      component: Home,
+      redirect: "/spajza",
     },
     {
+      name: "login",
       path: "/prihlasenie",
       component: Login,
     },
     {
+      name: "storageRoom",
       path: "/spajza",
       component: StorageRoom,
     },
     {
+      name: "recipies",
       path: "/recepty",
       component: Recipies,
     },
     {
+      name: "shopping",
       path: "/nakup",
       component: Shopping,
     },
     {
+      name: "item-type",
       path: "/typ-poloziek",
       component: CategoryItems,
     },
     {
+      name: "settings",
       path: "/nastavenia",
       component: Settings,
     },
     {
+      name: "storage-location",
       path: "/miesta-ulozenia",
       component: StoragePlaces,
     },

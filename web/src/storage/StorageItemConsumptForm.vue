@@ -2,88 +2,87 @@
   <Form
     @submit="onSubmit"
     ref="formRef"
+    class="q-ma-md"
     :validation-schema="schema"
     :initial-values="{ amount: props.defaultValue, unit: props.defaultUnit }"
     lang="sk"
     v-slot="{ meta: { valid, dirty } }"
   >
-    <div v-if="!isLoading" class="row q-col-gutter-md">
-      <div class="row">
-        <div class="col-12">
-          <Field
-            name="amount"
-            v-slot="{
-              errorMessage,
-              value,
-              field: { value: _, 'onUpdate:modelValue': modelValue, ...field },
-            }"
+    <div v-if="!isLoading" class="row">
+      <div class="col-12">
+        <Field
+          name="amount"
+          v-slot="{
+            errorMessage,
+            value,
+            field: { value: _, 'onUpdate:modelValue': modelValue, ...field },
+          }"
+        >
+          <q-input
+            label="Množstvo"
+            v-model.number="(value as number)"
+            @update:model-value="
+              (v) =>
+                modelValue?.(typeof v === 'number' ? v : parseFloat(v ?? '0'))
+            "
+            type="number"
+            input-class="text-right"
+            :error="!!errorMessage"
+            :error-message="errorMessage"
           >
-            <q-input
-              label="Množstvo"
-              v-model.number="(value as number)"
-              @update:model-value="
-                (v) =>
-                  modelValue?.(typeof v === 'number' ? v : parseFloat(v ?? '0'))
-              "
-              type="number"
-              input-class="text-right"
-              :error="!!errorMessage"
-              :error-message="errorMessage"
-            >
-            </q-input>
-          </Field>
-        </div>
-        <div class="col-12">
-          <Field
-            name="unit"
-            v-slot="{ errorMessage, value, field: { value: _, ...field } }"
+          </q-input>
+        </Field>
+      </div>
+      <div class="col-12">
+        <Field
+          name="unit"
+          v-slot="{ errorMessage, value, field: { value: _, ...field } }"
+        >
+          <q-select
+            label="Jednotky"
+            v-model="(value as number)"
+            :options="unitOptions"
+            stack-label
+            map-options
+            :use-input="false"
+            emit-value
+            use-chips
+            v-bind="field"
+            :error="!!errorMessage"
+            :error-message="errorMessage"
           >
-            <q-select
-              label="Jednotky"
-              v-model="(value as number)"
-              :options="unitOptions"
-              stack-label
-              map-options
-              :use-input="false"
-              emit-value
-              use-chips
-              v-bind="field"
-              :error="!!errorMessage"
-              :error-message="errorMessage"
-            >
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-grey">
-                    Neexistujú žiadne miesta
-                  </q-item-section>
-                </q-item>
-              </template>
-              <template v-slot:selected-item="scope">
-                <q-chip
-                  v-if="scope"
-                  square
-                  dense
-                  color="white"
-                  text-color="primary"
-                >
-                  <q-avatar
-                    color="primary"
-                    text-color="white"
-                    :icon="scope.opt.icon"
-                  />
-                  <span class="q-mx-xs">
-                    {{ scope.opt.label }}
-                  </span>
-                </q-chip>
-                <q-badge v-else>prázdny</q-badge>
-              </template>
-            </q-select>
-          </Field>
-        </div>
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey">
+                  Neexistujú žiadne miesta
+                </q-item-section>
+              </q-item>
+            </template>
+            <template v-slot:selected-item="scope">
+              <q-chip
+                v-if="scope"
+                square
+                dense
+                color="white"
+                text-color="primary"
+              >
+                <q-avatar
+                  color="primary"
+                  text-color="white"
+                  :icon="scope.opt.icon"
+                />
+                <span class="q-mx-xs">
+                  {{ scope.opt.label }}
+                </span>
+              </q-chip>
+              <q-badge v-else>prázdny</q-badge>
+            </template>
+          </q-select>
+        </Field>
       </div>
     </div>
 
-    <div class="row q-col-gutter-sm q-mt-md">
+    <div class="row q-mt-md">
       <div class="col-6">
         <q-btn class="full-width" flat type="button" @click="onClose">
           Zrušiť
