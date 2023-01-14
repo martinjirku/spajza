@@ -159,7 +159,6 @@ const auth = useAuthenticationStore();
 const router = useRouter();
 const toggleLeftDrawer = () => (isLeftOpen.value = !isLeftOpen.value);
 const links = [
-  // { icon: "home", text: "Prehľad", to: "/" },
   { icon: "storage", text: "Špajza", to: "/spajza" },
   { icon: "menu_book", text: "Recepty", to: "/recepty" },
   { icon: "shopping_bag", text: "Nákup", to: "/nakup" },
