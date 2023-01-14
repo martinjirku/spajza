@@ -12,6 +12,14 @@ export const schema = object({
     .transform((v) => (Number.isNaN(v) ? undefined : v))
     .required(),
   unit: string().required(),
+  ean: string()
+    .nullable()
+    .max(20)
+    .default(undefined)
+    .transform((v) => {
+      return v === "" ? undefined : v;
+    })
+    .optional(),
   expirationDate: date()
     .nullable()
     .default(undefined)

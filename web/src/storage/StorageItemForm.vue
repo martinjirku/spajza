@@ -17,6 +17,18 @@
     <div v-if="!isLoading" class="row q-col-gutter-md">
       <div class="col-6">
         <Field
+          name="ean"
+          v-slot="{ errorMessage, value, field: { value: _, ...field } }"
+        >
+          <barcode-input
+            label="Ean kód"
+            v-model="(value as string)"
+            v-bind="field"
+            :error="!!errorMessage"
+            :error-message="errorMessage"
+          ></barcode-input>
+        </Field>
+        <Field
           name="categoryId"
           v-slot="{ errorMessage, value, field: { value: _, ...field } }"
           @update:model-value="onCategoryChange"
@@ -207,10 +219,20 @@ import { useStoragePlaces } from "./StoragePlaceQuery";
 import { createStoragePlaceOptions } from "./StoragaPlace";
 import { useUnits } from "@categories/UnitQuery";
 import { createUnitOptions } from "@units/units";
+import BarcodeInput from "@components/common/BarcodeInput.vue";
+
+type ScreenSection = "barcode" | "form";
 
 const emit = defineEmits<{
   (e: "submitted", value: StorageItem): void;
 }>();
+
+type Props = {
+  barcodePreload: boolean;
+};
+const props = withDefaults(defineProps<Props>(), {
+  barcodePreload: false,
+});
 
 const formRef = ref<FormContext<NewStorageItem>>();
 
@@ -261,7 +283,7 @@ const isLoading = computed(() => {
   );
 });
 
-watch(isLoading, () => {
+watch(isLoading, (prev, next) => {
   if (isLoading.value === false) {
     formRef.value?.resetForm();
   }

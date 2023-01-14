@@ -31,14 +31,15 @@ func (s *StorageItemRepository) Create(storageItem entity.StorageItem) (entity.S
 		QuantityType:   string(storageItem.CurrentQuantity().Unit.GetQuantityType()),
 		Unit:           string(storageItem.CurrentQuantity().Unit),
 		ExpirationDate: storageItem.ExpirationDate,
+		Ean:            storageItem.Ean,
 	}
 
 	query := "INSERT INTO storage_items (created_at, updated_at, title," +
 		"storage_place_id, category_id, baseline_amount, current_amount," +
-		"quantity, unit, expiration_date) VALUES (?,?,?,?,?,?,?,?,?,?)"
+		"quantity, unit, expiration_date, ean) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
 	result, err := s.db.ExecContext(s.ctx, query, time.Now(), time.Now(), res.Title,
 		res.StoragePlaceId, res.CategoryId, res.BaselineAmount, res.CurrentAmount,
-		res.QuantityType, res.Unit, res.ExpirationDate)
+		res.QuantityType, res.Unit, res.ExpirationDate, res.Ean)
 	if err != nil {
 		return storageItem, err
 	}
@@ -58,9 +59,9 @@ func (s *StorageItemRepository) Update(si entity.StorageItem) error {
 	}
 	defer tx.Rollback()
 	unit := string(si.BaselineQuantity().Unit)
-	query := "UPDATE storage_items SET updated_at=?, title=?, storage_place_id=?, category_id=?, baseline_amount=?, unit=?, expiration_date=? WHERE storage_item_id=?"
+	query := "UPDATE storage_items SET updated_at=?, title=?, storage_place_id=?, category_id=?, baseline_amount=?, unit=?, expiration_date=?, ean=? WHERE storage_item_id=?"
 	result, err := tx.ExecContext(s.ctx, query, time.Now(), si.Title, si.StoragePlaceId,
-		si.CategoryId, si.BaselineQuantity().Value, unit, si.ExpirationDate, si.StorageItemId)
+		si.CategoryId, si.BaselineQuantity().Value, unit, si.ExpirationDate, si.Ean, si.StorageItemId)
 	if err != nil {
 		return err
 	}

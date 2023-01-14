@@ -33,4 +33,10 @@
             <sqlFile path="./006_users_auth_provider_down.sql" />
         </rollback>
     </changeSet>
+    <changeSet id="007" author="harry.hole">
+        <sqlFile path="./007_storage_item_ean_up.sql" />
+        <rollback>
+            <sqlFile path="./007_storage_item_ean_down.sql" />
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

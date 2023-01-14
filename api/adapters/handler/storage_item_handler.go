@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/martinjirku/zasobar/entity"
@@ -35,7 +34,8 @@ func (h *usecaseHandler) CreateStorageItem(w http.ResponseWriter, r *http.Reques
 		Title:          requestBody.Title,
 		CategoryId:     requestBody.CategoryId,
 		StoragePlaceId: requestBody.StoragePlaceId,
-		ExpirationDate: time.Time{},
+		ExpirationDate: requestBody.ExpirationDate,
+		Ean:            requestBody.Ean,
 	}
 	item.Init()
 	item.SetBaselineQuantity(entity.Quantity{Value: requestBody.Amount, Unit: entity.UnitName(requestBody.Unit)})

@@ -1,6 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import { quasarLang, quasarConfig } from "./quasar";
+import { quasarLang, quasarConfig, iconSet } from "./quasar";
 import { createPinia } from "pinia";
 import { VueQueryPlugin } from "vue-query";
 import { Quasar } from "quasar";
@@ -14,6 +14,7 @@ app.use(Quasar, {
   plugins: {},
   config: quasarConfig,
   lang: quasarLang,
+  iconSet: iconSet,
 });
 app.use(router);
 app.use(VueQueryPlugin);

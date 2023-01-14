@@ -12,12 +12,12 @@ type StoragePlace struct {
 	Code           string
 }
 
-// StorageItem is struct to track item in storage and its consumption
 type StorageItem struct {
 	StorageItemId    uint
 	Title            string
 	CategoryId       uint
 	StoragePlaceId   uint
+	Ean              string
 	ExpirationDate   time.Time
 	baselineQuantity Quantity
 	consumptions     []StorageItemConsumption

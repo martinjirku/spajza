@@ -11,5 +11,6 @@ type StorageItem struct {
 	StoragePlaceId uint
 	QuantityType   string
 	Unit           string
+	Ean            string
 	ExpirationDate time.Time
 }

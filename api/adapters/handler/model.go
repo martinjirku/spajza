@@ -111,6 +111,7 @@ type StorageItem struct {
 	StorageLocation string                   `json:"storageLocation"`
 	Quantity        entity.QuantityType      `json:"quantity"`
 	Unit            string                   `json:"unit"`
+	Ean             string                   `json:"ean"`
 	ExpirationDate  time.Time                `json:"expirationDate"`
 	Consumptions    []StorageItemConsumption `json:"consumptions,omitempty"`
 }
@@ -135,6 +136,7 @@ func mapEntityToStorageItem(si entity.StorageItem) StorageItem {
 		Unit:           string(unit),
 		ExpirationDate: si.ExpirationDate,
 		Consumptions:   consumptions,
+		Ean:            si.Ean,
 	}
 }
 
@@ -149,5 +151,6 @@ type NewStorageItem struct {
 	Title          string    `json:"title"`
 	Amount         float64   `json:"amount"`
 	Unit           string    `json:"unit"`
+	Ean            string    `json:"ean"`
 	ExpirationDate time.Time `json:"expirationDate"`
 }

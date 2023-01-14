@@ -8,22 +8,29 @@
               Špajza
             </h2>
             <q-space />
-            <div v-if="createNew" class="q-gutter-xs">
+            <div v-if="formState !== 'closed'" class="q-gutter-xs">
               <q-btn
                 round
                 flat
                 icon="close"
                 title="Zatvoriť"
-                @click="createNew = false"
+                @click="formState = 'closed'"
               ></q-btn>
             </div>
             <div v-else class="q-gutter-xs">
               <q-btn
                 round
                 flat
+                icon="sym_o_barcode"
+                title="Zatvoriť"
+                @click="formState = 'upload-barcode'"
+              />
+              <q-btn
+                round
+                flat
                 icon="add"
                 title="Pridať"
-                @click="createNew = true"
+                @click="formState = 'create-new'"
               ></q-btn>
             </div>
           </div>
@@ -36,15 +43,22 @@
         </div>
         <q-space></q-space>
       </div>
-      <div v-if="createNew" class="row fit q-col-gutter-sm q-pt-md q-mb-sm">
+      <div
+        v-if="formState !== 'closed'"
+        class="row fit q-col-gutter-sm q-pt-md q-mb-sm"
+      >
         <div class="col-12 shadow-4">
           <q-card flat square>
             <q-card-section>
-              <StorageItemForm />
+              <StorageItemForm
+                :barcode-preload="formState === 'upload-barcode'"
+              />
             </q-card-section>
           </q-card>
         </div>
       </div>
+      <div v-if="formState === 'upload-barcode'" class="row fit q-col" />
+
       <div v-if="!isLoading" class="row fit q-col-gutter-sm q-pt-md">
         <div
           class="col-12 col-sm-6 col-md-4 col-lg-3"
@@ -164,7 +178,9 @@ import StorageItemForm from "@storage/StorageItemForm.vue";
 import { createStoragePlaceOptions } from "@storage/StoragaPlace";
 import { QPopupProxy } from "quasar";
 
-const createNew = ref(false);
+type FormType = "closed" | "create-new" | "upload-barcode";
+
+const formState = ref<FormType>("closed");
 const consumptPopup = ref<QPopupProxy[]>();
 
 const { data: items, isLoading: isLoadingStorageItems } = useStorageItems();
