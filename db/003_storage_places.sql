@@ -1,3 +1,5 @@
+-- migrate:up
+
 CREATE TABLE storage_places (
     storage_place_id INT AUTO_INCREMENT PRIMARY KEY,
     created_at DATETIME NOT NULL,
@@ -6,3 +8,6 @@ CREATE TABLE storage_places (
     title VARCHAR(255),
     code VARCHAR(60) UNIQUE
 );
+
+-- migrate:down
+DROP TABLE storage_places;

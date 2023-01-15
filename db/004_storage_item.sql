@@ -1,3 +1,4 @@
+-- migrate:up
 CREATE TABLE storage_items (
     storage_item_id   INT AUTO_INCREMENT PRIMARY KEY,
     created_at        DATETIME NOT NULL,
@@ -24,3 +25,6 @@ CREATE TABLE storage_items (
         ON DELETE   SET NULL
         ON UPDATE   CASCADE
 );
+
+-- migrate:down
+DROP TABLE storage_items;

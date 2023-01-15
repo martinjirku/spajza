@@ -4,6 +4,7 @@ DB_PATH = $(CURDIR)/db
 BINARY_NAME = zasobar-api
 GO = $(shell which go)
 LIQUIBASE = $(shell which liquibase)
+DBMATE = $(shell which dbmate)
 GOINSTALL = $(GO) install
 GOCLEAN = $(GO) clean
 GOBUILD = $(GO) build
@@ -18,8 +19,8 @@ deps:
 clean:
 	@rm -rf $(BUILD_PATH)/$(BINARY_NAME)
 
-db-update:
-	@cd $(DB_PATH); $(LIQUIBASE) --changelog-file=./000_changelog.xml update
+db-up:
+	@cd $(DB_PATH); $(DBMATE) up
 
 dev:
 	@cd $(API_PATH); $(GO) run ./cmd/server/main.go

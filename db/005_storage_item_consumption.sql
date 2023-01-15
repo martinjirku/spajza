@@ -1,3 +1,5 @@
+-- migrate:up
+
 CREATE TABLE storage_consumptions (
     storage_item_consumption_id INT AUTO_INCREMENT PRIMARY KEY,
     created_at                  DATETIME NOT NULL,
@@ -13,3 +15,6 @@ CREATE TABLE storage_consumptions (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 )
+
+-- migrate:down
+DROP TABLE storage_consumptions;

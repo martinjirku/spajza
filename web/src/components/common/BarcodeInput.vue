@@ -12,7 +12,7 @@
             @show="onShow"
             @before-hide="onHide"
           >
-            <div class="window">
+            <div class="window barcode-input">
               <div :id="attrs.name"></div>
             </div>
           </q-popup-proxy>
