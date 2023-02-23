@@ -3,9 +3,12 @@ package db
 import (
 	"database/sql"
 	"log"
+	"sync"
 
+	"github.com/fsnotify/fsnotify"
 	_ "github.com/go-sql-driver/mysql"
 	config "github.com/martinjirku/zasobar/config"
+	"github.com/spf13/viper"
 )
 
 func NewDB() *sql.DB {
@@ -21,4 +24,14 @@ func NewDB() *sql.DB {
 	return DB
 }
 
-var SqlDb = NewDB()
+var SqlDb *sql.DB
+
+func init() {
+	mx := sync.Mutex{}
+	SqlDb = NewDB()
+	viper.GetViper().OnConfigChange(func(in fsnotify.Event) {
+		mx.Lock()
+		SqlDb = NewDB()
+		mx.Unlock()
+	})
+}

@@ -34,7 +34,7 @@ type UserHandler struct {
 }
 
 func CreateUserHandler(db *sql.DB, config config.Configuration) *UserHandler {
-	tokenProvider := web.NewTokenProvider(config.JWTSecret, config.JWTValidity, config.JWTIssuer)
+	tokenProvider := web.NewTokenProvider(config.Jwt.Secret, config.Jwt.Validity, config.Jwt.Issuer)
 	return &UserHandler{db, config, tokenProvider}
 }
 
@@ -67,7 +67,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Name:     "auth",
 		Value:    tokenString,
 		Path:     "/",
-		MaxAge:   int((config.DefaultConfiguration.JWTValidity + 2) * 60),
+		MaxAge:   int((config.GetConfiguration().Jwt.Validity + 2) * 60),
 		HttpOnly: true,
 	})
 	web.RespondNoContent(w)
@@ -161,7 +161,7 @@ func (h *UserHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 		Name:     "auth",
 		Value:    tokenString,
 		Path:     "/",
-		MaxAge:   int((config.DefaultConfiguration.JWTValidity + 2) * 60),
+		MaxAge:   int((config.GetConfiguration().Jwt.Validity + 2) * 60),
 		HttpOnly: true,
 	})
 	if redirect == "" {

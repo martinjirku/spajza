@@ -1,17 +1,17 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
 
-func GetDBType() string {
-	return DefaultConfiguration.DBType
-}
+	"github.com/spf13/viper"
+)
 
 func GetMariaDBSQLConnectionString() string {
 	dataBase := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		DefaultConfiguration.DBUser,
-		DefaultConfiguration.DBPassword,
-		DefaultConfiguration.DBHost,
-		DefaultConfiguration.DBPort,
-		DefaultConfiguration.DBName)
+		viper.GetString(dbType),
+		viper.GetString(dbPassword),
+		viper.GetString(dbHost),
+		viper.GetString(dbPort),
+		viper.GetString(dbName))
 	return dataBase
 }

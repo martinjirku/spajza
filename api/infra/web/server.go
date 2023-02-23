@@ -26,7 +26,7 @@ func InitMiddlewares(r *chi.Mux) {
 func InitServer() *chi.Mux {
 	r := chi.NewRouter()
 	InitMiddlewares(r)
-	user := handler.CreateUserHandler(db.SqlDb, config.DefaultConfiguration)
+	user := handler.CreateUserHandler(db.SqlDb, config.GetConfiguration())
 	units := handler.CreateUnitHandler()
 	categories := handler.CreateCategoryHandler(CategoryUsecaseProvider)
 	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
@@ -70,8 +70,9 @@ func InitServer() *chi.Mux {
 			r.Post("/storage/items/{id}/{fieldName}", storageItemHandler.UpdateField)
 		})
 	})
-	log.Printf("Application start, listening on %s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port)
-	http.ListenAndServe(fmt.Sprintf("%s:%s", config.DefaultConfiguration.Domain, config.DefaultConfiguration.Port), r)
+	c := config.GetConfiguration()
+	log.Printf("Application start, listening on %s:%s", c.Domain, c.Port)
+	http.ListenAndServe(fmt.Sprintf("%s:%s", c.Domain, c.Port), r)
 	return r
 }
 

@@ -8,3 +8,5 @@ api/.vscode/configurationCache.log
 api/.vscode/dryrun.log
 api/.vscode/targets.log
 db/.env
+api/vendor
+api/config.yaml
