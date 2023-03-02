@@ -67,7 +67,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Name:     "auth",
 		Value:    tokenString,
 		Path:     "/",
-		MaxAge:   int((config.GetConfiguration().Jwt.Validity + 2) * 60),
+		MaxAge:   int((h.config.Jwt.Validity + 2) * 60),
 		HttpOnly: true,
 	})
 	web.RespondNoContent(w)
@@ -161,7 +161,7 @@ func (h *UserHandler) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 		Name:     "auth",
 		Value:    tokenString,
 		Path:     "/",
-		MaxAge:   int((config.GetConfiguration().Jwt.Validity + 2) * 60),
+		MaxAge:   int((h.config.Jwt.Validity + 2) * 60),
 		HttpOnly: true,
 	})
 	if redirect == "" {

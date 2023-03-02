@@ -4,7 +4,7 @@
 <script lang="ts" setup>
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { QrDimensionFunction, QrDimensions } from "html5-qrcode/esm/core";
-import { defineProps, onMounted } from "vue";
+import { onMounted } from "vue";
 
 type Props = {
   id: string;

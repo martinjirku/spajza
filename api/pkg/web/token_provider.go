@@ -12,8 +12,8 @@ type TokenProvider struct {
 	issuer   string
 }
 
-func NewTokenProvider(secret string, validity uint, issuer string) *TokenProvider {
-	return &TokenProvider{secret: secret, validity: validity, issuer: issuer}
+func NewTokenProvider(secret string, validity int64, issuer string) *TokenProvider {
+	return &TokenProvider{secret: secret, validity: uint(validity), issuer: issuer}
 }
 
 func (p *TokenProvider) GetToken(userName string, currentTime time.Time) (string, error) {

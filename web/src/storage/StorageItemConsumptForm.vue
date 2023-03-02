@@ -103,7 +103,7 @@
 </template>
 <script lang="ts" setup>
 import { FormContext, SubmissionHandler } from "vee-validate";
-import { computed, ref, defineProps } from "vue";
+import { computed, ref } from "vue";
 import { useConsumptMutation } from "./StorageQuery";
 import { Field, Form } from "vee-validate";
 import { Consumption } from "@api/storage";

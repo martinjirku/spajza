@@ -2,36 +2,25 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
-	"sync"
 
-	"github.com/fsnotify/fsnotify"
 	_ "github.com/go-sql-driver/mysql"
 	config "github.com/martinjirku/zasobar/config"
-	"github.com/spf13/viper"
 )
 
-func NewDB() *sql.DB {
-	var err error
-	conString := config.GetMariaDBSQLConnectionString()
+func NewDB(dbConfig config.Db) *sql.DB {
+	conString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Name)
 
 	DB, err := sql.Open("mysql", conString)
-
 	if err != nil {
 		log.Panic(err)
 	}
 
 	return DB
-}
-
-var SqlDb *sql.DB
-
-func init() {
-	mx := sync.Mutex{}
-	SqlDb = NewDB()
-	viper.GetViper().OnConfigChange(func(in fsnotify.Event) {
-		mx.Lock()
-		SqlDb = NewDB()
-		mx.Unlock()
-	})
 }

@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,14 +24,15 @@ func InitMiddlewares(r *chi.Mux) {
 	// r.Use(middleware.Timeout(30 * time.Second))
 }
 
-func InitServer() *chi.Mux {
+func InitServer(config config.Configuration) *chi.Mux {
 	r := chi.NewRouter()
 	InitMiddlewares(r)
-	user := handler.CreateUserHandler(db.SqlDb, config.GetConfiguration())
+	db := db.NewDB(config.DB)
+	user := handler.CreateUserHandler(db, config)
 	units := handler.CreateUnitHandler()
-	categories := handler.CreateCategoryHandler(CategoryUsecaseProvider)
-	storagePlaceHandler := handler.CreateStoragePlaceHandler(db.SqlDb)
-	storageItemHandler := handler.CreateStorageItemHandler(StorageItemUsecaseProvider)
+	categories := handler.CreateCategoryHandler(GetCategoryUsecaseProvider(db))
+	storagePlaceHandler := handler.CreateStoragePlaceHandler(db)
+	storageItemHandler := handler.CreateStorageItemHandler(GetStorageItemUsecaseProvider(db))
 
 	r.Route("/api", func(r chi.Router) {
 		// Unauthorized routes
@@ -39,7 +41,7 @@ func InitServer() *chi.Mux {
 
 		// Authorized routes
 		r.Group(func(r chi.Router) {
-			r.Use(web.JwtMiddlware(config.GetJwtSecret))
+			r.Use(web.JwtMiddlware(func() string { return config.Jwt.Secret }))
 
 			// user
 			r.Post("/user/logout", user.Logout)
@@ -70,19 +72,23 @@ func InitServer() *chi.Mux {
 			r.Post("/storage/items/{id}/{fieldName}", storageItemHandler.UpdateField)
 		})
 	})
-	c := config.GetConfiguration()
-	log.Printf("Application start, listening on %s:%s", c.Domain, c.Port)
-	http.ListenAndServe(fmt.Sprintf("%s:%s", c.Domain, c.Port), r)
+	log.Printf("Application start, listening on %s:%s", config.Domain, config.Port)
+	http.ListenAndServe(fmt.Sprintf("%s:%s", config.Domain, config.Port), r)
 	return r
 }
 
-func CategoryUsecaseProvider(ctx context.Context) *usecase.CategoryUsecase {
-	repository := repository.NewCategoryRepository(ctx, db.SqlDb)
-	usecase := usecase.CreateCategoryUsecase(repository)
-	return usecase
+func GetCategoryUsecaseProvider(db *sql.DB) handler.CategoryUsecaseProvider {
+	return func(ctx context.Context) *usecase.CategoryUsecase {
+		repository := repository.NewCategoryRepository(ctx, db)
+		usecase := usecase.CreateCategoryUsecase(repository)
+		return usecase
+	}
+
 }
-func StorageItemUsecaseProvider(ctx context.Context) *usecase.StorageItemUsecase {
-	repository := repository.NewStorageItemRepository(ctx, db.SqlDb)
-	usecase := usecase.NewStorageItemUsecase(repository)
-	return usecase
+func GetStorageItemUsecaseProvider(db *sql.DB) handler.StorageItemUsecaseProvider {
+	return func(ctx context.Context) *usecase.StorageItemUsecase {
+		repository := repository.NewStorageItemRepository(ctx, db)
+		usecase := usecase.NewStorageItemUsecase(repository)
+		return usecase
+	}
 }

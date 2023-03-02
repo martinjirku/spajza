@@ -5,66 +5,72 @@ import (
 )
 
 type Jwt struct {
-	Secret   string
-	Validity uint
-	Issuer   string
+	Secret   string `mapstructure:"SECRET"`
+	Validity int64  `mapstructure:"VALIDITY"`
+	Issuer   string `mapstructure:"ISSUER"`
 }
 
 type Db struct {
-	User     string
-	Password string
-	Name     string
-	Host     string
-	Port     string
-	Type     string
+	User     string `mapstructure:"USER"`
+	Password string `mapstructure:"PASSWORD"`
+	Name     string `mapstructure:"NAME"`
+	Host     string `mapstructure:"HOST"`
+	Port     string `mapstructure:"PORT"`
+	Type     string `mapstructure:"TYPE"`
 }
 
 type Configuration struct {
-	Port   string
-	Domain string
-	Jwt    Jwt
-	DB     Db
+	viper  *viper.Viper
+	Port   string `mapstructure:"PORT"`
+	Domain string `mapstructure:"DOMAIN"`
+	Jwt    Jwt    `mapstructure:"JWT"`
+	DB     Db     `mapstructure:"DB"`
+}
+
+func NewConfiguration(v *viper.Viper) Configuration {
+	return Configuration{viper: v}
+}
+
+func (c *Configuration) LoadConfiguration() error {
+	return c.viper.Unmarshal(c)
 }
 
 const (
-	port        = "port"
-	domain      = "domain"
-	jwtSecret   = "jwt.secret"
-	jwtValidity = "Jwt.Validity"
-	dbUser      = "db.user"
-	dbPassword  = "db.password"
-	dbName      = "db.name"
-	dbHost      = "db.host"
-	dbPort      = "db.port"
-	dbType      = "db.type"
+	portKey    = "port"
+	domainKey  = "domain"
+	jwtKey     = "jwt"
+	dbKey      = "db"
+	dbUser     = "db.user"
+	dbPassword = "db.password"
+	dbName     = "db.name"
+	dbHost     = "db.host"
+	dbPort     = "db.port"
+	dbType     = "db.type"
 )
 
-func GetJwtSecret() string {
-	return viper.GetString(jwtSecret)
+func PrepareDefaultServe(v *viper.Viper, domainParam, portParam string) {
+	setDefaultAndBindEnv(v, domainKey, domainParam)
+	setDefaultAndBindEnv(v, portKey, portParam)
 }
 
-func PrepareDefaults() {
-	viper.SetDefault(domain, "localhost")
-	viper.SetDefault(port, "8000")
-	viper.SetDefault(jwtSecret, "TopSecret")
-	viper.SetDefault(jwtValidity, 10*60*24)
-	viper.SetDefault(dbUser, "user")
-	viper.SetDefault(dbPassword, "user")
-	viper.SetDefault(dbName, "zasobar")
-	viper.SetDefault(dbHost, "localhost")
-	viper.SetDefault(dbPort, "3306")
-	viper.SetDefault(dbType, "mysql")
+func PrepareJwt(v *viper.Viper) {
+	jwt := Jwt{Secret: "Secret", Issuer: "Issuer", Validity: 10 * 60 * 24}
+	setDefaultAndBindEnv(v, jwtKey, jwt)
 }
 
-func SetConfigurations() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/zasobar/")
-	viper.AddConfigPath(".")
+func PrepareDefaults(v *viper.Viper) {
+	db := Db{
+		User:     "user",
+		Password: "user",
+		Name:     "zasobar",
+		Host:     "localhost",
+		Port:     "8000",
+		Type:     "mysql",
+	}
+	setDefaultAndBindEnv(v, dbKey, db)
 }
 
-func GetConfiguration() Configuration {
-	config := Configuration{}
-	viper.Unmarshal(&config)
-	return config
+func setDefaultAndBindEnv(v *viper.Viper, key string, defaultValue interface{}) {
+	v.BindEnv(key)
+	v.SetDefault(key, defaultValue)
 }

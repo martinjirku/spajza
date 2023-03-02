@@ -34,7 +34,7 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import { useAttrs, defineProps, ref } from "vue";
+import { useAttrs, ref } from "vue";
 import { QInputProps as InterfaceRenamed, QPopupProxy } from "quasar";
 import { Html5QrcodeScanner } from "html5-qrcode";
 
