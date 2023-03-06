@@ -10,3 +10,6 @@ api/.vscode/targets.log
 db/.env
 api/vendor
 api/config.yaml
+.DS_Store
+api/spajza.yaml
+api/zasobar

@@ -38,7 +38,11 @@ var serveCmd = &cobra.Command{
 	Short:   "Serve the application",
 	Long:    fmt.Sprintf(`%sTo serve the api, you can use the serve command.`, headerHelp),
 	Version: "0.0.1",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		fmt.Print(headerHelp)
+	},
 	Run: func(cmd *cobra.Command, args []string) {
+
 		config.PrepareDefaults(v)
 		config.PrepareJwt(v)
 		config.PrepareDefaultServe(v, "localhost", "8232")
