@@ -11,6 +11,17 @@
             "mode": "debug",
             "program": "${workspaceFolder}/main.go",
             "args": ["serve"]
+        },
+        {
+            "name": "seed categories",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/category_seeder/main.go",
+            "args": [
+                "--pwd", "user",
+                "--file", "./cmd/category_seeder/data/taxonomy-with-ids.sk-SK.txt"
+            ]
         }
 
     ]

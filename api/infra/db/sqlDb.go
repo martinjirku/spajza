@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	config "github.com/martinjirku/zasobar/config"
@@ -16,11 +17,14 @@ func NewDB(dbConfig config.Db) *sql.DB {
 		dbConfig.Host,
 		dbConfig.Port,
 		dbConfig.Name)
+	maskedString := strings.ReplaceAll(conString, dbConfig.Password, "***")
+	log.Default().Printf("connection string %q created", maskedString)
 
 	DB, err := sql.Open("mysql", conString)
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("Could not open an database %q. Failed at %s", maskedString, err)
 	}
+	log.Default().Printf("db connected %q created", maskedString)
 
 	return DB
 }
