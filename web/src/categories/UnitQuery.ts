@@ -1,8 +1,8 @@
 import { getUnits } from "@api";
-import { useQuery } from "vue-query";
+import { useQuery } from "@tanstack/vue-query";
 
 export const useUnits = () =>
-  useQuery("units", () => getUnits(), {
+  useQuery(["units"], () => getUnits(), {
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,

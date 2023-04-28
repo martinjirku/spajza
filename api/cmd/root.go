@@ -37,10 +37,6 @@ var (
 `, headerHelp),
 		Run: func(cmd *cobra.Command, args []string) {
 			configuration.LoadConfiguration()
-			fmt.Print("\n>>>>\n\n")
-			v.Debug()
-
-			fmt.Print(configuration)
 		},
 	}
 )
@@ -61,7 +57,7 @@ func init() {
 		log.Default().Printf("setting configuration file: %s\n", cfgFile)
 		v.SetConfigFile(cfgFile)
 	} else {
-		log.Default().Printf("setting default configuraiton file: %s\n", defaultCfgFile)
+		log.Default().Printf("setting default configuration file: %s\n", defaultCfgFile)
 		v.SetConfigType("yaml")
 		v.AddConfigPath(".")
 		v.AddConfigPath("$HOME")

@@ -4,18 +4,18 @@ import {
   getCategories,
   updateCategory,
 } from "@api";
-import { useMutation, useQuery, useQueryClient } from "vue-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { Category } from "@api/category";
 import { createTreeLikeCategoryOptions } from "./Category";
 import { computed } from "vue";
 
 export const useCategories = () =>
-  useQuery("categories", () => getCategories(), {
+  useQuery(["categories"], () => getCategories(), {
     refetchOnMount: false,
   });
 
 export const useCategoryOptions = () => {
-  const { data, ...rest } = useQuery("categories", () => getCategories(), {
+  const { data, ...rest } = useQuery(["categories"], () => getCategories(), {
     refetchOnMount: false,
   });
   const options = computed(() => createTreeLikeCategoryOptions(data.value));
@@ -30,7 +30,7 @@ export const useCategoryMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("categories");
+        queryClient.invalidateQueries(["categories"]);
       },
     }
   );
@@ -44,7 +44,7 @@ export const useDeleteCategoryMutation = () => {
     },
     {
       onSettled: () => {
-        queryClient.invalidateQueries("categories");
+        queryClient.invalidateQueries(["categories"]);
       },
     }
   );

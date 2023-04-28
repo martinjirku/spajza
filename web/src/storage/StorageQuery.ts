@@ -5,10 +5,10 @@ import {
   updateStorageItemField,
 } from "@api";
 import { ConsumptionRequest, NewStorageItem, StorageItem } from "@api/storage";
-import { useMutation, useQuery, useQueryClient } from "vue-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 
 export const useStorageItems = () =>
-  useQuery("storage-items", () => getStorageItems(), {
+  useQuery(["storage-items"], () => getStorageItems(), {
     refetchOnMount: false,
   });
 
@@ -54,7 +54,7 @@ export const useNewStorageItemMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("storage-items");
+        queryClient.invalidateQueries(["storage-items"]);
       },
     }
   );
@@ -71,7 +71,7 @@ export const useConsumptMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("storage-items");
+        queryClient.invalidateQueries(["storage-items"]);
       },
     }
   );

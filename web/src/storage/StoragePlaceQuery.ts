@@ -4,11 +4,11 @@ import {
   getStoragePlaces,
   updateStoragePlace,
 } from "@api";
-import { useMutation, useQuery, useQueryClient } from "vue-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/vue-query";
 import { StoragePlace } from "@api/storagePlace";
 
 export const useStoragePlaces = () =>
-  useQuery("storage-places", () => getStoragePlaces(), {
+  useQuery(["storage-places"], () => getStoragePlaces(), {
     refetchOnMount: false,
   });
 
@@ -22,7 +22,7 @@ export const useStoragePlacesMutation = () => {
     },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries("storage-places");
+        queryClient.invalidateQueries(["storage-places"]);
       },
     }
   );
@@ -36,7 +36,7 @@ export const useDeleteStoragePlaceMutation = () => {
     },
     {
       onSettled: () => {
-        queryClient.invalidateQueries("storage-places");
+        queryClient.invalidateQueries(["storage-places"]);
       },
     }
   );
