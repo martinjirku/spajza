@@ -13,26 +13,26 @@ import (
 )
 
 func main() {
-	opt := options{}
-	flag.StringVar(&opt.filePath, "file", "./data/taxonomy-with-ids.sk-SK.txt", "path for file")
-	flag.StringVar(&opt.db.Name, "name", "zasobar", "db name")
-	flag.StringVar(&opt.db.User, "user", "user", "db name")
-	flag.StringVar(&opt.db.Host, "host", "localhost", "db host")
-	flag.StringVar(&opt.db.Port, "port", "3306", "db port")
-	flag.StringVar(&opt.db.Password, "pwd", "", "db pwd")
-	flag.StringVar(&opt.db.Type, "type", "mysql", "db type")
+	var filePath string
+	var dbConf config.Db
+
+	flag.StringVar(&filePath, "file", "./cmd/category_seeder/data/taxonomy-with-ids.sk-SK.txt", "path for file")
+	flag.StringVar(&dbConf.Name, "name", "zasobar", "db name")
+	flag.StringVar(&dbConf.User, "user", "user", "db name")
+	flag.StringVar(&dbConf.Host, "host", "localhost", "db host")
+	flag.StringVar(&dbConf.Port, "port", "3306", "db port")
+	flag.StringVar(&dbConf.Password, "pwd", "", "db pwd")
+	flag.StringVar(&dbConf.Type, "type", "mysql", "db type")
 
 	flag.Parse()
 
-	readFile, err := os.Open("./data/taxonomy-with-ids.sk-SK.txt")
-
+	readFile, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("Could not Open faile: %v", err)
+	}
 	defer func() { readFile.Close() }()
 
-	if err != nil {
-		panic("could not open the file")
-	}
-
-	database := db.NewDB(opt.db)
+	database := db.NewDB(dbConf)
 
 	tx, err := database.BeginTx(context.Background(), nil)
 	defer tx.Rollback()
@@ -49,14 +49,12 @@ func main() {
 			Name:       c.Name,
 			Path:       entity.NewProductCategoryPath(c.Path),
 		}
+		category.ParentId = categoryIndex[category.Path]
+
 		categories = append(categories, category)
-		if category.Path == "" || len(c.Path) == 0 {
-			continue
-		}
 		parentPath := c.Path[0:len(c.Path)]
-
-		categoryIndex[entity.NewProductCategoryPath(parentPath)] = &c.Id
-
+		path := entity.NewProductCategoryPath(append(parentPath, category.Name))
+		categoryIndex[path] = &category.CategoryId
 	}
 
 	for _, c := range categories {
@@ -67,7 +65,7 @@ func main() {
 		_, err := tx.Exec("INSERT INTO product_categories(category_id,name,path,parent_id) VALUES (?,?,?,?)",
 			c.CategoryId, c.Name, c.Path, c.ParentId)
 		if err != nil {
-			log.Default().Printf("Could not insert product_category %v: %q", c.CategoryId, c.Name)
+			log.Default().Printf("Could not insert product_category %v: %q: %q", c.CategoryId, c.Name, err)
 		}
 	}
 
@@ -75,9 +73,4 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not commit transaction %s", err)
 	}
-}
-
-type options struct {
-	filePath string
-	db       config.Db
 }

@@ -18,6 +18,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd/category_seeder/main.go",
+            "cwd": "${workspaceFolder}",
             "args": [
                 "--pwd", "user",
                 "--file", "./cmd/category_seeder/data/taxonomy-with-ids.sk-SK.txt"

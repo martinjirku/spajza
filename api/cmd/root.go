@@ -67,7 +67,6 @@ func init() {
 	v.SetEnvPrefix("SPAJZA")
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(`.`, `_`))
-	// config.PrepareDefaults(v)
 
 	v.ReadInConfig()
 	configuration = config.NewConfiguration(v)
