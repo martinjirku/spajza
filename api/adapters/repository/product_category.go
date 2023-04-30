@@ -3,31 +3,44 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"strings"
 
+	"github.com/martinjirku/zasobar/adapters/repository/client"
 	"github.com/martinjirku/zasobar/entity"
+	"github.com/martinjirku/zasobar/pkg/sqlnull"
 )
 
 type ProductCategoryRepository struct {
-	ctx context.Context
-	db  *sql.DB
+	ctx     context.Context
+	db      *sql.DB
+	queries *client.Queries
+}
+
+func NewProductCategoryRepository(ctx context.Context, db *sql.DB) *ProductCategoryRepository {
+	queries := client.New(db)
+	return &ProductCategoryRepository{ctx, db, queries}
 }
 
 func (pc *ProductCategoryRepository) CreateCategories(categories []entity.ProductCategory) error {
-	queryBuilder := strings.Builder{}
-	_, err := queryBuilder.WriteString("INSERT INTO product_categories (category_id, name, path, parent_id) VALUES ")
+	tx, err := pc.db.BeginTx(pc.ctx, nil)
 	if err != nil {
 		return err
 	}
-	parameters := make([]interface{}, len(categories)*4)
-	for i, category := range categories {
-		queryBuilder.WriteString("(?,?,?,?)")
-		parameters[i*4+0] = category.CategoryId
-		parameters[i*4+1] = category.Name
-		parameters[i*4+2] = category.Path
-		parameters[i*4+3] = category.ParentId
-	}
+	defer tx.Rollback()
+	q := pc.queries.WithTx(tx)
+	for _, category := range categories {
+		_, err := q.InsertProductCategory(pc.ctx, &client.InsertProductCategoryParams{
+			CategoryID: category.CategoryId,
+			Name:       sqlnull.FromString(category.Name),
+			Path:       sqlnull.FromString(string(category.Path)),
+			ParentID:   sqlnull.FromInt32Ptr(category.ParentId),
+		})
 
-	pc.db.ExecContext(pc.ctx, queryBuilder.String(), parameters...)
+		if err != nil {
+			return err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }

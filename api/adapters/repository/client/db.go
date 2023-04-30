@@ -30,6 +30,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteCategoryStmt, err = db.PrepareContext(ctx, deleteCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteCategory: %w", err)
 	}
+	if q.insertProductCategoryStmt, err = db.PrepareContext(ctx, insertProductCategory); err != nil {
+		return nil, fmt.Errorf("error preparing query InsertProductCategory: %w", err)
+	}
 	if q.listCategoriesStmt, err = db.PrepareContext(ctx, listCategories); err != nil {
 		return nil, fmt.Errorf("error preparing query ListCategories: %w", err)
 	}
@@ -49,6 +52,11 @@ func (q *Queries) Close() error {
 	if q.deleteCategoryStmt != nil {
 		if cerr := q.deleteCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteCategoryStmt: %w", cerr)
+		}
+	}
+	if q.insertProductCategoryStmt != nil {
+		if cerr := q.insertProductCategoryStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing insertProductCategoryStmt: %w", cerr)
 		}
 	}
 	if q.listCategoriesStmt != nil {
@@ -98,21 +106,23 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                 DBTX
-	tx                 *sql.Tx
-	createCategoryStmt *sql.Stmt
-	deleteCategoryStmt *sql.Stmt
-	listCategoriesStmt *sql.Stmt
-	updateCategoryStmt *sql.Stmt
+	db                        DBTX
+	tx                        *sql.Tx
+	createCategoryStmt        *sql.Stmt
+	deleteCategoryStmt        *sql.Stmt
+	insertProductCategoryStmt *sql.Stmt
+	listCategoriesStmt        *sql.Stmt
+	updateCategoryStmt        *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                 tx,
-		tx:                 tx,
-		createCategoryStmt: q.createCategoryStmt,
-		deleteCategoryStmt: q.deleteCategoryStmt,
-		listCategoriesStmt: q.listCategoriesStmt,
-		updateCategoryStmt: q.updateCategoryStmt,
+		db:                        tx,
+		tx:                        tx,
+		createCategoryStmt:        q.createCategoryStmt,
+		deleteCategoryStmt:        q.deleteCategoryStmt,
+		insertProductCategoryStmt: q.insertProductCategoryStmt,
+		listCategoriesStmt:        q.listCategoriesStmt,
+		updateCategoryStmt:        q.updateCategoryStmt,
 	}
 }

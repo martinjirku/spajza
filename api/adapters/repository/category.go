@@ -6,6 +6,7 @@ import (
 
 	"github.com/martinjirku/zasobar/adapters/repository/client"
 	"github.com/martinjirku/zasobar/entity"
+	"github.com/martinjirku/zasobar/pkg/sqlnull"
 )
 
 type CategoryRepository struct {
@@ -50,9 +51,9 @@ func (cr *CategoryRepository) Create(c entity.Category) (entity.Category, error)
 func (cr *CategoryRepository) Update(c entity.Category) (entity.Category, error) {
 	err := cr.queries.UpdateCategory(cr.ctx, &client.UpdateCategoryParams{
 		ID:          c.ID,
-		Title:       sql.NullString{c.Title, true},
-		Path:        sql.NullString{string(c.Path), true},
-		DefaultUnit: sql.NullString{c.DefaultUnit, true},
+		Title:       sqlnull.FromString(c.Title),
+		Path:        sqlnull.FromString(string(c.Path)),
+		DefaultUnit: sqlnull.FromString(c.DefaultUnit),
 	})
 	if err != nil {
 		return c, err

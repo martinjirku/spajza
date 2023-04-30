@@ -37,6 +37,32 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
 	return err
 }
 
+const insertProductCategory = `-- name: InsertProductCategory :execlastid
+
+INSERT INTO product_categories (category_id, name, path, parent_id) VALUES (?,?,?,?)
+`
+
+type InsertProductCategoryParams struct {
+	CategoryID int32
+	Name       sql.NullString
+	Path       sql.NullString
+	ParentID   sql.NullInt32
+}
+
+// PRODUCT CATEGORIES:
+func (q *Queries) InsertProductCategory(ctx context.Context, arg *InsertProductCategoryParams) (int64, error) {
+	result, err := q.exec(ctx, q.insertProductCategoryStmt, insertProductCategory,
+		arg.CategoryID,
+		arg.Name,
+		arg.Path,
+		arg.ParentID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
 const listCategories = `-- name: ListCategories :many
 
 SELECT id, created_at, updated_at, deleted_at, title, default_unit, path FROM categories WHERE deleted_at IS null

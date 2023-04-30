@@ -17,5 +17,5 @@ UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?;
 
 -- PRODUCT CATEGORIES:
 
--- name: InsertMultipleProductCategories :exec
--- INSERT INTO product_categories (category_id, name, path, parent_id) VALUES 
+-- name: InsertProductCategory :execlastid
+INSERT INTO product_categories (category_id, name, path, parent_id) VALUES (?,?,?,?);
