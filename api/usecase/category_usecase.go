@@ -8,7 +8,7 @@ type CategoryRepository interface {
 	List() (entity.Categories, error)
 	Create(c entity.Category) (entity.Category, error)
 	Update(c entity.Category) (entity.Category, error)
-	Delete(id uint) error
+	Delete(id int32) error
 }
 
 type CategoryUsecase struct {
@@ -42,6 +42,6 @@ func (cs *CategoryUsecase) Update(c entity.Category) (entity.Category, error) {
 	return cs.repository.Update(c)
 }
 
-func (cs *CategoryUsecase) Delete(id uint) error {
+func (cs *CategoryUsecase) Delete(id int32) error {
 	return cs.repository.Delete(id)
 }

@@ -9,8 +9,8 @@ func NewProductCategoryPath(paths []string) ProducCategoryPath {
 }
 
 type ProductCategory struct {
-	CategoryId int64              `json:"categoryId"`
+	CategoryId int32              `json:"categoryId"`
 	Path       ProducCategoryPath `json:"path"`
 	Name       string             `json:"name"`
-	ParentId   *int64             `json:"parentId"`
+	ParentId   *int32             `json:"parentId"`
 }

@@ -5,7 +5,7 @@ import (
 )
 
 type StoragePlace struct {
-	StoragePlaceId uint
+	StoragePlaceId int32
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	Title          string
@@ -13,10 +13,10 @@ type StoragePlace struct {
 }
 
 type StorageItem struct {
-	StorageItemId    uint
+	StorageItemId    int32
 	Title            string
-	CategoryId       uint
-	StoragePlaceId   uint
+	CategoryId       int32
+	StoragePlaceId   int32
 	Ean              string
 	ExpirationDate   time.Time
 	baselineQuantity Quantity

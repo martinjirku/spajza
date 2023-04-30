@@ -1,0 +1,12 @@
+Domain: localhost
+Port: 8000
+Jwt:
+  Secret: <<secret>>
+  Validity: 1200
+Db:
+  User: <<username>>
+  Password: <<password>>
+  Name: zasobar
+  Host: localhost
+  Port: 3306
+  Type: mysql

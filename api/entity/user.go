@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"database/sql"
 	"errors"
 	"regexp"
 	"time"
@@ -25,10 +24,10 @@ func (a AuthProvider) Contains(provider AuthProvider) bool {
 }
 
 type User struct {
-	ID            uint
+	ID            int32
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	DeletedAt     sql.NullTime
+	DeletedAt     *time.Time
 	Password      string
 	Email         string
 	Name          string

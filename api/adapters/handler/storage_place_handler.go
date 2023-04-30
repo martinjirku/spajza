@@ -64,12 +64,12 @@ func (h *storagePlaceHandler) UpdateStoragePlace(w http.ResponseWriter, r *http.
 	}
 
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
-	storagePlace.StoragePlaceId = uint(id)
+	storagePlace.StoragePlaceId = int32(id)
 	usecase := h.getUsecase(r.Context())
 	storagePlace, err = usecase.Update(storagePlace)
 	if err != nil {
@@ -82,13 +82,13 @@ func (h *storagePlaceHandler) UpdateStoragePlace(w http.ResponseWriter, r *http.
 
 func (h *storagePlaceHandler) GetStoragePlace(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
 	usecase := h.getUsecase(r.Context())
-	storagePlace, err := usecase.Get(uint(id))
+	storagePlace, err := usecase.Get(int32(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
@@ -99,13 +99,13 @@ func (h *storagePlaceHandler) GetStoragePlace(w http.ResponseWriter, r *http.Req
 
 func (h *storagePlaceHandler) DeleteStoragePlace(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return
 	}
 	usecase := h.getUsecase(r.Context())
-	err = usecase.Delete(uint(id))
+	err = usecase.Delete(int32(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, "Bad Request")
 		return

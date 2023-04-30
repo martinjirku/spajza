@@ -25,7 +25,7 @@ type (
 )
 
 type storagePlaceResponseDto struct {
-	StoragePlaceId uint   `json:"storagePlaceId"`
+	StoragePlaceId int32  `json:"storagePlaceId"`
 	Title          string `json:"title,omitempty"`
 	Code           string `json:"code"`
 }
@@ -54,7 +54,7 @@ func mapCategoryItemToCategory(c categoryItemDto) entity.Category {
 
 type (
 	categoryItemDto struct {
-		Id          int64  `json:"id"`
+		Id          int32  `json:"id"`
 		Title       string `json:"title"`
 		Path        string `json:"path"`
 		DefaultUnit string `json:"defaultUnit"`
@@ -102,12 +102,12 @@ func mapGoUnitsToUnitDto(u []entity.Unit) []unitDto {
 }
 
 type StorageItem struct {
-	StorageItemId   uint                     `json:"storageItemId"`
+	StorageItemId   int32                    `json:"storageItemId"`
 	Title           string                   `json:"title"`
 	BaselineAmount  float64                  `json:"baselineAmount"`
 	CurrentAmount   float64                  `json:"currentAmount"`
-	CategoryId      uint                     `json:"categoryId"`
-	StoragePlaceId  uint                     `json:"storagePlaceId"`
+	CategoryId      int32                    `json:"categoryId"`
+	StoragePlaceId  int32                    `json:"storagePlaceId"`
 	StorageLocation string                   `json:"storageLocation"`
 	Quantity        entity.QuantityType      `json:"quantity"`
 	Unit            string                   `json:"unit"`
@@ -146,8 +146,8 @@ type StorageItemConsumption struct {
 }
 
 type NewStorageItem struct {
-	CategoryId     uint      `json:"categoryId"`
-	StoragePlaceId uint      `json:"storagePlaceId"`
+	CategoryId     int32     `json:"categoryId"`
+	StoragePlaceId int32     `json:"storagePlaceId"`
 	Title          string    `json:"title"`
 	Amount         float64   `json:"amount"`
 	Unit           string    `json:"unit"`

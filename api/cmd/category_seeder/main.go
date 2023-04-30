@@ -42,10 +42,10 @@ func main() {
 	cats := productCategory.GetProductCategories(readFile)
 	categories := []entity.ProductCategory{}
 
-	categoryIndex := map[entity.ProducCategoryPath]*int64{}
+	categoryIndex := map[entity.ProducCategoryPath]*int32{}
 	for _, c := range cats {
 		category := entity.ProductCategory{
-			CategoryId: c.Id,
+			CategoryId: int32(c.Id),
 			Name:       c.Name,
 			Path:       entity.NewProductCategoryPath(c.Path),
 		}

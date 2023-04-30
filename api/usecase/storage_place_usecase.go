@@ -6,10 +6,10 @@ import (
 
 type StoragePlaceCruder interface {
 	Create(storagePlace entity.StoragePlace) (entity.StoragePlace, error)
-	Get(storagePlaceId uint) (entity.StoragePlace, error)
+	Get(storagePlaceId int32) (entity.StoragePlace, error)
 	List() ([]entity.StoragePlace, error)
 	Update(storagePlace entity.StoragePlace) (entity.StoragePlace, error)
-	Delete(storagePlaceId uint) error
+	Delete(storagePlaceId int32) error
 }
 
 type StoragePlaceUsecase struct {
@@ -24,7 +24,7 @@ func (s *StoragePlaceUsecase) Create(storagePlace entity.StoragePlace) (entity.S
 	return s.storagePlaceRepository.Create(storagePlace)
 }
 
-func (s *StoragePlaceUsecase) Get(storagePlaceId uint) (entity.StoragePlace, error) {
+func (s *StoragePlaceUsecase) Get(storagePlaceId int32) (entity.StoragePlace, error) {
 	return s.storagePlaceRepository.Get(storagePlaceId)
 }
 
@@ -36,6 +36,6 @@ func (s *StoragePlaceUsecase) Update(storagePlace entity.StoragePlace) (entity.S
 	return s.storagePlaceRepository.Update(storagePlace)
 }
 
-func (s *StoragePlaceUsecase) Delete(storagePlaceId uint) error {
+func (s *StoragePlaceUsecase) Delete(storagePlaceId int32) error {
 	return s.storagePlaceRepository.Delete(storagePlaceId)
 }

@@ -58,12 +58,12 @@ func (h *categoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 		web.RespondWithJSON(w, http.StatusOK, mapCategoryToCategoryItem(response))
 		return
 	}
-	id, err := strconv.ParseInt(idStr, 10, 64)
+	id, err := strconv.ParseInt(idStr, 10, 32)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	category.ID = id
+	category.ID = int32(id)
 	response, err := usecase.Update(category)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
@@ -75,12 +75,12 @@ func (h *categoryHandler) SaveCategory(w http.ResponseWriter, r *http.Request) {
 func (h *categoryHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	usecase := h.provideUsecase(r.Context())
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	err = usecase.Delete(uint(id))
+	err = usecase.Delete(int32(id))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return

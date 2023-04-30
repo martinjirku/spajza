@@ -29,11 +29,11 @@ func (s *StoragePlaceRepository) Create(storagePlace entity.StoragePlace) (entit
 	if err != nil {
 		return storagePlace, err
 	}
-	storagePlace.StoragePlaceId = uint(id)
+	storagePlace.StoragePlaceId = int32(id)
 	return storagePlace, nil
 }
 
-func (s *StoragePlaceRepository) Get(storagePlaceId uint) (entity.StoragePlace, error) {
+func (s *StoragePlaceRepository) Get(storagePlaceId int32) (entity.StoragePlace, error) {
 	var storagePlace = entity.StoragePlace{StoragePlaceId: storagePlaceId}
 	err := s.db.QueryRowContext(s.ctx, "SELECT created_at, updated_at, title, code FROM storage_places WHERE deleted_at IS NULL && storage_place_id=?", storagePlaceId).
 		Scan(&storagePlace.CreatedAt, &storagePlace.UpdatedAt, &storagePlace.Title, &storagePlace.Code)
@@ -77,7 +77,7 @@ func (s *StoragePlaceRepository) Update(storagePlace entity.StoragePlace) (entit
 	return storagePlace, err
 }
 
-func (s *StoragePlaceRepository) Delete(storagePlaceId uint) error {
+func (s *StoragePlaceRepository) Delete(storagePlaceId int32) error {
 	result, err := s.db.ExecContext(s.ctx, "UPDATE storage_places SET deleted_at=? WHERE storage_place_id=?", time.Now(), storagePlaceId)
 	if err != nil {
 		return err

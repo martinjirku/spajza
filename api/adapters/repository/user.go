@@ -64,7 +64,7 @@ func (r *UserRepository) CreateUser(user entity.User) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	user.ID = uint(id)
+	user.ID = int32(id)
 	return &user, nil
 }
 

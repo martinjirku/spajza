@@ -8,7 +8,7 @@ import (
 type CategoryPath string
 
 type Category struct {
-	ID          int64
+	ID          int32
 	Title       string
 	Path        CategoryPath
 	DefaultUnit string
@@ -37,7 +37,7 @@ func (c *Category) validateAgainstCategory(category Category) error {
 
 type Categories []Category
 
-func (c *Categories) SetCategoryTitle(id int64, title string) (Category, error) {
+func (c *Categories) SetCategoryTitle(id int32, title string) (Category, error) {
 	result := Category{}
 	categories := *c
 	var category *Category
@@ -72,7 +72,7 @@ func (c *Categories) AddCategory(category Category) error {
 
 func (c *Categories) validateCategory(category Category) error {
 	categories := *c
-	categoryMap := map[int64]*Category{}
+	categoryMap := map[int32]*Category{}
 	for i := 0; i < len(categories); i++ {
 		if err := categories[i].validateAgainstCategory(category); err != nil {
 			return err
@@ -86,11 +86,11 @@ func (c *Categories) validateCategory(category Category) error {
 		if idx == 0 && section == "" {
 			continue
 		}
-		id, err := strconv.ParseInt(section, 10, 64)
+		id, err := strconv.ParseInt(section, 10, 32)
 		if err != nil {
 			return ErrInvalidEntity
 		}
-		if _, ok := categoryMap[id]; !ok {
+		if _, ok := categoryMap[int32(id)]; !ok {
 			return ErrInvalidEntity
 		}
 	}

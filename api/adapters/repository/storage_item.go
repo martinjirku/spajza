@@ -48,7 +48,7 @@ func (s *StorageItemRepository) Create(storageItem entity.StorageItem) (entity.S
 	if err != nil {
 		return storageItem, err
 	}
-	storageItem.StorageItemId = uint(storageItemId)
+	storageItem.StorageItemId = int32(storageItemId)
 	return storageItem, nil
 }
 
@@ -93,8 +93,8 @@ func (s *StorageItemRepository) List() ([]entity.StorageItem, error) {
 
 	resp := make([]entity.StorageItem, 0)
 
-	idx := uint(0)
-	indexMap := map[uint]uint{}
+	idx := int32(0)
+	indexMap := map[int32]int32{}
 	for rowsSi.Next() {
 		s := entity.StorageItem{}
 		s.Init()
@@ -117,7 +117,7 @@ func (s *StorageItemRepository) List() ([]entity.StorageItem, error) {
 
 	for rowsCons.Next() {
 		consumption := entity.StorageItemConsumption{}
-		var storageItemId uint
+		var storageItemId int32
 		errCon := rowsCons.Scan(&storageItemId, &consumption.StorageItemConsumptionId, &consumption.Quantity.Value, &consumption.Quantity.Unit)
 		if errCon != nil {
 			return nil, err
