@@ -10,7 +10,7 @@ import (
 )
 
 func getStorageItem() entity.StorageItem {
-	item := entity.StorageItem{Title: "Title", StorageItemId: 1, StoragePlaceId: 1}
+	item := entity.StorageItem{Title: "Title", StorageItemID: 1, StoragePlaceID: 1}
 	item.Init()
 	return item
 }
@@ -31,8 +31,8 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 			return item, entity.ErrEntityNotFound
 		})
 		repo.UpdateCalls(func(si entity.StorageItem) error {
-			if si.StoragePlaceId != 2 {
-				t.Errorf("expected call with storagePlaceId %f, not %d", storagePlaceId, si.StoragePlaceId)
+			if si.StoragePlaceID != 2 {
+				t.Errorf("expected call with storagePlaceId %f, not %d", storagePlaceId, si.StoragePlaceID)
 				return entity.ErrEntityNotFound
 			}
 			return nil

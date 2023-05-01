@@ -28,21 +28,12 @@ func (q *Queries) CreateCategory(ctx context.Context, arg *CreateCategoryParams)
 	return result.LastInsertId()
 }
 
-const deleteCategory = `-- name: DeleteCategory :exec
-UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?
-`
-
-func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
-	_, err := q.exec(ctx, q.deleteCategoryStmt, deleteCategory, id)
-	return err
-}
-
-const insertProductCategory = `-- name: InsertProductCategory :execlastid
+const createProductCategory = `-- name: CreateProductCategory :execlastid
 
 INSERT INTO product_categories (category_id, name, path, parent_id) VALUES (?,?,?,?)
 `
 
-type InsertProductCategoryParams struct {
+type CreateProductCategoryParams struct {
 	CategoryID int32
 	Name       sql.NullString
 	Path       sql.NullString
@@ -50,8 +41,8 @@ type InsertProductCategoryParams struct {
 }
 
 // PRODUCT CATEGORIES:
-func (q *Queries) InsertProductCategory(ctx context.Context, arg *InsertProductCategoryParams) (int64, error) {
-	result, err := q.exec(ctx, q.insertProductCategoryStmt, insertProductCategory,
+func (q *Queries) CreateProductCategory(ctx context.Context, arg *CreateProductCategoryParams) (int64, error) {
+	result, err := q.exec(ctx, q.createProductCategoryStmt, createProductCategory,
 		arg.CategoryID,
 		arg.Name,
 		arg.Path,
@@ -61,6 +52,120 @@ func (q *Queries) InsertProductCategory(ctx context.Context, arg *InsertProductC
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+const createStorageConsumption = `-- name: CreateStorageConsumption :execlastid
+
+INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount,
+    unit, storage_item_id)
+VALUES (NOW(),NOW(),?,?,?)
+`
+
+type CreateStorageConsumptionParams struct {
+	NormalizedAmount sql.NullFloat64
+	Unit             sql.NullString
+	StorageItemID    int32
+}
+
+// STORAGE CONSUMPTIONS:
+func (q *Queries) CreateStorageConsumption(ctx context.Context, arg *CreateStorageConsumptionParams) (int64, error) {
+	result, err := q.exec(ctx, q.createStorageConsumptionStmt, createStorageConsumption, arg.NormalizedAmount, arg.Unit, arg.StorageItemID)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+const createStorageItem = `-- name: CreateStorageItem :execlastid
+
+INSERT INTO storage_items (created_at, updated_at, title,
+    storage_place_id, category_id, baseline_amount, current_amount,
+    quantity, unit, expiration_date, ean)
+VALUES (NOW(),NOW(),?,?,?,?,?,?,?,?,?)
+`
+
+type CreateStorageItemParams struct {
+	Title          sql.NullString
+	StoragePlaceID sql.NullInt32
+	CategoryID     sql.NullInt32
+	BaselineAmount float64
+	CurrentAmount  float64
+	Quantity       StorageItemsQuantity
+	Unit           string
+	ExpirationDate sql.NullTime
+	Ean            sql.NullString
+}
+
+// STORAGE ITEMS:
+func (q *Queries) CreateStorageItem(ctx context.Context, arg *CreateStorageItemParams) (int64, error) {
+	result, err := q.exec(ctx, q.createStorageItemStmt, createStorageItem,
+		arg.Title,
+		arg.StoragePlaceID,
+		arg.CategoryID,
+		arg.BaselineAmount,
+		arg.CurrentAmount,
+		arg.Quantity,
+		arg.Unit,
+		arg.ExpirationDate,
+		arg.Ean,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+const deleteCategory = `-- name: DeleteCategory :exec
+UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?
+`
+
+func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
+	_, err := q.exec(ctx, q.deleteCategoryStmt, deleteCategory, id)
+	return err
+}
+
+const getStorageConsumptionById = `-- name: GetStorageConsumptionById :one
+SELECT storage_item_consumption_id, created_at, updated_at, deleted_at, normalized_amount, unit, storage_item_id FROM storage_consumptions WHERE storage_item_id=?
+`
+
+func (q *Queries) GetStorageConsumptionById(ctx context.Context, storageItemID int32) (StorageConsumption, error) {
+	row := q.queryRow(ctx, q.getStorageConsumptionByIdStmt, getStorageConsumptionById, storageItemID)
+	var i StorageConsumption
+	err := row.Scan(
+		&i.StorageItemConsumptionID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.NormalizedAmount,
+		&i.Unit,
+		&i.StorageItemID,
+	)
+	return i, err
+}
+
+const getStorageItemById = `-- name: GetStorageItemById :one
+SELECT storage_item_id, created_at, updated_at, deleted_at, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date, ean FROM storage_items WHERE storage_item_id=?
+`
+
+func (q *Queries) GetStorageItemById(ctx context.Context, storageItemID int32) (StorageItem, error) {
+	row := q.queryRow(ctx, q.getStorageItemByIdStmt, getStorageItemById, storageItemID)
+	var i StorageItem
+	err := row.Scan(
+		&i.StorageItemID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.Title,
+		&i.StoragePlaceID,
+		&i.CategoryID,
+		&i.BaselineAmount,
+		&i.CurrentAmount,
+		&i.Quantity,
+		&i.Unit,
+		&i.ExpirationDate,
+		&i.Ean,
+	)
+	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
@@ -100,6 +205,83 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
+const listStorageConsumptions = `-- name: ListStorageConsumptions :many
+SELECT storage_item_consumption_id, created_at, updated_at, deleted_at, normalized_amount, unit, storage_item_id FROM storage_consumptions
+WHERE storage_item_id IN (SELECT storage_item_id FROM storage_items)
+`
+
+func (q *Queries) ListStorageConsumptions(ctx context.Context) ([]StorageConsumption, error) {
+	rows, err := q.query(ctx, q.listStorageConsumptionsStmt, listStorageConsumptions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []StorageConsumption
+	for rows.Next() {
+		var i StorageConsumption
+		if err := rows.Scan(
+			&i.StorageItemConsumptionID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.NormalizedAmount,
+			&i.Unit,
+			&i.StorageItemID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStorageItems = `-- name: ListStorageItems :many
+SELECT storage_item_id, created_at, updated_at, deleted_at, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date, ean FROM storage_items
+`
+
+func (q *Queries) ListStorageItems(ctx context.Context) ([]StorageItem, error) {
+	rows, err := q.query(ctx, q.listStorageItemsStmt, listStorageItems)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []StorageItem
+	for rows.Next() {
+		var i StorageItem
+		if err := rows.Scan(
+			&i.StorageItemID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.Title,
+			&i.StoragePlaceID,
+			&i.CategoryID,
+			&i.BaselineAmount,
+			&i.CurrentAmount,
+			&i.Quantity,
+			&i.Unit,
+			&i.ExpirationDate,
+			&i.Ean,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCategory = `-- name: UpdateCategory :exec
 UPDATE categories SET updated_at=NOW(),title=?,path=?,default_unit=? WHERE id=?
 `
@@ -117,6 +299,38 @@ func (q *Queries) UpdateCategory(ctx context.Context, arg *UpdateCategoryParams)
 		arg.Path,
 		arg.DefaultUnit,
 		arg.ID,
+	)
+	return err
+}
+
+const updateStorageItem = `-- name: UpdateStorageItem :exec
+UPDATE storage_items SET updated_at=NOW(), title=?, storage_place_id=?,
+    category_id=?, baseline_amount=?, unit=?,
+    expiration_date=?, ean=?
+WHERE storage_item_id=?
+`
+
+type UpdateStorageItemParams struct {
+	Title          sql.NullString
+	StoragePlaceID sql.NullInt32
+	CategoryID     sql.NullInt32
+	BaselineAmount float64
+	Unit           string
+	ExpirationDate sql.NullTime
+	Ean            sql.NullString
+	StorageItemID  int32
+}
+
+func (q *Queries) UpdateStorageItem(ctx context.Context, arg *UpdateStorageItemParams) error {
+	_, err := q.exec(ctx, q.updateStorageItemStmt, updateStorageItem,
+		arg.Title,
+		arg.StoragePlaceID,
+		arg.CategoryID,
+		arg.BaselineAmount,
+		arg.Unit,
+		arg.ExpirationDate,
+		arg.Ean,
+		arg.StorageItemID,
 	)
 	return err
 }

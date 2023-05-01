@@ -35,7 +35,7 @@ func (s *StorageItemUsecase) UpdateField(id uint, fieldName string, value interf
 		if !ok {
 			return item, entity.ErrInvalidParameter
 		}
-		item.StoragePlaceId = int32(parsedValue)
+		item.StoragePlaceID = int32(parsedValue)
 	}
 	if fieldName == "title" {
 		parsedValue, ok := value.(string)

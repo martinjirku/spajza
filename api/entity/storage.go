@@ -13,10 +13,10 @@ type StoragePlace struct {
 }
 
 type StorageItem struct {
-	StorageItemId    int32
+	StorageItemID    int32
 	Title            string
-	CategoryId       int32
-	StoragePlaceId   int32
+	CategoryID       int32
+	StoragePlaceID   int32
 	Ean              string
 	ExpirationDate   time.Time
 	baselineQuantity Quantity
@@ -51,6 +51,18 @@ func (s *StorageItem) SetBaselineQuantity(q Quantity) error {
 
 func (s *StorageItem) Consumptions() []StorageItemConsumption {
 	return s.consumptions
+}
+
+func (s *StorageItem) AddConsumption(consumption StorageItemConsumption) error {
+	if consumption.Quantity.Unit.GetQuantityType() != s.baselineQuantity.Unit.GetQuantityType() {
+		return ErrInvalidParameter
+	}
+	err := consumption.Quantity.Verify()
+	if err != nil {
+		return err
+	}
+	s.consumptions = append(s.consumptions, consumption)
+	return nil
 }
 
 func (s *StorageItem) SetConsumptions(consumptions []StorageItemConsumption) error {
@@ -96,6 +108,6 @@ func validateConsumption(consumptions []StorageItemConsumption, quantityType Qua
 }
 
 type StorageItemConsumption struct {
-	StorageItemConsumptionId uint
+	StorageItemConsumptionID int32
 	Quantity                 Quantity
 }

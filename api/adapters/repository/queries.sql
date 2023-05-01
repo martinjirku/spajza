@@ -17,5 +17,39 @@ UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?;
 
 -- PRODUCT CATEGORIES:
 
--- name: InsertProductCategory :execlastid
+-- name: CreateProductCategory :execlastid
 INSERT INTO product_categories (category_id, name, path, parent_id) VALUES (?,?,?,?);
+
+-- STORAGE ITEMS:
+
+-- name: CreateStorageItem :execlastid
+INSERT INTO storage_items (created_at, updated_at, title,
+    storage_place_id, category_id, baseline_amount, current_amount,
+    quantity, unit, expiration_date, ean)
+VALUES (NOW(),NOW(),?,?,?,?,?,?,?,?,?);
+
+-- name: UpdateStorageItem :exec
+UPDATE storage_items SET updated_at=NOW(), title=?, storage_place_id=?,
+    category_id=?, baseline_amount=?, unit=?,
+    expiration_date=?, ean=?
+WHERE storage_item_id=?;
+
+-- name: ListStorageItems :many
+SELECT * FROM storage_items;
+
+-- name: GetStorageItemById :one
+SELECT * FROM storage_items WHERE storage_item_id=?;
+
+-- STORAGE CONSUMPTIONS:
+
+-- name: CreateStorageConsumption :execlastid
+INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount,
+    unit, storage_item_id)
+VALUES (NOW(),NOW(),?,?,?);
+
+-- name: ListStorageConsumptions :many
+SELECT * FROM storage_consumptions
+WHERE storage_item_id IN (SELECT storage_item_id FROM storage_items);
+
+-- name: GetStorageConsumptionById :one
+SELECT * FROM storage_consumptions WHERE storage_item_id=?;

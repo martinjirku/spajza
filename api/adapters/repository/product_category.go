@@ -28,7 +28,7 @@ func (pc *ProductCategoryRepository) CreateCategories(categories []entity.Produc
 	defer tx.Rollback()
 	q := pc.queries.WithTx(tx)
 	for _, category := range categories {
-		_, err := q.InsertProductCategory(pc.ctx, &client.InsertProductCategoryParams{
+		_, err := q.CreateProductCategory(pc.ctx, &client.CreateProductCategoryParams{
 			CategoryID: category.CategoryId,
 			Name:       sqlnull.FromString(category.Name),
 			Path:       sqlnull.FromString(string(category.Path)),

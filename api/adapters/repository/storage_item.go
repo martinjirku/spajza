@@ -5,128 +5,125 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/martinjirku/zasobar/adapters/repository/client"
 	"github.com/martinjirku/zasobar/entity"
+	"github.com/martinjirku/zasobar/pkg/sqlnull"
 	"github.com/martinjirku/zasobar/usecase"
 )
 
 type StorageItemRepository struct {
-	ctx context.Context
-	db  *sql.DB
-	us  *usecase.UnitUsecase
+	ctx     context.Context
+	db      *sql.DB
+	queries *client.Queries
+	us      *usecase.UnitUsecase
 }
 
 func NewStorageItemRepository(ctx context.Context, db *sql.DB) *StorageItemRepository {
 	us := usecase.NewUnitUsecase()
-	return &StorageItemRepository{ctx, db, &us}
+	queries := client.New(db)
+	return &StorageItemRepository{ctx, db, queries, &us}
 }
 
 func (s *StorageItemRepository) Create(storageItem entity.StorageItem) (entity.StorageItem, error) {
-
-	res := StorageItem{
-		Title:          storageItem.Title,
+	ID, err := s.queries.CreateStorageItem(s.ctx, &client.CreateStorageItemParams{
+		Title:          sqlnull.FromString(storageItem.Title),
 		BaselineAmount: storageItem.BaselineQuantity().Value,
 		CurrentAmount:  storageItem.CurrentQuantity().Value,
-		CategoryId:     storageItem.CategoryId,
-		StoragePlaceId: storageItem.StoragePlaceId,
-		QuantityType:   string(storageItem.CurrentQuantity().Unit.GetQuantityType()),
+		CategoryID:     sqlnull.FromInt32Invalidable(storageItem.CategoryID),
+		StoragePlaceID: sqlnull.FromInt32Invalidable(storageItem.StoragePlaceID),
+		Quantity:       client.StorageItemsQuantity(storageItem.CurrentQuantity().Unit.GetQuantityType()),
 		Unit:           string(storageItem.CurrentQuantity().Unit),
-		ExpirationDate: storageItem.ExpirationDate,
-		Ean:            storageItem.Ean,
-	}
-
-	query := "INSERT INTO storage_items (created_at, updated_at, title," +
-		"storage_place_id, category_id, baseline_amount, current_amount," +
-		"quantity, unit, expiration_date, ean) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-	result, err := s.db.ExecContext(s.ctx, query, time.Now(), time.Now(), res.Title,
-		res.StoragePlaceId, res.CategoryId, res.BaselineAmount, res.CurrentAmount,
-		res.QuantityType, res.Unit, res.ExpirationDate, res.Ean)
+		ExpirationDate: sqlnull.FromTime(storageItem.ExpirationDate),
+		Ean:            sqlnull.FromStringInvalidatable(storageItem.Ean),
+	})
 	if err != nil {
 		return storageItem, err
 	}
 
-	storageItemId, err := result.LastInsertId()
-	if err != nil {
-		return storageItem, err
-	}
-	storageItem.StorageItemId = int32(storageItemId)
+	storageItem.StorageItemID = int32(ID)
 	return storageItem, nil
 }
 
 func (s *StorageItemRepository) Update(si entity.StorageItem) error {
-	tx, err := s.db.BeginTx(s.ctx, &sql.TxOptions{})
-	if err != nil {
-		return err
+	tx, errTx := s.db.BeginTx(s.ctx, &sql.TxOptions{})
+	if errTx != nil {
+		return errTx
 	}
 	defer tx.Rollback()
-	unit := string(si.BaselineQuantity().Unit)
-	query := "UPDATE storage_items SET updated_at=?, title=?, storage_place_id=?, category_id=?, baseline_amount=?, unit=?, expiration_date=?, ean=? WHERE storage_item_id=?"
-	result, err := tx.ExecContext(s.ctx, query, time.Now(), si.Title, si.StoragePlaceId,
-		si.CategoryId, si.BaselineQuantity().Value, unit, si.ExpirationDate, si.Ean, si.StorageItemId)
+	q := s.queries.WithTx(tx)
+	err := q.UpdateStorageItem(s.ctx, &client.UpdateStorageItemParams{
+		StorageItemID:  si.StorageItemID,
+		Title:          sqlnull.FromString(si.Title),
+		StoragePlaceID: sqlnull.FromInt32Invalidable(si.StoragePlaceID),
+		CategoryID:     sqlnull.FromInt32Invalidable(si.CategoryID),
+		BaselineAmount: si.BaselineQuantity().Value,
+		Unit:           string(si.BaselineQuantity().Unit),
+		ExpirationDate: sqlnull.FromTime(si.ExpirationDate),
+		Ean:            sqlnull.FromStringInvalidatable(si.Ean),
+	})
 	if err != nil {
 		return err
 	}
-	_, err = result.LastInsertId()
-	if err != nil {
-		return err
-	}
-	consumptions := si.Consumptions()
-	insertConsumptionQuery := "INSERT INTO storage_consumptions (created_at, updated_at, normalized_amount, unit, storage_item_id) VALUES (?,?,?,?,?)"
-	for _, c := range consumptions {
-		if c.StorageItemConsumptionId == 0 {
-			_, err := tx.ExecContext(s.ctx, insertConsumptionQuery, time.Now(), time.Now(), c.Quantity.Value, c.Quantity.Unit, si.StorageItemId)
+	for _, c := range si.Consumptions() {
+		if c.StorageItemConsumptionID == 0 {
+			ID, err := q.CreateStorageConsumption(s.ctx, &client.CreateStorageConsumptionParams{
+				StorageItemID:    si.StorageItemID,
+				NormalizedAmount: sqlnull.FromFloat64(si.CurrentQuantity().Value),
+				Unit:             sqlnull.FromString(string(si.CurrentQuantity().Unit)),
+			})
+			c.StorageItemConsumptionID = int32(ID)
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 	return tx.Commit()
 }
 
 func (s *StorageItemRepository) List() ([]entity.StorageItem, error) {
-	querySi := "SELECT storage_item_id, title, storage_place_id, category_id, baseline_amount, unit, expiration_date FROM storage_items"
-	rowsSi, err := s.db.QueryContext(s.ctx, querySi)
+	storageItems, err := s.queries.ListStorageItems(s.ctx)
 	if err != nil {
 		return nil, err
 	}
-	defer rowsSi.Close()
-
-	resp := make([]entity.StorageItem, 0)
-
-	idx := int32(0)
-	indexMap := map[int32]int32{}
-	for rowsSi.Next() {
-		s := entity.StorageItem{}
-		s.Init()
-		q := entity.Quantity{}
-		rowsSi.Scan(&s.StorageItemId, &s.Title, &s.StoragePlaceId, &s.CategoryId, &q.Value, &q.Unit, &s.ExpirationDate)
-		errSet := s.SetBaselineQuantity(q)
-		if errSet != nil {
-			return resp, errSet
+	resp := make([]entity.StorageItem, len(storageItems))
+	indexMap := make(map[int32]int)
+	for i, si := range storageItems {
+		resp[i] = entity.StorageItem{
+			StorageItemID:  int32(si.StorageItemID),
+			Title:          si.Title.String,
+			CategoryID:     si.CategoryID.Int32,
+			StoragePlaceID: si.StoragePlaceID.Int32,
+			ExpirationDate: si.ExpirationDate.Time,
+			Ean:            si.Ean.String,
 		}
-		resp = append(resp, s)
-		indexMap[s.StorageItemId] = idx
-		idx++
-	}
-	queryConsumption := "SELECT storage_item_id, storage_item_consumption_id, normalized_amount, unit from storage_consumptions WHERE storage_item_id IN (SELECT storage_item_id FROM storage_items)"
-	rowsCons, errCons := s.db.QueryContext(s.ctx, queryConsumption)
-	if errCons != nil {
-		return nil, err
-	}
-	defer rowsCons.Close()
-
-	for rowsCons.Next() {
-		consumption := entity.StorageItemConsumption{}
-		var storageItemId int32
-		errCon := rowsCons.Scan(&storageItemId, &consumption.StorageItemConsumptionId, &consumption.Quantity.Value, &consumption.Quantity.Unit)
-		if errCon != nil {
+		baselineQuantity := entity.Quantity{
+			Value: si.BaselineAmount,
+			Unit:  entity.UnitName(si.Unit),
+		}
+		err := resp[i].SetBaselineQuantity(baselineQuantity)
+		if err != nil {
 			return nil, err
 		}
-		idx, ok := indexMap[storageItemId]
+		indexMap[si.StorageItemID] = i
+	}
+
+	consumptions, errCons := s.queries.ListStorageConsumptions(s.ctx)
+	if errCons != nil {
+		return nil, errCons
+	}
+	for _, c := range consumptions {
+		consumption := entity.StorageItemConsumption{
+			StorageItemConsumptionID: c.StorageItemConsumptionID,
+			Quantity: entity.Quantity{
+				Value: c.NormalizedAmount.Float64,
+				Unit:  entity.UnitName(c.Unit.String),
+			},
+		}
+		idx, ok := indexMap[c.StorageItemID]
 		if !ok {
 			return nil, err
 		}
-		resp[idx].SetConsumptions(append(resp[idx].Consumptions(), consumption))
+		resp[idx].AddConsumption(consumption)
 	}
 	return resp, nil
 }
@@ -140,7 +137,7 @@ func (s *StorageItemRepository) ById(storageItemId uint) (entity.StorageItem, er
 	if row.Err() != nil {
 		return si, row.Err()
 	}
-	row.Scan(&si.StorageItemId, &si.Title, &si.StoragePlaceId, &si.CategoryId,
+	row.Scan(&si.StorageItemID, &si.Title, &si.StoragePlaceID, &si.CategoryID,
 		&baselineQuantity.Value, &baselineQuantity.Unit, &si.ExpirationDate)
 	err := si.SetBaselineQuantity(baselineQuantity)
 	if err != nil {
@@ -168,7 +165,7 @@ func (s *StorageItemRepository) GetStorageConsumptionById(storageItemId uint) ([
 	for rows.Next() {
 		c := entity.StorageItemConsumption{}
 		q := entity.Quantity{}
-		rows.Scan(&c.StorageItemConsumptionId, &q.Value, &q.Unit)
+		rows.Scan(&c.StorageItemConsumptionID, &q.Value, &q.Unit)
 		c.Quantity = q
 		errVerify := c.Quantity.Verify()
 		if errVerify != nil {
@@ -189,7 +186,7 @@ func (s *StorageItemRepository) AddStorageConsumption(id uint, sc entity.Storage
 	if err != nil {
 		return sc, err
 	}
-	sc.StorageItemConsumptionId = uint(lastInsertedId)
+	sc.StorageItemConsumptionID = int32(lastInsertedId)
 	return sc, nil
 }
 

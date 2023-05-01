@@ -30,10 +30,10 @@ func (h *usecaseHandler) CreateStorageItem(w http.ResponseWriter, r *http.Reques
 	}
 	usecase := h.provideUsecase(r.Context())
 	item := entity.StorageItem{
-		StorageItemId:  requestBody.StoragePlaceId,
+		StorageItemID:  requestBody.StoragePlaceId,
 		Title:          requestBody.Title,
-		CategoryId:     requestBody.CategoryId,
-		StoragePlaceId: requestBody.StoragePlaceId,
+		CategoryID:     requestBody.CategoryId,
+		StoragePlaceID: requestBody.StoragePlaceId,
 		ExpirationDate: requestBody.ExpirationDate,
 		Ean:            requestBody.Ean,
 	}

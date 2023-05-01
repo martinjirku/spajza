@@ -126,12 +126,12 @@ func mapEntityToStorageItem(si entity.StorageItem) StorageItem {
 		}
 	}
 	return StorageItem{
-		StorageItemId:  si.StorageItemId,
+		StorageItemId:  si.StorageItemID,
 		Title:          si.Title,
 		BaselineAmount: si.BaselineQuantity().Value,
 		CurrentAmount:  si.CurrentQuantity().Value,
-		CategoryId:     si.CategoryId,
-		StoragePlaceId: si.StoragePlaceId,
+		CategoryId:     si.CategoryID,
+		StoragePlaceId: si.StoragePlaceID,
 		Quantity:       unit.GetQuantityType(),
 		Unit:           string(unit),
 		ExpirationDate: si.ExpirationDate,

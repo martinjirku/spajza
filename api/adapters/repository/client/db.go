@@ -27,17 +27,38 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createCategoryStmt, err = db.PrepareContext(ctx, createCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateCategory: %w", err)
 	}
+	if q.createProductCategoryStmt, err = db.PrepareContext(ctx, createProductCategory); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateProductCategory: %w", err)
+	}
+	if q.createStorageConsumptionStmt, err = db.PrepareContext(ctx, createStorageConsumption); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateStorageConsumption: %w", err)
+	}
+	if q.createStorageItemStmt, err = db.PrepareContext(ctx, createStorageItem); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateStorageItem: %w", err)
+	}
 	if q.deleteCategoryStmt, err = db.PrepareContext(ctx, deleteCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteCategory: %w", err)
 	}
-	if q.insertProductCategoryStmt, err = db.PrepareContext(ctx, insertProductCategory); err != nil {
-		return nil, fmt.Errorf("error preparing query InsertProductCategory: %w", err)
+	if q.getStorageConsumptionByIdStmt, err = db.PrepareContext(ctx, getStorageConsumptionById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetStorageConsumptionById: %w", err)
+	}
+	if q.getStorageItemByIdStmt, err = db.PrepareContext(ctx, getStorageItemById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetStorageItemById: %w", err)
 	}
 	if q.listCategoriesStmt, err = db.PrepareContext(ctx, listCategories); err != nil {
 		return nil, fmt.Errorf("error preparing query ListCategories: %w", err)
 	}
+	if q.listStorageConsumptionsStmt, err = db.PrepareContext(ctx, listStorageConsumptions); err != nil {
+		return nil, fmt.Errorf("error preparing query ListStorageConsumptions: %w", err)
+	}
+	if q.listStorageItemsStmt, err = db.PrepareContext(ctx, listStorageItems); err != nil {
+		return nil, fmt.Errorf("error preparing query ListStorageItems: %w", err)
+	}
 	if q.updateCategoryStmt, err = db.PrepareContext(ctx, updateCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateCategory: %w", err)
+	}
+	if q.updateStorageItemStmt, err = db.PrepareContext(ctx, updateStorageItem); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateStorageItem: %w", err)
 	}
 	return &q, nil
 }
@@ -49,14 +70,34 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createCategoryStmt: %w", cerr)
 		}
 	}
+	if q.createProductCategoryStmt != nil {
+		if cerr := q.createProductCategoryStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createProductCategoryStmt: %w", cerr)
+		}
+	}
+	if q.createStorageConsumptionStmt != nil {
+		if cerr := q.createStorageConsumptionStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createStorageConsumptionStmt: %w", cerr)
+		}
+	}
+	if q.createStorageItemStmt != nil {
+		if cerr := q.createStorageItemStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createStorageItemStmt: %w", cerr)
+		}
+	}
 	if q.deleteCategoryStmt != nil {
 		if cerr := q.deleteCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteCategoryStmt: %w", cerr)
 		}
 	}
-	if q.insertProductCategoryStmt != nil {
-		if cerr := q.insertProductCategoryStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing insertProductCategoryStmt: %w", cerr)
+	if q.getStorageConsumptionByIdStmt != nil {
+		if cerr := q.getStorageConsumptionByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getStorageConsumptionByIdStmt: %w", cerr)
+		}
+	}
+	if q.getStorageItemByIdStmt != nil {
+		if cerr := q.getStorageItemByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getStorageItemByIdStmt: %w", cerr)
 		}
 	}
 	if q.listCategoriesStmt != nil {
@@ -64,9 +105,24 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listCategoriesStmt: %w", cerr)
 		}
 	}
+	if q.listStorageConsumptionsStmt != nil {
+		if cerr := q.listStorageConsumptionsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listStorageConsumptionsStmt: %w", cerr)
+		}
+	}
+	if q.listStorageItemsStmt != nil {
+		if cerr := q.listStorageItemsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listStorageItemsStmt: %w", cerr)
+		}
+	}
 	if q.updateCategoryStmt != nil {
 		if cerr := q.updateCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateCategoryStmt: %w", cerr)
+		}
+	}
+	if q.updateStorageItemStmt != nil {
+		if cerr := q.updateStorageItemStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateStorageItemStmt: %w", cerr)
 		}
 	}
 	return err
@@ -106,23 +162,37 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                        DBTX
-	tx                        *sql.Tx
-	createCategoryStmt        *sql.Stmt
-	deleteCategoryStmt        *sql.Stmt
-	insertProductCategoryStmt *sql.Stmt
-	listCategoriesStmt        *sql.Stmt
-	updateCategoryStmt        *sql.Stmt
+	db                            DBTX
+	tx                            *sql.Tx
+	createCategoryStmt            *sql.Stmt
+	createProductCategoryStmt     *sql.Stmt
+	createStorageConsumptionStmt  *sql.Stmt
+	createStorageItemStmt         *sql.Stmt
+	deleteCategoryStmt            *sql.Stmt
+	getStorageConsumptionByIdStmt *sql.Stmt
+	getStorageItemByIdStmt        *sql.Stmt
+	listCategoriesStmt            *sql.Stmt
+	listStorageConsumptionsStmt   *sql.Stmt
+	listStorageItemsStmt          *sql.Stmt
+	updateCategoryStmt            *sql.Stmt
+	updateStorageItemStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                        tx,
-		tx:                        tx,
-		createCategoryStmt:        q.createCategoryStmt,
-		deleteCategoryStmt:        q.deleteCategoryStmt,
-		insertProductCategoryStmt: q.insertProductCategoryStmt,
-		listCategoriesStmt:        q.listCategoriesStmt,
-		updateCategoryStmt:        q.updateCategoryStmt,
+		db:                            tx,
+		tx:                            tx,
+		createCategoryStmt:            q.createCategoryStmt,
+		createProductCategoryStmt:     q.createProductCategoryStmt,
+		createStorageConsumptionStmt:  q.createStorageConsumptionStmt,
+		createStorageItemStmt:         q.createStorageItemStmt,
+		deleteCategoryStmt:            q.deleteCategoryStmt,
+		getStorageConsumptionByIdStmt: q.getStorageConsumptionByIdStmt,
+		getStorageItemByIdStmt:        q.getStorageItemByIdStmt,
+		listCategoriesStmt:            q.listCategoriesStmt,
+		listStorageConsumptionsStmt:   q.listStorageConsumptionsStmt,
+		listStorageItemsStmt:          q.listStorageItemsStmt,
+		updateCategoryStmt:            q.updateCategoryStmt,
+		updateStorageItemStmt:         q.updateStorageItemStmt,
 	}
 }
