@@ -8,7 +8,7 @@ import (
 
 type StorageItemRepository interface {
 	Create(storageItem entity.StorageItem) (entity.StorageItem, error)
-	ById(storageItemId uint) (entity.StorageItem, error)
+	ById(storageItemId int32) (entity.StorageItem, error)
 	Update(storageItem entity.StorageItem) error
 	List() ([]entity.StorageItem, error)
 }
@@ -25,7 +25,7 @@ func (s *StorageItemUsecase) Create(storageItem entity.StorageItem) (entity.Stor
 	return s.repo.Create(storageItem)
 }
 
-func (s *StorageItemUsecase) UpdateField(id uint, fieldName string, value interface{}) (entity.StorageItem, error) {
+func (s *StorageItemUsecase) UpdateField(id int32, fieldName string, value interface{}) (entity.StorageItem, error) {
 	item, err := s.repo.ById(id)
 	if err != nil {
 		return item, err
@@ -47,7 +47,7 @@ func (s *StorageItemUsecase) UpdateField(id uint, fieldName string, value interf
 	return item, s.repo.Update(item)
 }
 
-func (s *StorageItemUsecase) Consumpt(id uint, amount float64, unit entity.UnitName) (entity.StorageItem, error) {
+func (s *StorageItemUsecase) Consumpt(id int32, amount float64, unit entity.UnitName) (entity.StorageItem, error) {
 	item, err := s.repo.ById(id)
 	if err != nil {
 		return item, err

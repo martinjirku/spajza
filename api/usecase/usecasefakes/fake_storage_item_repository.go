@@ -9,10 +9,10 @@ import (
 )
 
 type FakeStorageItemRepository struct {
-	ByIdStub        func(uint) (entity.StorageItem, error)
+	ByIdStub        func(int32) (entity.StorageItem, error)
 	byIdMutex       sync.RWMutex
 	byIdArgsForCall []struct {
-		arg1 uint
+		arg1 int32
 	}
 	byIdReturns struct {
 		result1 entity.StorageItem
@@ -62,11 +62,11 @@ type FakeStorageItemRepository struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeStorageItemRepository) ById(arg1 uint) (entity.StorageItem, error) {
+func (fake *FakeStorageItemRepository) ById(arg1 int32) (entity.StorageItem, error) {
 	fake.byIdMutex.Lock()
 	ret, specificReturn := fake.byIdReturnsOnCall[len(fake.byIdArgsForCall)]
 	fake.byIdArgsForCall = append(fake.byIdArgsForCall, struct {
-		arg1 uint
+		arg1 int32
 	}{arg1})
 	stub := fake.ByIdStub
 	fakeReturns := fake.byIdReturns
@@ -87,13 +87,13 @@ func (fake *FakeStorageItemRepository) ByIdCallCount() int {
 	return len(fake.byIdArgsForCall)
 }
 
-func (fake *FakeStorageItemRepository) ByIdCalls(stub func(uint) (entity.StorageItem, error)) {
+func (fake *FakeStorageItemRepository) ByIdCalls(stub func(int32) (entity.StorageItem, error)) {
 	fake.byIdMutex.Lock()
 	defer fake.byIdMutex.Unlock()
 	fake.ByIdStub = stub
 }
 
-func (fake *FakeStorageItemRepository) ByIdArgsForCall(i int) uint {
+func (fake *FakeStorageItemRepository) ByIdArgsForCall(i int) int32 {
 	fake.byIdMutex.RLock()
 	defer fake.byIdMutex.RUnlock()
 	argsForCall := fake.byIdArgsForCall[i]

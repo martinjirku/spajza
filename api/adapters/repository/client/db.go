@@ -36,14 +36,23 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createStorageItemStmt, err = db.PrepareContext(ctx, createStorageItem); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateStorageItem: %w", err)
 	}
+	if q.createStoragePlaceStmt, err = db.PrepareContext(ctx, createStoragePlace); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateStoragePlace: %w", err)
+	}
 	if q.deleteCategoryStmt, err = db.PrepareContext(ctx, deleteCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteCategory: %w", err)
+	}
+	if q.deleteStoragePlaceStmt, err = db.PrepareContext(ctx, deleteStoragePlace); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteStoragePlace: %w", err)
 	}
 	if q.getStorageConsumptionByIdStmt, err = db.PrepareContext(ctx, getStorageConsumptionById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetStorageConsumptionById: %w", err)
 	}
 	if q.getStorageItemByIdStmt, err = db.PrepareContext(ctx, getStorageItemById); err != nil {
 		return nil, fmt.Errorf("error preparing query GetStorageItemById: %w", err)
+	}
+	if q.getStoragePlaceByIdStmt, err = db.PrepareContext(ctx, getStoragePlaceById); err != nil {
+		return nil, fmt.Errorf("error preparing query GetStoragePlaceById: %w", err)
 	}
 	if q.listCategoriesStmt, err = db.PrepareContext(ctx, listCategories); err != nil {
 		return nil, fmt.Errorf("error preparing query ListCategories: %w", err)
@@ -54,11 +63,17 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.listStorageItemsStmt, err = db.PrepareContext(ctx, listStorageItems); err != nil {
 		return nil, fmt.Errorf("error preparing query ListStorageItems: %w", err)
 	}
+	if q.listStoragePlacesStmt, err = db.PrepareContext(ctx, listStoragePlaces); err != nil {
+		return nil, fmt.Errorf("error preparing query ListStoragePlaces: %w", err)
+	}
 	if q.updateCategoryStmt, err = db.PrepareContext(ctx, updateCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateCategory: %w", err)
 	}
 	if q.updateStorageItemStmt, err = db.PrepareContext(ctx, updateStorageItem); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateStorageItem: %w", err)
+	}
+	if q.updateStoragePlaceStmt, err = db.PrepareContext(ctx, updateStoragePlace); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateStoragePlace: %w", err)
 	}
 	return &q, nil
 }
@@ -85,9 +100,19 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createStorageItemStmt: %w", cerr)
 		}
 	}
+	if q.createStoragePlaceStmt != nil {
+		if cerr := q.createStoragePlaceStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createStoragePlaceStmt: %w", cerr)
+		}
+	}
 	if q.deleteCategoryStmt != nil {
 		if cerr := q.deleteCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteCategoryStmt: %w", cerr)
+		}
+	}
+	if q.deleteStoragePlaceStmt != nil {
+		if cerr := q.deleteStoragePlaceStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteStoragePlaceStmt: %w", cerr)
 		}
 	}
 	if q.getStorageConsumptionByIdStmt != nil {
@@ -98,6 +123,11 @@ func (q *Queries) Close() error {
 	if q.getStorageItemByIdStmt != nil {
 		if cerr := q.getStorageItemByIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getStorageItemByIdStmt: %w", cerr)
+		}
+	}
+	if q.getStoragePlaceByIdStmt != nil {
+		if cerr := q.getStoragePlaceByIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getStoragePlaceByIdStmt: %w", cerr)
 		}
 	}
 	if q.listCategoriesStmt != nil {
@@ -115,6 +145,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing listStorageItemsStmt: %w", cerr)
 		}
 	}
+	if q.listStoragePlacesStmt != nil {
+		if cerr := q.listStoragePlacesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing listStoragePlacesStmt: %w", cerr)
+		}
+	}
 	if q.updateCategoryStmt != nil {
 		if cerr := q.updateCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateCategoryStmt: %w", cerr)
@@ -123,6 +158,11 @@ func (q *Queries) Close() error {
 	if q.updateStorageItemStmt != nil {
 		if cerr := q.updateStorageItemStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateStorageItemStmt: %w", cerr)
+		}
+	}
+	if q.updateStoragePlaceStmt != nil {
+		if cerr := q.updateStoragePlaceStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateStoragePlaceStmt: %w", cerr)
 		}
 	}
 	return err
@@ -168,14 +208,19 @@ type Queries struct {
 	createProductCategoryStmt     *sql.Stmt
 	createStorageConsumptionStmt  *sql.Stmt
 	createStorageItemStmt         *sql.Stmt
+	createStoragePlaceStmt        *sql.Stmt
 	deleteCategoryStmt            *sql.Stmt
+	deleteStoragePlaceStmt        *sql.Stmt
 	getStorageConsumptionByIdStmt *sql.Stmt
 	getStorageItemByIdStmt        *sql.Stmt
+	getStoragePlaceByIdStmt       *sql.Stmt
 	listCategoriesStmt            *sql.Stmt
 	listStorageConsumptionsStmt   *sql.Stmt
 	listStorageItemsStmt          *sql.Stmt
+	listStoragePlacesStmt         *sql.Stmt
 	updateCategoryStmt            *sql.Stmt
 	updateStorageItemStmt         *sql.Stmt
+	updateStoragePlaceStmt        *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
@@ -186,13 +231,18 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createProductCategoryStmt:     q.createProductCategoryStmt,
 		createStorageConsumptionStmt:  q.createStorageConsumptionStmt,
 		createStorageItemStmt:         q.createStorageItemStmt,
+		createStoragePlaceStmt:        q.createStoragePlaceStmt,
 		deleteCategoryStmt:            q.deleteCategoryStmt,
+		deleteStoragePlaceStmt:        q.deleteStoragePlaceStmt,
 		getStorageConsumptionByIdStmt: q.getStorageConsumptionByIdStmt,
 		getStorageItemByIdStmt:        q.getStorageItemByIdStmt,
+		getStoragePlaceByIdStmt:       q.getStoragePlaceByIdStmt,
 		listCategoriesStmt:            q.listCategoriesStmt,
 		listStorageConsumptionsStmt:   q.listStorageConsumptionsStmt,
 		listStorageItemsStmt:          q.listStorageItemsStmt,
+		listStoragePlacesStmt:         q.listStoragePlacesStmt,
 		updateCategoryStmt:            q.updateCategoryStmt,
 		updateStorageItemStmt:         q.updateStorageItemStmt,
+		updateStoragePlaceStmt:        q.updateStoragePlaceStmt,
 	}
 }

@@ -115,6 +115,26 @@ func (q *Queries) CreateStorageItem(ctx context.Context, arg *CreateStorageItemP
 	return result.LastInsertId()
 }
 
+const createStoragePlace = `-- name: CreateStoragePlace :execlastid
+
+INSERT INTO storage_places(created_at, updated_at, title, code)
+VALUES (NOW(),NOW(),?,?)
+`
+
+type CreateStoragePlaceParams struct {
+	Title sql.NullString
+	Code  sql.NullString
+}
+
+// STORAGE PLACE:
+func (q *Queries) CreateStoragePlace(ctx context.Context, arg *CreateStoragePlaceParams) (int64, error) {
+	result, err := q.exec(ctx, q.createStoragePlaceStmt, createStoragePlace, arg.Title, arg.Code)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
 const deleteCategory = `-- name: DeleteCategory :exec
 UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?
 `
@@ -124,23 +144,49 @@ func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
 	return err
 }
 
-const getStorageConsumptionById = `-- name: GetStorageConsumptionById :one
+const deleteStoragePlace = `-- name: DeleteStoragePlace :exec
+UPDATE storage_places SET deleted_at=NOW()
+WHERE storage_place_id=?
+`
+
+func (q *Queries) DeleteStoragePlace(ctx context.Context, storagePlaceID int32) error {
+	_, err := q.exec(ctx, q.deleteStoragePlaceStmt, deleteStoragePlace, storagePlaceID)
+	return err
+}
+
+const getStorageConsumptionById = `-- name: GetStorageConsumptionById :many
 SELECT storage_item_consumption_id, created_at, updated_at, deleted_at, normalized_amount, unit, storage_item_id FROM storage_consumptions WHERE storage_item_id=?
 `
 
-func (q *Queries) GetStorageConsumptionById(ctx context.Context, storageItemID int32) (StorageConsumption, error) {
-	row := q.queryRow(ctx, q.getStorageConsumptionByIdStmt, getStorageConsumptionById, storageItemID)
-	var i StorageConsumption
-	err := row.Scan(
-		&i.StorageItemConsumptionID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.DeletedAt,
-		&i.NormalizedAmount,
-		&i.Unit,
-		&i.StorageItemID,
-	)
-	return i, err
+func (q *Queries) GetStorageConsumptionById(ctx context.Context, storageItemID int32) ([]StorageConsumption, error) {
+	rows, err := q.query(ctx, q.getStorageConsumptionByIdStmt, getStorageConsumptionById, storageItemID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []StorageConsumption
+	for rows.Next() {
+		var i StorageConsumption
+		if err := rows.Scan(
+			&i.StorageItemConsumptionID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.NormalizedAmount,
+			&i.Unit,
+			&i.StorageItemID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getStorageItemById = `-- name: GetStorageItemById :one
@@ -164,6 +210,25 @@ func (q *Queries) GetStorageItemById(ctx context.Context, storageItemID int32) (
 		&i.Unit,
 		&i.ExpirationDate,
 		&i.Ean,
+	)
+	return i, err
+}
+
+const getStoragePlaceById = `-- name: GetStoragePlaceById :one
+SELECT storage_place_id, created_at, updated_at, deleted_at, title, code FROM storage_places
+WHERE deleted_at IS NULL && storage_place_id=?
+`
+
+func (q *Queries) GetStoragePlaceById(ctx context.Context, storagePlaceID int32) (StoragePlace, error) {
+	row := q.queryRow(ctx, q.getStoragePlaceByIdStmt, getStoragePlaceById, storagePlaceID)
+	var i StoragePlace
+	err := row.Scan(
+		&i.StoragePlaceID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+		&i.Title,
+		&i.Code,
 	)
 	return i, err
 }
@@ -282,6 +347,41 @@ func (q *Queries) ListStorageItems(ctx context.Context) ([]StorageItem, error) {
 	return items, nil
 }
 
+const listStoragePlaces = `-- name: ListStoragePlaces :many
+SELECT storage_place_id, created_at, updated_at, deleted_at, title, code FROM storage_places
+WHERE deleted_at IS NULL
+`
+
+func (q *Queries) ListStoragePlaces(ctx context.Context) ([]StoragePlace, error) {
+	rows, err := q.query(ctx, q.listStoragePlacesStmt, listStoragePlaces)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []StoragePlace
+	for rows.Next() {
+		var i StoragePlace
+		if err := rows.Scan(
+			&i.StoragePlaceID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.Title,
+			&i.Code,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateCategory = `-- name: UpdateCategory :exec
 UPDATE categories SET updated_at=NOW(),title=?,path=?,default_unit=? WHERE id=?
 `
@@ -332,5 +432,22 @@ func (q *Queries) UpdateStorageItem(ctx context.Context, arg *UpdateStorageItemP
 		arg.Ean,
 		arg.StorageItemID,
 	)
+	return err
+}
+
+const updateStoragePlace = `-- name: UpdateStoragePlace :exec
+UPDATE storage_places
+SET updated_at=NOW(),title=?,code=?
+WHERE storage_place_id=?
+`
+
+type UpdateStoragePlaceParams struct {
+	Title          sql.NullString
+	Code           sql.NullString
+	StoragePlaceID int32
+}
+
+func (q *Queries) UpdateStoragePlace(ctx context.Context, arg *UpdateStoragePlaceParams) error {
+	_, err := q.exec(ctx, q.updateStoragePlaceStmt, updateStoragePlace, arg.Title, arg.Code, arg.StoragePlaceID)
 	return err
 }

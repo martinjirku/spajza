@@ -67,7 +67,7 @@ func (h *usecaseHandler) UpdateField(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	usecase := h.provideUsecase(r.Context())
-	_, err = usecase.UpdateField(uint(id), fieldName, requestBody.Value)
+	_, err = usecase.UpdateField(int32(id), fieldName, requestBody.Value)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -89,7 +89,7 @@ func (h *usecaseHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	usecase := h.provideUsecase(r.Context())
-	response, err := usecase.Consumpt(uint(id), requestBody.Amount, entity.UnitName(requestBody.Unit))
+	response, err := usecase.Consumpt(int32(id), requestBody.Amount, entity.UnitName(requestBody.Unit))
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return

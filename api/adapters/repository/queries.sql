@@ -51,5 +51,28 @@ VALUES (NOW(),NOW(),?,?,?);
 SELECT * FROM storage_consumptions
 WHERE storage_item_id IN (SELECT storage_item_id FROM storage_items);
 
--- name: GetStorageConsumptionById :one
+-- name: GetStorageConsumptionById :many
 SELECT * FROM storage_consumptions WHERE storage_item_id=?;
+
+-- STORAGE PLACE:
+
+-- name: CreateStoragePlace :execlastid
+INSERT INTO storage_places(created_at, updated_at, title, code)
+VALUES (NOW(),NOW(),?,?);
+
+-- name: GetStoragePlaceById :one
+SELECT * FROM storage_places
+WHERE deleted_at IS NULL && storage_place_id=?;
+
+-- name: ListStoragePlaces :many
+SELECT * FROM storage_places
+WHERE deleted_at IS NULL;
+
+-- name: UpdateStoragePlace :exec
+UPDATE storage_places
+SET updated_at=NOW(),title=?,code=?
+WHERE storage_place_id=?;
+
+-- name: DeleteStoragePlace :exec
+UPDATE storage_places SET deleted_at=NOW()
+WHERE storage_place_id=?

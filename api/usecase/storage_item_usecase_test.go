@@ -24,7 +24,7 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 		var storagePlaceId interface{}
 		json.Unmarshal([]byte(storagePlaceIdJson), &storagePlaceId)
 
-		repo.ByIdCalls(func(id uint) (entity.StorageItem, error) {
+		repo.ByIdCalls(func(id int32) (entity.StorageItem, error) {
 			if id == 1 {
 				return item, nil
 			}
@@ -54,7 +54,7 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 		item := getStorageItem()
 		storagePlaceId := "test"
 
-		repo.ByIdCalls(func(id uint) (entity.StorageItem, error) {
+		repo.ByIdCalls(func(id int32) (entity.StorageItem, error) {
 			if id == 1 {
 				return item, nil
 			}
@@ -77,7 +77,7 @@ func Test_StorageItemUsecase_UpdateField(t *testing.T) {
 		item := getStorageItem()
 		title := "new title"
 
-		repo.ByIdCalls(func(id uint) (entity.StorageItem, error) {
+		repo.ByIdCalls(func(id int32) (entity.StorageItem, error) {
 			if id == 1 {
 				return item, nil
 			}
