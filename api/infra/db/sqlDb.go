@@ -24,7 +24,10 @@ func NewDB(dbConfig config.Db) *sql.DB {
 	if err != nil {
 		log.Panicf("Could not open an database %q. Failed at %s", maskedString, err)
 	}
+	err = DB.Ping()
+	if err != nil {
+		log.Fatalf("Could not connect to db: %q", err)
+	}
 	log.Default().Printf("db connected %q created", maskedString)
-
 	return DB
 }
