@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "@pages/Login.vue";
-import StorageRoom from "@pages/Storage.vue";
+import StorageRoom from "@pages/Storage/Storage.vue";
 import Recipies from "@pages/Recipies.vue";
 import Shopping from "@pages/Shopping.vue";
 import CategoryItems from "@pages/CategoryItems.vue";
