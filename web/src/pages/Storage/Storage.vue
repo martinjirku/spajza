@@ -33,6 +33,14 @@
                 @click="formState = 'create-new'"
               ></q-btn>
             </div>
+            <q-separator vertical dark spaced />
+            <q-btn
+              round
+              flat
+              :icon="viewType === 'card' ? 'table_view' : 'grid_view'"
+              title="Tabuľka"
+              @click="viewType = viewType === 'card' ? 'table' : 'card'"
+            ></q-btn>
           </div>
         </q-img>
       </div>
@@ -58,8 +66,8 @@
         </div>
       </div>
       <div v-if="formState === 'upload-barcode'" class="row fit q-col" />
-
       <card-list
+        v-if="viewType === 'card'"
         :is-loading="isLoading"
         :items="itemsData?.items"
         :units="unitsData"
@@ -69,6 +77,7 @@
           (id, value) => updateLocation({ storageItemId: id, value })
         "
       />
+      <storage-table v-else></storage-table>
     </q-scroll-area>
   </PageLayout>
 </template>
@@ -85,10 +94,12 @@ import {
 import { computed, ref } from "vue";
 import StorageItemForm from "@storage/StorageItemForm.vue";
 import CardList from "./CardList.vue";
+import StorageTable from "./StorageTable.vue";
 
 type FormType = "closed" | "create-new" | "upload-barcode";
 
 const formState = ref<FormType>("closed");
+const viewType = ref<"table" | "card">("card");
 
 const { data: itemsData, isLoading: isLoadingStorageItems } = useStorageItems();
 const { data: unitsData, isLoading: isLoadingUnits } = useUnits();

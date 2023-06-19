@@ -82,7 +82,7 @@
             </div>
             <div class="col-6 col-md-8">
               <q-btn class="fit" outline flat>
-                <q-popup-proxy ref="consumptPopup">
+                <q-popup-proxy toggle="true" ref="consumptPopup">
                   <StorageItemConsumptForm
                     :id="i.storageItemId ?? 0"
                     :default-unit="i.unit ?? ''"
@@ -105,6 +105,7 @@
 import { StorageItem } from "@api/storage";
 import { StoragePlace } from "@api/storagePlace";
 import { Unit } from "@api/unit";
+import StorageItemConsumptForm from "@storage/StorageItemConsumptForm.vue";
 import { createStoragePlaceOptions } from "@storage/StoragaPlace";
 import { QPopupProxy } from "quasar";
 import { computed, ref } from "vue";

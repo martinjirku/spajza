@@ -23,9 +23,8 @@ const getUseUpdateStorageItem =
         return updateStorageItemField(storageItemId, field, value);
       },
       {
-        onSuccess: () => {
-          queryClient.invalidateQueries("storage-items");
-        },
+        onSuccess: () =>
+          queryClient.invalidateQueries({ queryKey: ["storage-items"] }),
       }
     );
   };
@@ -53,9 +52,8 @@ export const useNewStorageItemMutation = () => {
       });
     },
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["storage-items"]);
-      },
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ["storage-items"] }),
     }
   );
 };
