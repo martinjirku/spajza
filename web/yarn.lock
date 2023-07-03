@@ -179,6 +179,11 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.29.14.tgz#569de51719a0f4445fabff775012d5c09a173b96"
   integrity sha512-ElEAahtLWA7Y7c2Haw10KdEf2tx+XZl/Z8dmyWxZehxWK3TPL5qtXtb7kUEhvt/8u2cSP62fLxgh2qqzMMGnDQ==
 
+"@tanstack/table-core@8.9.3":
+  version "8.9.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/table-core/-/table-core-8.9.3.tgz#991da6b015f6200fdc841c48048bee5e197f6a46"
+  integrity sha512-NpHZBoHTfqyJk0m/s/+CSuAiwtebhYK90mDuf5eylTvgViNOujiaOaxNDxJkQQAsVvHWZftUGAx1EfO1rkKtLg==
+
 "@tanstack/vue-query@4.29.14":
   version "4.29.14"
   resolved "https://registry.yarnpkg.com/@tanstack/vue-query/-/vue-query-4.29.14.tgz#e7b36328ed0ce715797bd0d1fb151d371902c550"
@@ -188,6 +193,13 @@
     "@tanstack/query-core" "4.29.14"
     "@vue/devtools-api" "^6.4.2"
     vue-demi "^0.13.11"
+
+"@tanstack/vue-table@^8.9.3":
+  version "8.9.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/vue-table/-/vue-table-8.9.3.tgz#6412e773fbeebebe6d23285cae8e46a4964b2516"
+  integrity sha512-Ca9+XZogYOi99rBqIoEJKKIfS0hNWcHnIh8pDUy2xbBk396AtJaO/tvP6B9qsxZF6j4szHzx8TeRveHPpZ+bBw==
+  dependencies:
+    "@tanstack/table-core" "8.9.3"
 
 "@types/estree@^1.0.0":
   version "1.0.1"

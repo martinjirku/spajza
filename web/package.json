@@ -9,12 +9,13 @@
   },
   "dependencies": {
     "@quasar/extras": "1.16.4",
+    "@tanstack/vue-query": "4.29.14",
+    "@tanstack/vue-table": "^8.9.3",
     "html5-qrcode": "2.3.8",
     "pinia": "2.1.4",
     "quasar": "2.12.0",
     "vee-validate": "4.9.6",
     "vue": "3.3.4",
-    "@tanstack/vue-query": "4.29.14",
     "vue-router": "4.2.2",
     "yup": "1.2.0"
   },

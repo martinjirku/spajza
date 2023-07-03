@@ -77,7 +77,17 @@
           (id, value) => updateLocation({ storageItemId: id, value })
         "
       />
-      <storage-table v-else></storage-table>
+      <storage-table
+        v-else
+        :is-loading="isLoading"
+        :items="itemsData?.items"
+        :units="unitsData"
+        :storage-places="storagePlaces"
+        @update:title="(id, value) => updateTitle({ storageItemId: id, value })"
+        @update:location="
+          (id, value) => updateLocation({ storageItemId: id, value })
+        "
+      ></storage-table>
     </q-scroll-area>
   </PageLayout>
 </template>
