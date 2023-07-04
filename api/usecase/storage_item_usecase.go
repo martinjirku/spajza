@@ -10,7 +10,7 @@ type StorageItemRepository interface {
 	Create(storageItem entity.StorageItem) (entity.StorageItem, error)
 	ById(storageItemId int32) (entity.StorageItem, error)
 	Update(storageItem entity.StorageItem) error
-	List() ([]entity.StorageItem, error)
+	List(pagination entity.Pagination) ([]entity.StorageItem, error)
 }
 
 type StorageItemUsecase struct {
@@ -63,8 +63,8 @@ func (s *StorageItemUsecase) Consumpt(id int32, amount float64, unit entity.Unit
 	return item, nil
 }
 
-func (s *StorageItemUsecase) List() ([]entity.StorageItem, error) {
-	result, err := s.repo.List()
+func (s *StorageItemUsecase) List(pagination entity.Pagination) ([]entity.StorageItem, error) {
+	result, err := s.repo.List(pagination)
 	if err != nil {
 		return nil, err
 	}

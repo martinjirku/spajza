@@ -79,8 +79,12 @@ func (s *StorageItemRepository) Update(si entity.StorageItem) error {
 	return tx.Commit()
 }
 
-func (s *StorageItemRepository) List() ([]entity.StorageItem, error) {
-	storageItems, err := s.queries.ListStorageItems(s.ctx)
+func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.StorageItem, error) {
+	queryParams := client.ListStorageItemsParams{
+		Limit:  pagination.Size,
+		Offset: pagination.Index,
+	}
+	storageItems, err := s.queries.ListStorageItems(s.ctx, &queryParams)
 	if err != nil {
 		return nil, err
 	}

@@ -99,7 +99,12 @@ func (h *usecaseHandler) Consumpt(w http.ResponseWriter, r *http.Request) {
 
 func (h *usecaseHandler) List(w http.ResponseWriter, r *http.Request) {
 	usecase := h.provideUsecase(r.Context())
-	items, err := usecase.List()
+	pagination := entity.PaginationFromQuery(r.URL.Query())
+	if !pagination.Validate() {
+		web.RespondWithError(w, http.StatusBadRequest, entity.ErrInvalidParameter.Error())
+		return
+	}
+	items, err := usecase.List(pagination)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return

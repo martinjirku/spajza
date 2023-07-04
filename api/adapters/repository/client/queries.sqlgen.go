@@ -307,11 +307,16 @@ func (q *Queries) ListStorageConsumptions(ctx context.Context) ([]StorageConsump
 }
 
 const listStorageItems = `-- name: ListStorageItems :many
-SELECT storage_item_id, created_at, updated_at, deleted_at, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date, ean FROM storage_items
+SELECT storage_item_id, created_at, updated_at, deleted_at, title, storage_place_id, category_id, baseline_amount, current_amount, quantity, unit, expiration_date, ean FROM storage_items WHERE deleted_at IS NULL LIMIT ? OFFSET ?
 `
 
-func (q *Queries) ListStorageItems(ctx context.Context) ([]StorageItem, error) {
-	rows, err := q.query(ctx, q.listStorageItemsStmt, listStorageItems)
+type ListStorageItemsParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListStorageItems(ctx context.Context, arg *ListStorageItemsParams) ([]StorageItem, error) {
+	rows, err := q.query(ctx, q.listStorageItemsStmt, listStorageItems, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

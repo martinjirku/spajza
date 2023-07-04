@@ -35,7 +35,7 @@ UPDATE storage_items SET updated_at=NOW(), title=?, storage_place_id=?,
 WHERE storage_item_id=?;
 
 -- name: ListStorageItems :many
-SELECT * FROM storage_items;
+SELECT * FROM storage_items WHERE deleted_at IS NULL LIMIT ? OFFSET ?;
 
 -- name: GetStorageItemById :one
 SELECT * FROM storage_items WHERE storage_item_id=?;
