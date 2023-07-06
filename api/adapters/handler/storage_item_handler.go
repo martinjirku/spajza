@@ -104,14 +104,14 @@ func (h *usecaseHandler) List(w http.ResponseWriter, r *http.Request) {
 		web.RespondWithError(w, http.StatusBadRequest, entity.ErrInvalidParameter.Error())
 		return
 	}
-	items, err := usecase.List(pagination)
+	result, err := usecase.List(pagination)
 	if err != nil {
 		web.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	result := make([]StorageItem, len(items))
-	for i, si := range items {
-		result[i] = mapEntityToStorageItem(si)
+	data := make([]StorageItem, len(result.Data))
+	for i, si := range result.Data {
+		data[i] = mapEntityToStorageItem(si)
 	}
-	web.RespondWithJSON(w, http.StatusOK, listResponse{result})
+	web.RespondWithJSON(w, http.StatusOK, listResponse{Data: data, Count: result.Count})
 }

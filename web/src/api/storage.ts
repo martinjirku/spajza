@@ -18,6 +18,11 @@ export type StorageItem = {
   consumptions?: Consumption[];
 };
 
+export type StorageItemListResponse = {
+  data: StorageItem[];
+  count: number;
+};
+
 export type NewStorageItem = {
   categoryId: number;
   title: string;

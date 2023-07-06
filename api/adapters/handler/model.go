@@ -36,7 +36,8 @@ type (
 		Unit   string  `json:"unit"`
 	}
 	listResponse struct {
-		Items []StorageItem `json:"items"`
+		Data  []StorageItem `json:"data"`
+		Count int64         `json:"count"`
 	}
 	updateFieldRequest struct {
 		Value interface{} `json:"value"`

@@ -24,7 +24,7 @@ type StorageItem struct {
 }
 
 type StorageItemList struct {
-	Items []StorageItem `json:"items"`
+	Data  []StorageItem `json:"data"`
 	Count int64         `json:"count"`
 }
 

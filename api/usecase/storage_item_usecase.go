@@ -11,7 +11,8 @@ type StorageItemRepository interface {
 	ById(storageItemId int32) (entity.StorageItem, error)
 	Update(storageItem entity.StorageItem) error
 	List(pagination entity.Pagination) ([]entity.StorageItem, error)
-	Count() (int64, error)
+	Count(pagination entity.Pagination) (int64, error)
+	CountAll() (int64, error)
 }
 
 type StorageItemUsecase struct {
@@ -64,14 +65,14 @@ func (s *StorageItemUsecase) Consumpt(id int32, amount float64, unit entity.Unit
 	return item, nil
 }
 
-func (s *StorageItemUsecase) List(pagination entity.Pagination) ([]entity.StorageItem, error) {
-	// count, err := s.repo.Count()
-	// if err != nil {
-	// 	return nil, err
-	// }
-	result, err := s.repo.List(pagination)
+func (s *StorageItemUsecase) List(pagination entity.Pagination) (entity.StorageItemList, error) {
+	count, err := s.repo.CountAll()
 	if err != nil {
-		return nil, err
+		return entity.StorageItemList{}, err
 	}
-	return result, nil
+	data, err := s.repo.List(pagination)
+	if err != nil {
+		return entity.StorageItemList{}, err
+	}
+	return entity.StorageItemList{Data: data, Count: count}, nil
 }

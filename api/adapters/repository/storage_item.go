@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 
-	. "github.com/go-jet/jet/v2/mysql"
+	jet "github.com/go-jet/jet/v2/mysql"
 	"github.com/martinjirku/zasobar/adapters/repository/client"
 	"github.com/martinjirku/zasobar/adapters/repository/client/zasobar/model"
-	. "github.com/martinjirku/zasobar/adapters/repository/client/zasobar/table"
+	table "github.com/martinjirku/zasobar/adapters/repository/client/zasobar/table"
 	"github.com/martinjirku/zasobar/entity"
 	"github.com/martinjirku/zasobar/pkg/pointer"
 	"github.com/martinjirku/zasobar/pkg/sqlnull"
@@ -83,11 +83,18 @@ func (s *StorageItemRepository) Update(si entity.StorageItem) error {
 	return tx.Commit()
 }
 
+func getStorageItemStmt(pagination *entity.Pagination, projection jet.Projection, projections ...jet.Projection) jet.SelectStatement {
+	stmt := jet.SELECT(projection, projections...).FROM(table.StorageItems).
+		WHERE(table.StorageItems.DeletedAt.IS_NULL())
+
+	if pagination != nil {
+		stmt = stmt.OFFSET(pagination.Index).LIMIT(pagination.Size)
+	}
+	return stmt
+}
+
 func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.StorageItem, error) {
-	selectStmt := SELECT(StorageItems.AllColumns).FROM(StorageItems).
-		WHERE(StorageItems.DeletedAt.IS_NULL()).
-		LIMIT(pagination.Size).
-		OFFSET(pagination.Index)
+	selectStmt := getStorageItemStmt(&pagination, table.StorageItems.AllColumns)
 	var storageItems []model.StorageItems
 	err := selectStmt.QueryContext(s.ctx, s.db, &storageItems)
 	if err != nil {
@@ -116,8 +123,9 @@ func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.Sto
 	}
 
 	selectedIDStmt := selectStmt.AsTable("selected_id")
-	selectedIDs := StorageItems.StorageItemID.From(selectedIDStmt)
-	consumpationStmt := SELECT(StorageConsumptions.AllColumns).FROM(selectedIDStmt.INNER_JOIN(StorageConsumptions, StorageConsumptions.StorageItemID.EQ(selectedIDs)))
+	selectedIDs := table.StorageItems.StorageItemID.From(selectedIDStmt)
+	consumpationStmt := jet.SELECT(table.StorageConsumptions.AllColumns).
+		FROM(selectedIDStmt.INNER_JOIN(table.StorageConsumptions, table.StorageConsumptions.StorageItemID.EQ(selectedIDs)))
 	var consumptions []model.StorageConsumptions
 	errCons := consumpationStmt.QueryContext(s.ctx, s.db, &consumptions)
 	if errCons != nil {
@@ -205,22 +213,27 @@ func (s *StorageItemRepository) AddStorageConsumption(id int32, sc entity.Storag
 	return sc, nil
 }
 
-func (s *StorageItemRepository) Count() (int64, error) {
-	return s.queries.CountStorageItems(s.ctx)
+func (s *StorageItemRepository) count(pagination *entity.Pagination) (int64, error) {
+	countStmt := getStorageItemStmt(pagination, jet.COUNT(jet.STAR))
+	var count int64
+	query, args := countStmt.Sql()
+	var row *sql.Row
+	if len(args) == 0 {
+		row = s.db.QueryRowContext(s.ctx, query)
+	} else {
+		row = s.db.QueryRowContext(s.ctx, query, args...)
+	}
+	if err := row.Scan(&count); err == nil {
+		return count, nil
+	} else {
+		return count, err
+	}
 }
 
-// func findUnit(units []entity.Unit, unitName string) (entity.Unit, error) {
-// 	var unit entity.Unit
-// 	found := false
-// 	for _, u := range units {
-// 		if string(u.Name) == unitName {
-// 			unit = u
-// 			found = true
-// 			break
-// 		}
-// 	}
-// 	if !found {
-// 		return unit, errors.New("not valid unit")
-// 	}
-// 	return unit, nil
-// }
+func (s *StorageItemRepository) Count(pagination entity.Pagination) (int64, error) {
+	return s.count(&pagination)
+}
+
+func (s *StorageItemRepository) CountAll() (int64, error) {
+	return s.count(nil)
+}

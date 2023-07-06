@@ -69,7 +69,7 @@
       <card-list
         v-if="viewType === 'card'"
         :is-loading="isLoading"
-        :items="itemsData?.items"
+        :items="itemsData?.data"
         :units="unitsData"
         :storage-places="storagePlaces"
         @update:title="(id, value) => updateTitle({ storageItemId: id, value })"
@@ -80,7 +80,7 @@
       <storage-table
         v-else
         :is-loading="isLoading"
-        :items="itemsData?.items"
+        :items="itemsData?.data"
         :units="unitsData"
         :storage-places="storagePlaces"
         @update:title="(id, value) => updateTitle({ storageItemId: id, value })"

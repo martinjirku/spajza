@@ -1,5 +1,10 @@
 import { Category } from "./category";
-import { ConsumptionRequest, NewStorageItem, StorageItem } from "./storage";
+import {
+  ConsumptionRequest,
+  NewStorageItem,
+  StorageItemListResponse,
+  StorageItem,
+} from "./storage";
 import { CreateStoragePlace, StoragePlace } from "./storagePlace";
 import { Unit } from "./unit";
 
@@ -104,7 +109,7 @@ export const getStorageItems = () => {
     headers,
   })
     .then((r) => r.json())
-    .then((data) => data as { items: StorageItem[] });
+    .then((data) => data as StorageItemListResponse);
 };
 
 export const updateStorageItemField = (
