@@ -21,3 +21,9 @@ First we need to instal sqlc dependency by `brew install sqlc`
 ```sh
 sqlc
 ```
+
+## Jet DB
+
+```sh
+jet -source=mysql -host=localhost -port=3306 -user=user -password=user -dbname=zasobar -path=./adapters/repository
+```

@@ -4,8 +4,12 @@ import (
 	"context"
 	"database/sql"
 
+	. "github.com/go-jet/jet/v2/mysql"
 	"github.com/martinjirku/zasobar/adapters/repository/client"
+	"github.com/martinjirku/zasobar/adapters/repository/client/zasobar/model"
+	. "github.com/martinjirku/zasobar/adapters/repository/client/zasobar/table"
 	"github.com/martinjirku/zasobar/entity"
+	"github.com/martinjirku/zasobar/pkg/pointer"
 	"github.com/martinjirku/zasobar/pkg/sqlnull"
 	"github.com/martinjirku/zasobar/usecase"
 )
@@ -80,11 +84,12 @@ func (s *StorageItemRepository) Update(si entity.StorageItem) error {
 }
 
 func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.StorageItem, error) {
-	queryParams := client.ListStorageItemsParams{
-		Limit:  pagination.Size,
-		Offset: pagination.Index,
-	}
-	storageItems, err := s.queries.ListStorageItems(s.ctx, &queryParams)
+	selectStmt := SELECT(StorageItems.AllColumns).FROM(StorageItems).
+		WHERE(StorageItems.DeletedAt.IS_NULL()).
+		LIMIT(pagination.Size).
+		OFFSET(pagination.Index)
+	var storageItems []model.StorageItems
+	err := selectStmt.QueryContext(s.ctx, s.db, &storageItems)
 	if err != nil {
 		return nil, err
 	}
@@ -93,11 +98,11 @@ func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.Sto
 	for i, si := range storageItems {
 		resp[i] = entity.StorageItem{
 			StorageItemID:  int32(si.StorageItemID),
-			Title:          si.Title.String,
-			CategoryID:     si.CategoryID.Int32,
-			StoragePlaceID: si.StoragePlaceID.Int32,
-			ExpirationDate: si.ExpirationDate.Time,
-			Ean:            si.Ean.String,
+			Title:          pointer.Dereference(si.Title),
+			CategoryID:     pointer.Dereference(si.CategoryID),
+			StoragePlaceID: pointer.Dereference(si.StoragePlaceID),
+			ExpirationDate: pointer.Dereference(si.ExpirationDate),
+			Ean:            pointer.Dereference(si.Ean),
 		}
 		baselineQuantity := entity.Quantity{
 			Value: si.BaselineAmount,
@@ -110,19 +115,23 @@ func (s *StorageItemRepository) List(pagination entity.Pagination) ([]entity.Sto
 		indexMap[si.StorageItemID] = i
 	}
 
-	consumptions, errCons := s.queries.ListStorageConsumptions(s.ctx)
+	selectedIDStmt := selectStmt.AsTable("selected_id")
+	selectedIDs := StorageItems.StorageItemID.From(selectedIDStmt)
+	consumpationStmt := SELECT(StorageConsumptions.AllColumns).FROM(selectedIDStmt.INNER_JOIN(StorageConsumptions, StorageConsumptions.StorageItemID.EQ(selectedIDs)))
+	var consumptions []model.StorageConsumptions
+	errCons := consumpationStmt.QueryContext(s.ctx, s.db, &consumptions)
 	if errCons != nil {
 		return nil, errCons
 	}
-	for _, c := range consumptions {
+	for i := range consumptions {
 		consumption := entity.StorageItemConsumption{
-			StorageItemConsumptionID: c.StorageItemConsumptionID,
+			StorageItemConsumptionID: consumptions[i].StorageItemConsumptionID,
 			Quantity: entity.Quantity{
-				Value: c.NormalizedAmount.Float64,
-				Unit:  entity.UnitName(c.Unit.String),
+				Value: pointer.Dereference(consumptions[i].NormalizedAmount),
+				Unit:  entity.UnitName(pointer.Dereference(consumptions[i].Unit)),
 			},
 		}
-		idx, ok := indexMap[c.StorageItemID]
+		idx, ok := indexMap[consumptions[i].StorageItemID]
 		if !ok {
 			return nil, err
 		}
@@ -194,6 +203,10 @@ func (s *StorageItemRepository) AddStorageConsumption(id int32, sc entity.Storag
 
 	sc.StorageItemConsumptionID = int32(resultId)
 	return sc, nil
+}
+
+func (s *StorageItemRepository) Count() (int64, error) {
+	return s.queries.CountStorageItems(s.ctx)
 }
 
 // func findUnit(units []entity.Unit, unitName string) (entity.Unit, error) {

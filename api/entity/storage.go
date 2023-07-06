@@ -23,6 +23,11 @@ type StorageItem struct {
 	consumptions     []StorageItemConsumption
 }
 
+type StorageItemList struct {
+	Items []StorageItem `json:"items"`
+	Count int64         `json:"count"`
+}
+
 func (s *StorageItem) Init() *StorageItem {
 	if s.consumptions == nil {
 		s.consumptions = []StorageItemConsumption{}

@@ -8,7 +8,19 @@ package client
 import (
 	"context"
 	"database/sql"
+	"strings"
 )
+
+const countStorageItems = `-- name: CountStorageItems :one
+SELECT COUNT(*) FROM storage_items WHERE deleted_at IS NULL
+`
+
+func (q *Queries) CountStorageItems(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countStorageItems)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
 
 const createCategory = `-- name: CreateCategory :execlastid
 INSERT INTO categories(created_at, updated_at, title, path, default_unit) VALUES (NOW(), NOW(),?,?,?)
@@ -21,7 +33,7 @@ type CreateCategoryParams struct {
 }
 
 func (q *Queries) CreateCategory(ctx context.Context, arg *CreateCategoryParams) (int64, error) {
-	result, err := q.exec(ctx, q.createCategoryStmt, createCategory, arg.Title, arg.Path, arg.DefaultUnit)
+	result, err := q.db.ExecContext(ctx, createCategory, arg.Title, arg.Path, arg.DefaultUnit)
 	if err != nil {
 		return 0, err
 	}
@@ -42,7 +54,7 @@ type CreateProductCategoryParams struct {
 
 // PRODUCT CATEGORIES:
 func (q *Queries) CreateProductCategory(ctx context.Context, arg *CreateProductCategoryParams) (int64, error) {
-	result, err := q.exec(ctx, q.createProductCategoryStmt, createProductCategory,
+	result, err := q.db.ExecContext(ctx, createProductCategory,
 		arg.CategoryID,
 		arg.Name,
 		arg.Path,
@@ -69,7 +81,7 @@ type CreateStorageConsumptionParams struct {
 
 // STORAGE CONSUMPTIONS:
 func (q *Queries) CreateStorageConsumption(ctx context.Context, arg *CreateStorageConsumptionParams) (int64, error) {
-	result, err := q.exec(ctx, q.createStorageConsumptionStmt, createStorageConsumption, arg.NormalizedAmount, arg.Unit, arg.StorageItemID)
+	result, err := q.db.ExecContext(ctx, createStorageConsumption, arg.NormalizedAmount, arg.Unit, arg.StorageItemID)
 	if err != nil {
 		return 0, err
 	}
@@ -98,7 +110,7 @@ type CreateStorageItemParams struct {
 
 // STORAGE ITEMS:
 func (q *Queries) CreateStorageItem(ctx context.Context, arg *CreateStorageItemParams) (int64, error) {
-	result, err := q.exec(ctx, q.createStorageItemStmt, createStorageItem,
+	result, err := q.db.ExecContext(ctx, createStorageItem,
 		arg.Title,
 		arg.StoragePlaceID,
 		arg.CategoryID,
@@ -128,7 +140,7 @@ type CreateStoragePlaceParams struct {
 
 // STORAGE PLACE:
 func (q *Queries) CreateStoragePlace(ctx context.Context, arg *CreateStoragePlaceParams) (int64, error) {
-	result, err := q.exec(ctx, q.createStoragePlaceStmt, createStoragePlace, arg.Title, arg.Code)
+	result, err := q.db.ExecContext(ctx, createStoragePlace, arg.Title, arg.Code)
 	if err != nil {
 		return 0, err
 	}
@@ -140,7 +152,7 @@ UPDATE categories SET updated_at=NOW(), deleted_at=NOW() WHERE id=?
 `
 
 func (q *Queries) DeleteCategory(ctx context.Context, id int32) error {
-	_, err := q.exec(ctx, q.deleteCategoryStmt, deleteCategory, id)
+	_, err := q.db.ExecContext(ctx, deleteCategory, id)
 	return err
 }
 
@@ -150,7 +162,7 @@ WHERE storage_place_id=?
 `
 
 func (q *Queries) DeleteStoragePlace(ctx context.Context, storagePlaceID int32) error {
-	_, err := q.exec(ctx, q.deleteStoragePlaceStmt, deleteStoragePlace, storagePlaceID)
+	_, err := q.db.ExecContext(ctx, deleteStoragePlace, storagePlaceID)
 	return err
 }
 
@@ -159,7 +171,7 @@ SELECT storage_item_consumption_id, created_at, updated_at, deleted_at, normaliz
 `
 
 func (q *Queries) GetStorageConsumptionById(ctx context.Context, storageItemID int32) ([]StorageConsumption, error) {
-	rows, err := q.query(ctx, q.getStorageConsumptionByIdStmt, getStorageConsumptionById, storageItemID)
+	rows, err := q.db.QueryContext(ctx, getStorageConsumptionById, storageItemID)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +206,7 @@ SELECT storage_item_id, created_at, updated_at, deleted_at, title, storage_place
 `
 
 func (q *Queries) GetStorageItemById(ctx context.Context, storageItemID int32) (StorageItem, error) {
-	row := q.queryRow(ctx, q.getStorageItemByIdStmt, getStorageItemById, storageItemID)
+	row := q.db.QueryRowContext(ctx, getStorageItemById, storageItemID)
 	var i StorageItem
 	err := row.Scan(
 		&i.StorageItemID,
@@ -220,7 +232,7 @@ WHERE deleted_at IS NULL && storage_place_id=?
 `
 
 func (q *Queries) GetStoragePlaceById(ctx context.Context, storagePlaceID int32) (StoragePlace, error) {
-	row := q.queryRow(ctx, q.getStoragePlaceByIdStmt, getStoragePlaceById, storagePlaceID)
+	row := q.db.QueryRowContext(ctx, getStoragePlaceById, storagePlaceID)
 	var i StoragePlace
 	err := row.Scan(
 		&i.StoragePlaceID,
@@ -240,7 +252,7 @@ SELECT id, created_at, updated_at, deleted_at, title, default_unit, path FROM ca
 
 // CATEGORIES:
 func (q *Queries) ListCategories(ctx context.Context) ([]Category, error) {
-	rows, err := q.query(ctx, q.listCategoriesStmt, listCategories)
+	rows, err := q.db.QueryContext(ctx, listCategories)
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +288,53 @@ WHERE storage_item_id IN (SELECT storage_item_id FROM storage_items)
 `
 
 func (q *Queries) ListStorageConsumptions(ctx context.Context) ([]StorageConsumption, error) {
-	rows, err := q.query(ctx, q.listStorageConsumptionsStmt, listStorageConsumptions)
+	rows, err := q.db.QueryContext(ctx, listStorageConsumptions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []StorageConsumption
+	for rows.Next() {
+		var i StorageConsumption
+		if err := rows.Scan(
+			&i.StorageItemConsumptionID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+			&i.NormalizedAmount,
+			&i.Unit,
+			&i.StorageItemID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStorageConsumptionsByStorageItemIds = `-- name: ListStorageConsumptionsByStorageItemIds :many
+SELECT storage_item_consumption_id, created_at, updated_at, deleted_at, normalized_amount, unit, storage_item_id FROM storage_consumptions
+WHERE storage_item_id IN (/*SLICE:storageItemIds*/?)
+`
+
+func (q *Queries) ListStorageConsumptionsByStorageItemIds(ctx context.Context, storageitemids []int32) ([]StorageConsumption, error) {
+	sql := listStorageConsumptionsByStorageItemIds
+	var queryParams []interface{}
+	if len(storageitemids) > 0 {
+		for _, v := range storageitemids {
+			queryParams = append(queryParams, v)
+		}
+		sql = strings.Replace(sql, "/*SLICE:storageItemIds*/?", strings.Repeat(",?", len(storageitemids))[1:], 1)
+	} else {
+		sql = strings.Replace(sql, "/*SLICE:storageItemIds*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, sql, queryParams...)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +374,7 @@ type ListStorageItemsParams struct {
 }
 
 func (q *Queries) ListStorageItems(ctx context.Context, arg *ListStorageItemsParams) ([]StorageItem, error) {
-	rows, err := q.query(ctx, q.listStorageItemsStmt, listStorageItems, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listStorageItems, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -358,7 +416,7 @@ WHERE deleted_at IS NULL
 `
 
 func (q *Queries) ListStoragePlaces(ctx context.Context) ([]StoragePlace, error) {
-	rows, err := q.query(ctx, q.listStoragePlacesStmt, listStoragePlaces)
+	rows, err := q.db.QueryContext(ctx, listStoragePlaces)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +457,7 @@ type UpdateCategoryParams struct {
 }
 
 func (q *Queries) UpdateCategory(ctx context.Context, arg *UpdateCategoryParams) error {
-	_, err := q.exec(ctx, q.updateCategoryStmt, updateCategory,
+	_, err := q.db.ExecContext(ctx, updateCategory,
 		arg.Title,
 		arg.Path,
 		arg.DefaultUnit,
@@ -427,7 +485,7 @@ type UpdateStorageItemParams struct {
 }
 
 func (q *Queries) UpdateStorageItem(ctx context.Context, arg *UpdateStorageItemParams) error {
-	_, err := q.exec(ctx, q.updateStorageItemStmt, updateStorageItem,
+	_, err := q.db.ExecContext(ctx, updateStorageItem,
 		arg.Title,
 		arg.StoragePlaceID,
 		arg.CategoryID,
@@ -453,6 +511,6 @@ type UpdateStoragePlaceParams struct {
 }
 
 func (q *Queries) UpdateStoragePlace(ctx context.Context, arg *UpdateStoragePlaceParams) error {
-	_, err := q.exec(ctx, q.updateStoragePlaceStmt, updateStoragePlace, arg.Title, arg.Code, arg.StoragePlaceID)
+	_, err := q.db.ExecContext(ctx, updateStoragePlace, arg.Title, arg.Code, arg.StoragePlaceID)
 	return err
 }

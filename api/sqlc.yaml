@@ -7,6 +7,6 @@ sql:
       go:
         package: "client"
         out: "adapters/repository/client"
-        emit_prepared_queries: true
+        emit_prepared_queries: false
         emit_params_struct_pointers: true
         output_files_suffix: "gen"

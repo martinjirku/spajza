@@ -6,8 +6,8 @@ import (
 )
 
 type Pagination struct {
-	Index int32 `json:"index"`
-	Size  int32 `json:"size"`
+	Index int64 `json:"index"`
+	Size  int64 `json:"size"`
 }
 
 func (p Pagination) Validate() bool {
@@ -26,15 +26,15 @@ func PaginationFromQuery(query url.Values) Pagination {
 		Size:  10,
 	}
 	if index, ok := query["index"]; ok {
-		parsedIndex, err := strconv.ParseInt(index[0], 10, 32)
+		parsedIndex, err := strconv.ParseInt(index[0], 10, 64)
 		if err == nil {
-			pagination.Index = int32(parsedIndex)
+			pagination.Index = parsedIndex
 		}
 	}
 	if size, ok := query["size"]; ok {
-		parsedSize, err := strconv.ParseInt(size[0], 10, 32)
+		parsedSize, err := strconv.ParseInt(size[0], 10, 64)
 		if err == nil {
-			pagination.Size = int32(parsedSize)
+			pagination.Size = parsedSize
 		}
 	}
 	return pagination

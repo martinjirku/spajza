@@ -66,6 +66,7 @@
             :disabled="!table.getCanPreviousPage()"
             color="grey-2"
             outline
+            size="sm"
             icon="first_page"
             @click="() => table.setPageIndex(0)"
           ></q-btn>
@@ -73,6 +74,7 @@
             :disabled="!table.getCanPreviousPage()"
             color="grey-2"
             outline
+            size="sm"
             icon="navigate_before"
             @click="() => table.previousPage()"
           ></q-btn>
@@ -81,6 +83,7 @@
             color="grey-2"
             :disable="pagination.pageIndex === btnIndex"
             push
+            size="sm"
             :flat="pagination.pageIndex !== btnIndex"
             :outline="pagination.pageIndex === btnIndex"
             @click="table.setPageIndex(btnIndex)"
@@ -90,6 +93,7 @@
             :disable="!table.getCanNextPage()"
             color="grey-2"
             outline
+            size="sm"
             icon="navigate_next"
             @click="() => table.nextPage()"
           ></q-btn>
@@ -97,6 +101,7 @@
             :disable="!table.getCanNextPage()"
             color="grey-2"
             outline
+            size="sm"
             icon="last_page"
             @click="() => table.setPageIndex(table.getPageCount() - 1)"
           ></q-btn>
